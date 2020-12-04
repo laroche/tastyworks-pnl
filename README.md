@@ -20,7 +20,8 @@ history over all years. The csv file has the following first line:
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
 </code>
 
-If you work on Linux with Ubuntu/Debian, you need o make sure
+
+If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
 
 <code>
