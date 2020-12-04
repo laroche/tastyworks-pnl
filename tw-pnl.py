@@ -121,10 +121,10 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
         # already long, or sell more if we are already short.)
         if sign(fifo[0][1]) == sign(quantity):
             break
-        # This now remove entres from the FIFO:
+        # Here we start removing entries from the FIFO.
+        # Check if the FIFO queue has enough entries for
+        # us to finish:
         if abs(fifo[0][1]) >= abs(quantity):
-            # The FIFO queue has enough entries for
-            # us to finish:
             pnl += quantity * (fifo[0][0] - price)
             fifo[0][1] += quantity
             if fifo[0][1] == 0:
@@ -132,13 +132,12 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
                 if len(fifo) == 0:
                     del fifos[asset]
             return pnl
-        else:
-            # Remove the oldest FIFO entry and continue
-            # the loop for further entries (or add the
-            # remaining entries into the FIFO.
-            pnl += fifo[0][1] * (price - fifo[0][0])
-            quantity += fifo[0][1]
-            fifo.popleft()
+        # Remove the oldest FIFO entry and continue
+        # the loop for further entries (or add the
+        # remaining entries into the FIFO).
+        pnl += fifo[0][1] * (price - fifo[0][0])
+        quantity += fifo[0][1]
+        fifo.popleft()
     # Just add this to the FIFO queue:
     fifo.append([price, quantity])
     return pnl
