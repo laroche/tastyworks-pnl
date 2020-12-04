@@ -33,9 +33,9 @@
 
 import sys
 import getopt
-import pandas
-import math
 from collections import deque
+import math
+import pandas
 
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ['Money Movement', 'Trade', 'Receive Deliver']:
@@ -95,10 +95,10 @@ def sign(x):
         return 1
     return -1
 
-# "fifos" is a dictionary with "asset" names. It contains
-# a list with "price" (as float) and "quantity" (as integer)
+# "fifos" is a dictionary with "asset" names. It contains a FIFO
+# "deque()" with a list of "price" (as float) and "quantity" (as integer)
 # of the asset.
-
+# https://docs.python.org/3/library/collections.html?#collections.deque
 def fifo_add(fifos, quantity, price, asset, debug=False):
     if debug:
         print_fifos(fifos)
@@ -111,7 +111,7 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     #if is_option and quantity < 0:
     #    pnl = quantity * price
     # Find the right FIFO queue for our asset:
-    if fifos.get(asset) == None:
+    if fifos.get(asset) is None:
         fifos[asset] = deque()
     fifo = fifos[asset]
     # If the queue is empty, just add it to the queue:
