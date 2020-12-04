@@ -95,6 +95,10 @@ def sign(x):
         return 1
     return -1
 
+# "fifos" is a dictionary with "asset" names. It contains
+# a list with "price" (as float) and "quantity" (as integer)
+# of the asset.
+
 def fifo_add(fifos, quantity, price, asset, debug=False):
     if debug:
         print_fifos(fifos)
@@ -139,6 +143,8 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     fifo.append([price, quantity])
     return pnl
 
+# Check if the first entry in the FIFO
+# is "long" the underlying or "short".
 def fifos_islong(fifos, asset):
     return fifos[asset][0][1] > 0
 
