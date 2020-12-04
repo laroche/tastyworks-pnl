@@ -32,10 +32,23 @@
 #
 
 import sys
+import os
 import getopt
 from collections import deque
 import math
 import pandas
+
+eurusd = None
+
+# If the file 'eurusd.csv' does not exist, download the data from
+# the bundesbank directly.
+def read_eurusd():
+    global eurusd
+    url = 'eurusd.csv'
+    if not os.path.exists(url):
+        url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
+    eurusd = pandas.read_csv(url, skiprows=5, skipfooter=2,
+        names=['date', 'eurusd', 'nix'], index_col='date', usecols=['date', 'eurusd'], na_values=['.'], engine='python')
 
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ['Money Movement', 'Trade', 'Receive Deliver']:
@@ -320,6 +333,7 @@ def main(argv):
             sys.exit()
         elif opt in ('-y', '--year'):
             year = arg
+    read_eurusd()
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
