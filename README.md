@@ -9,16 +9,17 @@ How to use
 ----------
 
 Download your trade history as csv file from
-https://trade.tastyworks.com/index.html#/transactionHistoryPage
+<https://trade.tastyworks.com/index.html#/transactionHistoryPage>.
 
 Newest entries in the csv file should be on the top and it should contain the complete
 history over all years. The csv file has the following first line:
+
 <code>
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
 </code>
 
 If you work on Linux with Ubuntu/Debian, you need o make sure
-pandas is installed:
+<https://pandas.pydata.org/> is installed:
 
 <code>
 sudo apt-get install python3-pandas
