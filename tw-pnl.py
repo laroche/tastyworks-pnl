@@ -97,7 +97,7 @@ def sign(x):
 
 def fifo_add(fifos, quantity, price, asset, debug=False):
     if debug:
-        print_fifos()
+        print_fifos(fifos)
         print('fifo_add', quantity, price, asset)
     # Detect if this is an option we are working with as
     # we have to pay taxes for selling an option:
@@ -106,13 +106,21 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     pnl = .0
     #if is_option and quantity < 0:
     #    pnl = quantity * price
+    # Find the right FIFO queue for our asset:
     if fifos.get(asset) == None:
         fifos[asset] = deque()
     fifo = fifos[asset]
+    # If the queue is empty, just add it to the queue:
     while len(fifo) > 0:
+        # If we add assets into the same trading direction,
+        # just add the asset into the queue. (Buy more if we are
+        # already long, or sell more if we are already short.)
         if sign(fifo[0][1]) == sign(quantity):
             break
+        # This now remove entres from the FIFO:
         if abs(fifo[0][1]) >= abs(quantity):
+            # The FIFO queue has enough entries for
+            # us to finish:
             pnl += quantity * (fifo[0][0] - price)
             fifo[0][1] += quantity
             if fifo[0][1] == 0:
@@ -121,9 +129,13 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
                     del fifos[asset]
             return pnl
         else:
+            # Remove the oldest FIFO entry and continue
+            # the loop for further entries (or add the
+            # remaining entries into the FIFO.
             pnl += fifo[0][1] * (price - fifo[0][0])
             quantity += fifo[0][1]
             fifo.popleft()
+    # Just add this to the FIFO queue:
     fifo.append([price, quantity])
     return pnl
 
