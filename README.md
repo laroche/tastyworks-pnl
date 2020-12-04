@@ -10,6 +10,8 @@ How to use
 
 Download your trade history as csv file from
 <https://trade.tastyworks.com/index.html#/transactionHistoryPage>.
+(Choose "Activity" and then "History" and then setup the filter for a
+custom period of time and download it as csv file.)
 
 Newest entries in the csv file should be on the top and it should contain the complete
 history over all years. The csv file has the following first line:
