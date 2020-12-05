@@ -16,7 +16,8 @@
 #
 # TODO:
 # - Profit and loss is only calculated like for normal stocks,
-#   no special handling for options until now.
+#   no special handling for options until now. (Works ok if you
+#   have closed all positions by end of year.)
 # - Missing conversion from USD to EUR.
 # - Filter out tax gains due to currency changes.
 # - Does not work with futures.
@@ -37,6 +38,8 @@ from collections import deque
 import math
 import pandas
 
+convert_currency = True
+
 eurusd = None
 
 # If the file 'eurusd.csv' does not exist, download the data from
@@ -51,10 +54,14 @@ def read_eurusd():
     eurusd = dict(eurusd.values.tolist())
 
 def eur2usd(x, date):
-    return x * eurusd[date]
+    if convert_currency:
+        return x * eurusd[date]
+    return x
 
 def usd2eur(x, date):
-    return x / eurusd[date]
+    if convert_currency:
+        return x / eurusd[date]
+    return x
 
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ['Money Movement', 'Trade', 'Receive Deliver']:
