@@ -18,7 +18,6 @@
 # - Profit and loss is only calculated like for normal stocks,
 #   no special handling for options until now.
 # - Missing conversion from USD to EUR.
-#   - Download official conversion data and include it also inline here.
 # - Filter out tax gains due to currency changes.
 # - Does not work with futures.
 # - Translate text output into German.
@@ -48,7 +47,14 @@ def read_eurusd():
     if not os.path.exists(url):
         url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
     eurusd = pandas.read_csv(url, skiprows=5, skipfooter=2,
-        names=['date', 'eurusd', 'nix'], index_col='date', usecols=['date', 'eurusd'], na_values=['.'], engine='python')
+        names=['date', 'eurusd', 'nix'], usecols=['date', 'eurusd'], na_values=['.'], engine='python')
+    eurusd = dict(eurusd.values.tolist())
+
+def eur2usd(x, date):
+    return x * eurusd[date]
+
+def usd2eur(x, date):
+    return x / eurusd[date]
 
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ['Money Movement', 'Trade', 'Receive Deliver']:
