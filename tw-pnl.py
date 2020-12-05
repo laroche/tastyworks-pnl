@@ -230,7 +230,7 @@ def check(wk, year):
         amount = float(wk['Amount'][i])
         total += amount - fees
         eur_amount = usd2eur(amount, date)
-        usd += fifo_add(fifos, int((amount - fees) * 10000), get_eurusd(date), 'usd')
+        usd += fifo_add(fifos, int((amount - fees) * 10000), 1 / get_eurusd(date), 'usd')
 
         quantity = wk['Quantity'][i]
         if str(quantity) != 'nan':
