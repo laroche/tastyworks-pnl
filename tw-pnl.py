@@ -40,7 +40,7 @@ import math
 import pandas
 import datetime as pydatetime
 
-convert_currency = True
+convert_currency = False
 
 eurusd = None
 
@@ -66,12 +66,12 @@ def get_eurusd(date, debug=False):
 
 def eur2usd(x, date):
     if convert_currency:
-        return x * get_eurusd(x)
+        return x * get_eurusd(date)
     return x
 
 def usd2eur(x, date):
     if convert_currency:
-        return x / get_eurusd(x)
+        return x / get_eurusd(date)
     return x
 
 def check_tcode(tcode, tsubcode, description):
@@ -207,6 +207,7 @@ def check(wk, year):
     check_account_ref = None
     for i in range(len(wk) - 1, -1, -1):
         datetime = wk['Date/Time'][i]
+        date = str(datetime)[:10]
         if cur_year != str(datetime)[:4]:
             if cur_year is not None:
                 pass # Print out old yearly data and reset counters
@@ -228,7 +229,7 @@ def check(wk, year):
         total_fees += fees
         amount = float(wk['Amount'][i])
         total += amount - fees
-        usd += fifo_add(fifos, int((amount - fees) * 10000), get_eurusd(str(datetime)[:10]), 'usd')
+        usd += fifo_add(fifos, int((amount - fees) * 10000), get_eurusd(date), 'usd')
 
         quantity = wk['Quantity'][i]
         if str(quantity) != 'nan':
@@ -313,6 +314,7 @@ def check(wk, year):
                 quantity = - quantity
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
+            price = usd2eur(price, date)
             local_pnl = fifo_add(fifos, quantity, price, asset)
             print(datetime, f'{local_pnl:10.2f}', '$', f'{amount-fees:10.2f}', '$', '%5d' % quantity, asset)
             if check_stock:
