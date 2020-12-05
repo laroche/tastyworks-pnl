@@ -6,7 +6,7 @@
 #
 # Download your trade history as csv file from
 # https://trade.tastyworks.com/index.html#/transactionHistoryPage
-# (Choose "Activity" and then "History" and then setup the filter for a
+# (Choose 'Activity' and then 'History' and then setup the filter for a
 # custom period of time and download it as csv file.)
 # Newest entries in the csv file should be on the top and it should contain the complete
 # history over all years. The csv file has the following first line:
@@ -28,6 +28,7 @@
 # - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 # - Check if dates are truely ascending.
 # - Improve output of open positions.
+# - Are we rounding output correctly?
 # - Use pandas.isna(x)?
 #
 
@@ -37,6 +38,7 @@ import getopt
 from collections import deque
 import math
 import pandas
+import datetime as pydatetime
 
 convert_currency = True
 
@@ -53,14 +55,23 @@ def read_eurusd():
         names=['date', 'eurusd', 'nix'], usecols=['date', 'eurusd'], na_values=['.'], engine='python')
     eurusd = dict(eurusd.values.tolist())
 
+def get_eurusd(date, debug=False):
+    while True:
+        x = eurusd[date]
+        if str(x) != "nan":
+            return x
+        if debug:
+            print('EURUSD conversion not found for', date)
+        date = str(pydatetime.date(*map(int, date.split('-'))) - pydatetime.timedelta(days=1))
+
 def eur2usd(x, date):
     if convert_currency:
-        return x * eurusd[date]
+        return x * get_eurusd(x)
     return x
 
 def usd2eur(x, date):
     if convert_currency:
-        return x / eurusd[date]
+        return x / get_eurusd(x)
     return x
 
 def check_tcode(tcode, tsubcode, description):
@@ -121,8 +132,8 @@ def sign(x):
         return 1
     return -1
 
-# "fifos" is a dictionary with "asset" names. It contains a FIFO
-# "deque()" with a list of "price" (as float) and "quantity" (as integer)
+# 'fifos' is a dictionary with 'asset' names. It contains a FIFO
+# 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
 def fifo_add(fifos, quantity, price, asset, debug=False):
@@ -131,7 +142,7 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
         print('fifo_add', quantity, price, asset)
     # Detect if this is an option we are working with as
     # we have to pay taxes for selling an option:
-    # This is a gross hack, should we check the "expire" param?
+    # This is a gross hack, should we check the 'expire' param?
     #is_option = (len(asset) > 10)
     pnl = .0
     #if is_option and quantity < 0:
@@ -169,7 +180,7 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     return pnl
 
 # Check if the first entry in the FIFO
-# is "long" the underlying or "short".
+# is 'long' the underlying or 'short'.
 def fifos_islong(fifos, asset):
     return fifos[asset][0][1] > 0
 
@@ -192,6 +203,7 @@ def check(wk, year):
     pnl_stocks = .0
     pnl = .0
     cur_year = None
+    usd = .0
     check_account_ref = None
     for i in range(len(wk) - 1, -1, -1):
         datetime = wk['Date/Time'][i]
@@ -216,6 +228,7 @@ def check(wk, year):
         total_fees += fees
         amount = float(wk['Amount'][i])
         total += amount - fees
+        usd += fifo_add(fifos, int((amount - fees) * 10000), get_eurusd(str(datetime)[:10]), 'usd')
 
         quantity = wk['Quantity'][i]
         if str(quantity) != 'nan':
@@ -284,8 +297,7 @@ def check(wk, year):
         else:
             asset = symbol
             if str(expire) != 'nan':
-                from datetime import datetime as pydatetime
-                expire = pydatetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
+                expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
                 price *= 100.0
                 if int(strike) == strike:
                     strike = int(strike)
@@ -322,11 +334,13 @@ def check(wk, year):
     print('fee adjustments:      ', f'{fee_adjustments:10.2f}', '$')
     print('pnl stocks:           ', f'{pnl_stocks:10.2f}', '$')
     print('pnl other:            ', f'{pnl:10.2f}', '$')
+    print('USD currency gains:   ', f'{int(usd / 10000):7d}')
     print()
     print('New end sums and open positions:')
     print('total fees paid:      ', f'{total_fees:10.2f}', '$')
     print('account end total:    ', f'{total:10.2f}', '$')
     print_fifos(fifos)
+    #print(fifos['usd'])
 
     #print(wk)
 

@@ -35,7 +35,6 @@ TODO
 - Profit and loss is only calculated like for normal stocks,
   no special handling for options until now.
 - Missing conversion from USD to EUR.
-  - Download official conversion data and include it also inline here.
 - Filter out tax gains due to currency changes.
 - Does not work with futures.
 - Translate text output into German.
@@ -45,5 +44,6 @@ TODO
 - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Check if dates are truely ascending.
 - Improve output of open positions.
+- Are we rounding output correctly?
 - Use pandas.isna(x)?
 
