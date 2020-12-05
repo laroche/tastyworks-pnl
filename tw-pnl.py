@@ -226,9 +226,10 @@ def check(wk, year):
         if account_ref != check_account_ref: # check if this does not change over time
             raise
         fees = float(wk['Fees'][i])
-        total_fees += fees
+        total_fees += usd2eur(fees, date)
         amount = float(wk['Amount'][i])
         total += amount - fees
+        eur_amount = usd2eur(amount, date)
         usd += fifo_add(fifos, int((amount - fees) * 10000), get_eurusd(date), 'usd')
 
         quantity = wk['Quantity'][i]
@@ -252,28 +253,28 @@ def check(wk, year):
                 if description == 'INTEREST ON CREDIT BALANCE':
                     print(datetime, f'{amount:10.2f}', '$ interest')
                     if amount > .0:
-                        interest_recv += amount
+                        interest_recv += eur_amount
                     else:
-                        interest_paid += amount
+                        interest_paid += eur_amount
                 else:
                     if amount > .0:
-                        dividends += amount
+                        dividends += eur_amount
                         print(datetime, f'{amount:10.2f}', '$ dividends: %s,' % symbol, description)
                     else:
-                        withholding_tax += amount
+                        withholding_tax += eur_amount
                         print(datetime, f'{amount:10.2f}', '$ withholding tax: %s,' % symbol, description)
                 if fees != .0:
                     raise
             elif tsubcode == 'Balance Adjustment':
-                fee_adjustments += amount
-                total_fees += amount
+                fee_adjustments += eur_amount
+                total_fees += eur_amount
                 if fees != .0:
                     raise
             elif tsubcode == 'Fee':
                 # XXX Additional fees for dividends paid in short stock? Interest fees?
                 print(datetime, f'{amount:10.2f}', '$ fees: %s,' % symbol, description)
-                fee_adjustments += amount
-                total_fees += amount
+                fee_adjustments += eur_amount
+                total_fees += eur_amount
                 if amount >= .0:
                     raise
                 if fees != .0:
@@ -281,17 +282,17 @@ def check(wk, year):
             elif tsubcode == 'Withdrawal':
                 # XXX In my case dividends paid for short stock:
                 print(datetime, f'{amount:10.2f}', '$ dividends paid: %s,' % symbol, description)
-                withdrawal += amount
+                withdrawal += eur_amount
                 if amount >= .0:
                     raise
                 if fees != .0:
                     raise
             elif tsubcode == 'Dividend':
                 if amount > .0:
-                    dividends += amount
+                    dividends += eur_amount
                     print(datetime, f'{amount:10.2f}', '$ dividends: %s,' % symbol, description)
                 else:
-                    withholding_tax += amount
+                    withholding_tax += eur_amount
                     print(datetime, f'{amount:10.2f}', '$ withholding tax: %s,' % symbol, description)
                 if fees != .0:
                     raise
