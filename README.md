@@ -24,6 +24,8 @@ If you delete the local "eurusd.csv" file, a current one is downloaded over the
 Internet.
 
 The option '--usd' can be used to not translate pnl data into Euro.
+Per default balance adjustments are only output as total sum, you can use the option '--long'
+to include balance adjustments into the list of transactions.
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:

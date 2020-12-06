@@ -189,7 +189,7 @@ def print_fifos(fifos):
     for fifo in fifos:
         print(fifo)
 
-def check(wk):
+def check(wk, long):
     #print(wk)
     fifos = {}
     total_fees = .0           # sum of all fees paid
@@ -301,7 +301,8 @@ def check(wk):
                 if fees != .0:
                     raise
             elif tsubcode == 'Balance Adjustment':
-                # no output due to too many and too small amounts of money
+                if long:
+                    print(header, 'balance adjustment')
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
                 if fees != .0:
@@ -387,8 +388,9 @@ def help():
     print('tw-pnl.py *.csv')
 
 def main(argv):
+    long = False
     try:
-        opts, args = getopt.getopt(argv, 'hu', ['help', 'usd'])
+        opts, args = getopt.getopt(argv, 'hlu', ['help', 'long', 'usd'])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -396,6 +398,8 @@ def main(argv):
         if opt in ('-h', '--help'):
             help()
             sys.exit()
+        elif opt in ('-l', '--long'):
+            long = True
         elif opt in ('-u', '--usd'):
             global convert_currency
             convert_currency = False
@@ -403,7 +407,7 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk)
+        check(wk, long)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
