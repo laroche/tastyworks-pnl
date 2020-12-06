@@ -18,13 +18,13 @@
 # - Profit and loss is only calculated like for normal stocks,
 #   no special handling for options until now. (Works ok if you
 #   have closed all positions by end of year.)
-# - Missing conversion from USD to EUR.
-# - Filter out tax gains due to currency changes.
+# - Filter out tax gains due to currency changes for an extra report.
 # - Does not work with futures.
 # - Translate text output into German.
 # - Complete the list of non-stocks.
 # - Add test data for users to try out.
-# - Output yearly information, currently only the end result is printed once.
+# - Output new CSV file with all transactions plus year-end pnl data and also
+#   pnl in $ and pnl in Euro.
 # - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 # - Check if dates are truely ascending.
 # - Improve output of open positions.
@@ -37,10 +37,10 @@ import os
 import getopt
 from collections import deque
 import math
-import pandas
 import datetime as pydatetime
+import pandas
 
-convert_currency = False
+convert_currency = True
 
 eurusd = None
 
@@ -189,17 +189,17 @@ def print_fifos(fifos):
     for fifo in fifos:
         print(fifo)
 
-def check(wk, year):
+def check(wk):
     #print(wk)
     fifos = {}
     total_fees = .0           # sum of all fees paid
     total = .0                # account total
-    interest_paid = .0
-    interest_recv = .0
-    fee_adjustments = .0
     dividends = .0
     withholding_tax = .0      # withholding tax = German 'Quellensteuer'
     withdrawal = .0
+    interest_recv = .0
+    interest_paid = .0
+    fee_adjustments = .0
     pnl_stocks = .0
     pnl = .0
     cur_year = None
@@ -210,7 +210,37 @@ def check(wk, year):
         date = str(datetime)[:10]
         if cur_year != str(datetime)[:4]:
             if cur_year is not None:
-                pass # Print out old yearly data and reset counters
+                print()
+                print('Total sums paid and received in the year %s:' % cur_year)
+                print('dividends received:   ', f'{dividends:10.2f}' + curr_sym)
+                print('withholding tax paid: ', f'{-withholding_tax:10.2f}' + curr_sym)
+                if withdrawal != .0:
+                    print('dividends paid:       ', f'{-withdrawal:10.2f}' + curr_sym)
+                print('interest received:    ', f'{interest_recv:10.2f}' + curr_sym)
+                if interest_paid != .0:
+                    print('interest paid:        ', f'{-interest_paid:10.2f}' + curr_sym)
+                print('fee adjustments:      ', f'{fee_adjustments:10.2f}' + curr_sym)
+                print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
+                print('pnl other:            ', f'{pnl:10.2f}' + curr_sym)
+                print('USD currency gains:   ', f'{int(usd / 10000):7d}')
+                print()
+                print('New end sums and open positions:')
+                print('total fees paid:      ', f'{total_fees:10.2f}' + curr_sym)
+                print('account end total:    ', f'{total:10.2f}' + '$')
+                print_fifos(fifos)
+                #print(fifos['usd'])
+                print()
+
+                dividends = .0
+                withholding_tax = .0
+                withdrawal = .0
+                interest_recv = .0
+                interest_paid = .0
+                fee_adjustments = .0
+                pnl_stocks = .0
+                pnl = .0
+                usd = .0
+                total_fees = .0
             cur_year = str(datetime)[:4]
         tcode = wk['Transaction Code'][i]
         tsubcode = wk['Transaction Subcode'][i]
@@ -246,12 +276,17 @@ def check(wk, year):
         if price < .0:
             raise
 
+        curr_sym = '€'
+        if not convert_currency:
+            curr_sym = '$'
+        header = "%s %s%s %s$" % (datetime, f'{eur_amount:10.2f}', curr_sym, f'{amount:10.2f}')
+
         if tcode == 'Money Movement':
             if tsubcode == 'Transfer':
-                print(datetime, f'{amount:10.2f}', '$ transferred:', description)
+                print(header, 'transferred:', description)
             elif tsubcode  in ['Deposit', 'Credit Interest']:
                 if description == 'INTEREST ON CREDIT BALANCE':
-                    print(datetime, f'{amount:10.2f}', '$ interest')
+                    print(header, 'interest')
                     if amount > .0:
                         interest_recv += eur_amount
                     else:
@@ -259,20 +294,21 @@ def check(wk, year):
                 else:
                     if amount > .0:
                         dividends += eur_amount
-                        print(datetime, f'{amount:10.2f}', '$ dividends: %s,' % symbol, description)
+                        print(header, 'dividends: %s,' % symbol, description)
                     else:
                         withholding_tax += eur_amount
-                        print(datetime, f'{amount:10.2f}', '$ withholding tax: %s,' % symbol, description)
+                        print(header, 'withholding tax: %s,' % symbol, description)
                 if fees != .0:
                     raise
             elif tsubcode == 'Balance Adjustment':
+                # no output due to too many and too small amounts of money
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
                 if fees != .0:
                     raise
             elif tsubcode == 'Fee':
                 # XXX Additional fees for dividends paid in short stock? Interest fees?
-                print(datetime, f'{amount:10.2f}', '$ fees: %s,' % symbol, description)
+                print(header, 'fees: %s,' % symbol, description)
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
                 if amount >= .0:
@@ -281,7 +317,7 @@ def check(wk, year):
                     raise
             elif tsubcode == 'Withdrawal':
                 # XXX In my case dividends paid for short stock:
-                print(datetime, f'{amount:10.2f}', '$ dividends paid: %s,' % symbol, description)
+                print(header, 'dividends paid: %s,' % symbol, description)
                 withdrawal += eur_amount
                 if amount >= .0:
                     raise
@@ -290,10 +326,10 @@ def check(wk, year):
             elif tsubcode == 'Dividend':
                 if amount > .0:
                     dividends += eur_amount
-                    print(datetime, f'{amount:10.2f}', '$ dividends: %s,' % symbol, description)
+                    print(header, 'dividends: %s,' % symbol, description)
                 else:
                     withholding_tax += eur_amount
-                    print(datetime, f'{amount:10.2f}', '$ withholding tax: %s,' % symbol, description)
+                    print(header, 'withholding tax: %s,' % symbol, description)
                 if fees != .0:
                     raise
         else:
@@ -317,7 +353,7 @@ def check(wk, year):
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date)
             local_pnl = fifo_add(fifos, quantity, price, asset)
-            print(datetime, f'{local_pnl:10.2f}', '$', f'{amount-fees:10.2f}', '$', '%5d' % quantity, asset)
+            print(datetime, f'{local_pnl:10.2f}' + curr_sym, f'{amount-fees:10.2f}' + '$', '%5d' % quantity, asset)
             if check_stock:
                 pnl_stocks += local_pnl
             else:
@@ -326,22 +362,22 @@ def check(wk, year):
     wk.drop('Account Reference', axis=1, inplace=True)
 
     print()
-    print('Total sums paid and received:')
-    print('dividends received:   ', f'{dividends:10.2f}', '$')
-    print('withholding tax paid: ', f'{-withholding_tax:10.2f}', '$')
+    print('Total sums paid and received in the year %s:' % cur_year)
+    print('dividends received:   ', f'{dividends:10.2f}' + curr_sym)
+    print('withholding tax paid: ', f'{-withholding_tax:10.2f}' + curr_sym)
     if withdrawal != .0:
-        print('dividends paid:       ', f'{-withdrawal:10.2f}', '$')
-    print('interest received:    ', f'{interest_recv:10.2f}', '$')
+        print('dividends paid:       ', f'{-withdrawal:10.2f}' + curr_sym)
+    print('interest received:    ', f'{interest_recv:10.2f}' + curr_sym)
     if interest_paid != .0:
-        print('interest paid:        ', f'{-interest_paid:10.2f}', '$')
-    print('fee adjustments:      ', f'{fee_adjustments:10.2f}', '$')
-    print('pnl stocks:           ', f'{pnl_stocks:10.2f}', '$')
-    print('pnl other:            ', f'{pnl:10.2f}', '$')
+        print('interest paid:        ', f'{-interest_paid:10.2f}' + curr_sym)
+    print('fee adjustments:      ', f'{fee_adjustments:10.2f}' + curr_sym)
+    print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
+    print('pnl other:            ', f'{pnl:10.2f}' + curr_sym)
     print('USD currency gains:   ', f'{int(usd / 10000):7d}')
     print()
     print('New end sums and open positions:')
-    print('total fees paid:      ', f'{total_fees:10.2f}', '$')
-    print('account end total:    ', f'{total:10.2f}', '$')
+    print('total fees paid:      ', f'{total_fees:10.2f}' + curr_sym)
+    print('account end total:    ', f'{total:10.2f}' + '$')
     print_fifos(fifos)
     #print(fifos['usd'])
 
@@ -351,9 +387,8 @@ def help():
     print('tw-pnl.py *.csv')
 
 def main(argv):
-    year = None
     try:
-        opts, args = getopt.getopt(argv, 'hy:', ['help', 'year'])
+        opts, args = getopt.getopt(argv, 'hu', ['help', 'usd'])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -361,13 +396,14 @@ def main(argv):
         if opt in ('-h', '--help'):
             help()
             sys.exit()
-        elif opt in ('-y', '--year'):
-            year = arg
+        elif opt in ('-u', '--usd'):
+            global convert_currency
+            convert_currency = False
     read_eurusd()
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, year)
+        check(wk)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

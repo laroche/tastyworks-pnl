@@ -20,6 +20,10 @@ history over all years. The csv file has the following first line:
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
 </code>
 
+If you delete the local "eurusd.csv" file, a current one is downloaded over the
+Internet.
+
+The option '--usd' can be used to not translate pnl data into Euro.
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
@@ -33,14 +37,15 @@ TODO
 ----
 
 - Profit and loss is only calculated like for normal stocks,
-  no special handling for options until now.
-- Missing conversion from USD to EUR.
-- Filter out tax gains due to currency changes.
+  no special handling for options until now. (Works ok if you
+  have closed all positions by end of year.)
+- Filter out tax gains due to currency changes for an extra report.
 - Does not work with futures.
 - Translate text output into German.
 - Complete the list of non-stocks.
 - Add test data for users to try out.
-- Output yearly information, currently only the end result is printed once.
+- Output new CSV file with all transactions plus year-end pnl data and also
+  pnl in $ and pnl in Euro.
 - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Check if dates are truely ascending.
 - Improve output of open positions.
