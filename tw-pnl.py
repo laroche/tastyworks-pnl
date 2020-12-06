@@ -113,7 +113,7 @@ def check_trade(tsubcode, check_amount, amount):
         if str(check_amount) != 'nan' and check_amount != .0:
             raise
 
-# Is the symbol a real stock or anything else
+# Is the symbol a individual stock or anything else
 # like an ETF or fond?
 def is_stock(symbol):
     # Well known ETFs:
@@ -126,7 +126,6 @@ def is_stock(symbol):
     if symbol in ['M','AAPL','TSLA']:
         return True
     # The conservative way is to through an exception if we are not sure.
-    # Change the default of the function if you are in a hurry to get things running.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
         print('Use the option --assume-individual-stock to assume individual stock for all unknown symbols.')
@@ -216,7 +215,6 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print('total fees paid:      ', f'{total_fees:10.2f}' + curr_sym)
     print('account end total:    ', f'{total:10.2f}' + '$')
     print_fifos(fifos)
-    #print(fifos['usd'])
     print()
 
 def check(wk, long):
