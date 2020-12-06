@@ -390,7 +390,7 @@ def main(argv):
         help()
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ('--assume-individual-stock'):
+        if opt == '--assume-individual-stock':
             global assume_stock
             assume_stock = True
         elif opt in ('-h', '--help'):
