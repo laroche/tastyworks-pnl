@@ -192,7 +192,7 @@ def fifos_islong(fifos, asset):
 def print_fifos(fifos):
     print('open positions:')
     for fifo in fifos:
-        print(fifo)
+        print(fifo, fifos[fifo])
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
