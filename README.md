@@ -27,6 +27,10 @@ The option '--usd' can be used to not translate pnl data into Euro.
 Per default balance adjustments are only output as total sum, you can use the option '--long'
 to include balance adjustments into the list of transactions.
 
+Per default the script stops on unknown trading symbols (underlyings) and you have
+to hardcode into the source code if it is an individual stock or some ETF/fond.
+You can use the '--assume-stock' option to assume individual stock for all unknown symbols.
+
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
 

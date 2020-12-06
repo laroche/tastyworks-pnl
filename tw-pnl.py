@@ -42,6 +42,10 @@ import pandas
 
 convert_currency = True
 
+# For an unknown symbol (underlying), assume it is a normal stock.
+# Otherwise you need to adjust the hardcoded list in this script.
+assume_stock = False
+
 eurusd = None
 
 # If the file 'eurusd.csv' does not exist, download the data from
@@ -110,7 +114,7 @@ def check_trade(tsubcode, check_amount, amount):
 
 # Is the symbol a real stock or anything else
 # like an ETF or fond?
-def is_stock(symbol, conservative=True):
+def is_stock(symbol):
     # Well known ETFs:
     if symbol in ['DXJ','EEM','EFA','EFA','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','GLD','HYG','IEF','IWM','IYR','KRE','OIH','QQQ',
@@ -122,7 +126,7 @@ def is_stock(symbol, conservative=True):
         return True
     # The conservative way is to through an exception if we are not sure.
     # Change the default of the function if you are in a hurry to get things running.
-    if conservative:
+    if not assume_stock:
         print('No idea if this is a stock:', symbol)
         raise
     return True # Just assume this is a normal stock if not in the above list
@@ -390,12 +394,16 @@ def help():
 def main(argv):
     long = False
     try:
-        opts, args = getopt.getopt(argv, 'hlu', ['help', 'long', 'usd'])
+        opts, args = getopt.getopt(argv, 'hlu',
+            ['assume-stock', 'help', 'long', 'usd'])
     except getopt.GetoptError:
         help()
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ('-h', '--help'):
+        if opt in ('--assume-stock'):
+            global assume_stock
+            assume_stock = True
+        elif opt in ('-h', '--help'):
             help()
             sys.exit()
         elif opt in ('-l', '--long'):
