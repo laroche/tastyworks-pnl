@@ -46,6 +46,7 @@ TODO
   no special handling for options until now. (Works ok if you
   have closed all positions by end of year.)
 - Filter out tax gains due to currency changes for an extra report.
+- Add net total including open positions.
 - Does not work with futures.
 - Translate text output into German.
 - Complete the list of non-stocks.
