@@ -379,7 +379,7 @@ def check(wk, long):
     #print(wk)
 
 def help():
-    print('tw-pnl.py *.csv')
+    print('tw-pnl.py [--assume-individual-stock][--long][--usd][--help] *.csv')
 
 def main(argv):
     long = False
