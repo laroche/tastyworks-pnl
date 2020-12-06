@@ -42,7 +42,7 @@ import pandas
 
 convert_currency = True
 
-# For an unknown symbol (underlying), assume it is a normal stock.
+# For an unknown symbol (underlying), assume it is a individual/ normal stock.
 # Otherwise you need to adjust the hardcoded list in this script.
 assume_stock = False
 
@@ -128,6 +128,7 @@ def is_stock(symbol):
     # Change the default of the function if you are in a hurry to get things running.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
+        print('Use the option --assume-individual-stock to assume individual stock for all unknown symbols.')
         raise
     return True # Just assume this is a normal stock if not in the above list
 
@@ -400,7 +401,7 @@ def main(argv):
         help()
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ('--assume-stock'):
+        if opt in ('--assume-individual-stock'):
             global assume_stock
             assume_stock = True
         elif opt in ('-h', '--help'):

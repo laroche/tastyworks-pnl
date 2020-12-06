@@ -29,7 +29,7 @@ to include balance adjustments into the list of transactions.
 
 Per default the script stops on unknown trading symbols (underlyings) and you have
 to hardcode into the source code if it is an individual stock or some ETF/fond.
-You can use the '--assume-stock' option to assume individual stock for all unknown symbols.
+You can use the '--assume-individual-stock' option to assume individual stock for all unknown symbols.
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
