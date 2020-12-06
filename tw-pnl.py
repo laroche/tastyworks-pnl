@@ -385,7 +385,7 @@ def main(argv):
     long = False
     try:
         opts, args = getopt.getopt(argv, 'hlu',
-            ['assume-stock', 'help', 'long', 'usd'])
+            ['assume-individual-stock', 'help', 'long', 'usd'])
     except getopt.GetoptError:
         help()
         sys.exit(2)
