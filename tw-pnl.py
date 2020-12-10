@@ -206,18 +206,20 @@ def print_fifos(fifos):
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-        pnl, usd, total_fees, total, fifos):
+        pnl, usd, total_fees, total, fifos, verbose):
     print()
     print('Total sums paid and received in the year %s:' % cur_year)
-    print('dividends received:   ', f'{dividends:10.2f}' + curr_sym)
-    print('withholding tax paid: ', f'{-withholding_tax:10.2f}' + curr_sym)
+    if dividends != .0 or withholding_tax != .0 or verbose:
+        print('dividends received:   ', f'{dividends:10.2f}' + curr_sym)
+        print('withholding tax paid: ', f'{-withholding_tax:10.2f}' + curr_sym)
     if withdrawal != .0:
         print('dividends paid:       ', f'{-withdrawal:10.2f}' + curr_sym)
     print('interest received:    ', f'{interest_recv:10.2f}' + curr_sym)
     if interest_paid != .0:
         print('interest paid:        ', f'{-interest_paid:10.2f}' + curr_sym)
     print('fee adjustments:      ', f'{fee_adjustments:10.2f}' + curr_sym)
-    print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
+    if pnl_stocks != .0 or verbose:
+        print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
     print('pnl other:            ', f'{pnl:10.2f}' + curr_sym)
     print('USD currency gains:   ', f'{int(usd / 10000):7d}')
     print()
@@ -250,7 +252,7 @@ def check(wk, long, verbose):
             if cur_year is not None:
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
                     withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-                    pnl, usd, total_fees, total, fifos)
+                    pnl, usd, total_fees, total, fifos, verbose)
                 dividends = .0
                 withholding_tax = .0
                 withdrawal = .0
@@ -394,7 +396,7 @@ def check(wk, long, verbose):
 
     print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-        pnl, usd, total_fees, total, fifos)
+        pnl, usd, total_fees, total, fifos, verbose)
 
     #print(wk)
 
