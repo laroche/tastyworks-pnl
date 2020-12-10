@@ -33,6 +33,8 @@
 # - Are we rounding output correctly?
 # - Use pandas.isna(x)?
 #
+# pylint: disable=C0103,C0114,C0116
+#
 
 import sys
 import os
@@ -59,8 +61,8 @@ def read_eurusd():
     url = 'eurusd.csv'
     if not os.path.exists(url):
         url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
-    eurusd = pandas.read_csv(url, skiprows=5, skipfooter=2,
-        names=['date', 'eurusd', 'nix'], usecols=['date', 'eurusd'], na_values=['.'], engine='python')
+    eurusd = pandas.read_csv(url, skiprows=5, skipfooter=2, names=['date', 'eurusd', 'nix'],
+        usecols=['date', 'eurusd'], na_values=['.'], engine='python')
     eurusd = dict(eurusd.values.tolist())
 
 def get_eurusd(date, debug=False):
@@ -86,7 +88,8 @@ def check_tcode(tcode, tsubcode, description):
     if tcode not in ['Money Movement', 'Trade', 'Receive Deliver']:
         raise
     if tcode == 'Money Movement':
-        if tsubcode not in ['Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment', 'Fee', 'Withdrawal', 'Dividend']:
+        if tsubcode not in ['Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
+            'Fee', 'Withdrawal', 'Dividend']:
             raise
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment':
             raise
@@ -94,7 +97,8 @@ def check_tcode(tcode, tsubcode, description):
         if tsubcode not in ['Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close']:
             raise
     elif tcode == 'Receive Deliver':
-        if tsubcode not in ['Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Expiration', 'Assignment', 'Exercise']:
+        if tsubcode not in ['Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
+            'Expiration', 'Assignment', 'Exercise']:
             raise
 
 def check_param(buysell, openclose, callput):
