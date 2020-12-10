@@ -227,7 +227,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, long):
+def check(wk, long, verbose):
     #print(wk)
     fifos = {}
     total_fees = .0           # sum of all fees paid
@@ -299,9 +299,12 @@ def check(wk, long):
         curr_sym = '€'
         if not convert_currency:
             curr_sym = '$'
+        header = "%s %s %s" % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount:10.2f}' + '$')
+        if verbose:
+            header += " %s" % f'{get_eurusd(date):8.4f}'
         if str(quantity) == 'nan':
             quantity = 1
-        header = "%s %s%s %s$ %5d" % (datetime, f'{eur_amount:10.2f}', curr_sym, f'{amount:10.2f}', quantity)
+        header += " %5d" % quantity
 
         if tcode == 'Money Movement':
             if tsubcode == 'Transfer':
@@ -378,7 +381,10 @@ def check(wk, long):
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date)
             local_pnl = fifo_add(fifos, quantity, price, asset)
-            print(datetime, f'{local_pnl:10.2f}' + curr_sym, f'{amount-fees:10.2f}' + '$', '%5d' % quantity, asset)
+            header = "%s %s %s" % (datetime, f'{local_pnl:10.2f}' + curr_sym, f'{amount-fees:10.2f}' + '$')
+            if verbose:
+                header += " %s" % f'{get_eurusd(date):8.4f}'
+            print(header, '%5d' % quantity, asset)
             if check_stock:
                 pnl_stocks += local_pnl
             else:
@@ -393,13 +399,14 @@ def check(wk, long):
     #print(wk)
 
 def help():
-    print('tw-pnl.py [--assume-individual-stock][--long][--usd][--help] *.csv')
+    print('tw-pnl.py [--assume-individual-stock][--long][--usd][--help][--verbose] *.csv')
 
 def main(argv):
     long = False
+    verbose = False
     try:
-        opts, args = getopt.getopt(argv, 'hlu',
-            ['assume-individual-stock', 'help', 'long', 'usd'])
+        opts, args = getopt.getopt(argv, 'hluv',
+            ['assume-individual-stock', 'help', 'long', 'usd', 'verbose'])
     except getopt.GetoptError:
         help()
         sys.exit(2)
@@ -415,11 +422,13 @@ def main(argv):
         elif opt in ('-u', '--usd'):
             global convert_currency
             convert_currency = False
+        elif opt in ('-v', '--verbose'):
+            verbose = True
     read_eurusd()
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, long)
+        check(wk, long, verbose)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
