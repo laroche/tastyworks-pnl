@@ -42,15 +42,16 @@ sudo apt-get install python3-pandas
 TODO
 ----
 
-- Profit and loss is only calculated like for normal stocks,
-  no special handling for options until now. (Works ok if you
-  have closed all positions by end of year.)
+- If a long option is assigned, the buy price should be added to
+  the stock price. This is currently not done, but we print a warning
+  message for this case for manual adjustments in this rather rare case.
 - Filter out tax gains due to currency changes for an extra report.
 - Add net total including open positions.
 - Does not work with futures.
 - Translate text output into German.
 - Complete the list of non-stocks.
 - Add test data for users to try out.
+- Add testsuite to verify proper operation.
 - Output new CSV file with all transactions plus year-end pnl data and also
   pnl in $ and pnl in Euro.
 - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.

@@ -15,15 +15,16 @@
 # sudo apt-get install python3-pandas
 #
 # TODO:
-# - Profit and loss is only calculated like for normal stocks,
-#   no special handling for options until now. (Works ok if you
-#   have closed all positions by end of year.)
+# - If a long option is assigned, the buy price should be added to
+#   the stock price. This is currently not done, but we print a warning
+#   message for this case for manual adjustments in this rather rare case.
 # - Filter out tax gains due to currency changes for an extra report.
 # - Add net total including open positions.
 # - Does not work with futures.
 # - Translate text output into German.
 # - Complete the list of non-stocks.
 # - Add test data for users to try out.
+# - Add testsuite to verify proper operation.
 # - Output new CSV file with all transactions plus year-end pnl data and also
 #   pnl in $ and pnl in Euro.
 # - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
@@ -49,6 +50,8 @@ assume_stock = False
 
 eurusd = None
 
+# Setup 'eurusd' as dict() to contain the EURUSD exchange rate on a given date
+# based on official data from bundesbank.de.
 # If the file 'eurusd.csv' does not exist, download the data from
 # the bundesbank directly.
 def read_eurusd():
@@ -148,10 +151,8 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     # Detect if this is an option we are working with as
     # we have to pay taxes for selling an option:
     # This is a gross hack, should we check the 'expire' param?
-    #is_option = (len(asset) > 10)
+    is_option = (len(asset) > 10)
     pnl = .0
-    #if is_option and quantity < 0:
-    #    pnl = quantity * price
     # Find the right FIFO queue for our asset:
     if fifos.get(asset) is None:
         fifos[asset] = deque()
@@ -167,7 +168,10 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
         # Check if the FIFO queue has enough entries for
         # us to finish:
         if abs(fifo[0][1]) >= abs(quantity):
-            pnl += quantity * (fifo[0][0] - price)
+            if is_option and quantity > 0:
+                pnl -= quantity * price
+            else:
+                pnl += quantity * (fifo[0][0] - price)
             fifo[0][1] += quantity
             if fifo[0][1] == 0:
                 fifo.popleft()
@@ -177,11 +181,17 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
         # Remove the oldest FIFO entry and continue
         # the loop for further entries (or add the
         # remaining entries into the FIFO).
-        pnl += fifo[0][1] * (price - fifo[0][0])
+        if is_option and quantity > 0:
+            pnl += fifo[0][1] * price
+        else:
+            pnl += fifo[0][1] * (price - fifo[0][0])
         quantity += fifo[0][1]
         fifo.popleft()
     # Just add this to the FIFO queue:
     fifo.append([price, quantity])
+    # selling an option is taxed directly as income
+    if is_option and quantity < 0:
+        pnl -= quantity * price
     return pnl
 
 # Check if the first entry in the FIFO
@@ -289,7 +299,9 @@ def check(wk, long):
         curr_sym = '€'
         if not convert_currency:
             curr_sym = '$'
-        header = "%s %s%s %s$" % (datetime, f'{eur_amount:10.2f}', curr_sym, f'{amount:10.2f}')
+        if str(quantity) == 'nan':
+            quantity = 1
+        header = "%s %s%s %s$ %5d" % (datetime, f'{eur_amount:10.2f}', curr_sym, f'{amount:10.2f}', quantity)
 
         if tcode == 'Money Movement':
             if tsubcode == 'Transfer':
@@ -360,6 +372,8 @@ def check(wk, long):
             if str(buysell) == 'Sell' or \
                 (tsubcode in ['Expiration', 'Exercise', 'Assignment'] and fifos_islong(fifos, asset)):
                 quantity = - quantity
+            if tsubcode in ['Exercise', 'Assignment'] and quantity < 0:
+                print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date)
