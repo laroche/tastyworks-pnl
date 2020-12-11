@@ -55,7 +55,7 @@ def read_eurusd():
 def get_eurusd(date, debug=False):
     while True:
         x = eurusd[date]
-        if str(x) != "nan":
+        if str(x) != 'nan':
             return x
         if debug:
             print('EURUSD conversion not found for', date)
@@ -292,12 +292,12 @@ def check(wk, long, verbose):
         curr_sym = '€'
         if not convert_currency:
             curr_sym = '$'
-        header = "%s %s %s" % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount:10.2f}' + '$')
+        header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount:10.2f}' + '$')
         if verbose:
-            header += " %s" % f'{get_eurusd(date):8.4f}'
+            header += ' %s' % f'{get_eurusd(date):8.4f}'
         if str(quantity) == 'nan':
             quantity = 1
-        header += " %5d" % quantity
+        header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
             if tsubcode == 'Transfer':
@@ -374,9 +374,9 @@ def check(wk, long, verbose):
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date)
             local_pnl = fifo_add(fifos, quantity, price, asset)
-            header = "%s %s %s" % (datetime, f'{local_pnl:10.2f}' + curr_sym, f'{amount-fees:10.2f}' + '$')
+            header = '%s %s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym, f'{amount-fees:10.2f}' + '$')
             if verbose:
-                header += " %s" % f'{get_eurusd(date):8.4f}'
+                header += ' %s' % f'{get_eurusd(date):8.4f}'
             print(header, '%5d' % quantity, asset)
             if check_stock:
                 pnl_stocks += local_pnl
