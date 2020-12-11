@@ -4,34 +4,21 @@
 #
 # Generate data for a German tax income statement from Tastyworks trade history.
 #
+#
 # Download your trade history as csv file from
 # https://trade.tastyworks.com/index.html#/transactionHistoryPage
 # (Choose 'Activity' and then 'History' and then setup the filter for a
 # custom period of time and download it as csv file.)
 # Newest entries in the csv file should be on the top and it should contain the complete
 # history over all years. The csv file has the following first line:
-# Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
+# Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,\
+#   Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
+#
+#
+# Install on Debian/Ubuntu-based systems:
 #
 # sudo apt-get install python3-pandas
 #
-# TODO:
-# - If a long option is assigned, the buy price should be added to
-#   the stock price. This is currently not done, but we print a warning
-#   message for this case for manual adjustments in this rather rare case.
-# - Filter out tax gains due to currency changes for an extra report.
-# - Add net total including open positions.
-# - Does not work with futures.
-# - Translate text output into German.
-# - Complete the list of non-stocks.
-# - Add test data for users to try out.
-# - Add testsuite to verify proper operation.
-# - Output new CSV file with all transactions plus year-end pnl data and also
-#   pnl in $ and pnl in Euro.
-# - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
-# - Check if dates are truely ascending.
-# - Improve output of open positions.
-# - Are we rounding output correctly?
-# - Use pandas.isna(x)?
 #
 # pylint: disable=C0103,C0114,C0116
 #

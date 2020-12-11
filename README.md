@@ -42,21 +42,30 @@ sudo apt-get install python3-pandas
 TODO
 ----
 
+Important:
+
 - If a long option is assigned, the buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
-- Filter out tax gains due to currency changes for an extra report.
-- Add net total including open positions.
-- Does not work with futures.
-- Translate text output into German.
-- Complete the list of non-stocks.
-- Add test data for users to try out.
-- Add testsuite to verify proper operation.
 - Output new CSV file with all transactions plus year-end pnl data and also
   pnl in $ and pnl in Euro.
 - Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
+- Filter out tax gains due to currency changes for an extra report. If the pnl
+  lists currency gains separate, can they be used up to 600 € for tax-free income?
+- Does not work with futures.
+- Add images on how to download csv-file within Tastyworks into docu.
+- Complete the list of non-stocks.
+- Add net total including open positions.
+- Add performance reviews, graphs based on different time periods.
 - Check if dates are truely ascending.
-- Improve output of open positions.
 - Are we rounding output correctly?
+
+Nice:
+
+- Translate text output into German.
+- Add docu in German.
+- Add test data for users to try out.
+- Add testsuite to verify proper operation.
+- Improve output of open positions.
 - Use pandas.isna(x)?
 
