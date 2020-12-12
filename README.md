@@ -57,6 +57,7 @@ Important:
 - Complete the list of non-stocks.
 - Add net total including open positions.
 - Add performance reviews, graphs based on different time periods.
+- Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Check if dates are truely ascending.
 - Are we rounding output correctly?
 
