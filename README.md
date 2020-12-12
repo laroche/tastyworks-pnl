@@ -25,6 +25,7 @@ from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
 (Link to the data: [eurusd.csv](https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010))
 
 The option '--usd' can be used to not translate pnl data into Euro.
+
 Per default balance adjustments are only output as total sum, you can use the option '--long'
 to include balance adjustments into the list of transactions.
 
