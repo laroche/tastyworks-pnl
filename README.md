@@ -20,18 +20,18 @@ history over all years. The csv file has the following first line:
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
 </code>
 
-If you delete the 'eurusd.csv' file, a current version is downloaded directly
+If you delete the __eurusd.csv__ file, a current version is downloaded directly
 from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
 (Link to the data: [eurusd.csv](https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010))
 
-The option '--usd' can be used to not translate pnl data into Euro.
+The option __--usd__ can be used to not translate pnl data into Euro.
 
-Per default balance adjustments are only output as total sum, you can use the option '--long'
+Per default balance adjustments are only output as total sum, you can use the option __--long__
 to include balance adjustments into the list of transactions.
 
 Per default the script stops on unknown trading symbols (underlyings) and you have
 to hardcode into the source code if it is an individual stock or some ETF/fond.
-You can use the '--assume-individual-stock' option to assume individual stock for all unknown symbols.
+You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
 
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
