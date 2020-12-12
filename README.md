@@ -20,8 +20,9 @@ history over all years. The csv file has the following first line:
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
 </code>
 
-If you delete the local "eurusd.csv" file, a current one is downloaded over the
-Internet.
+If you delete the 'eurusd.csv' file, a current version is downloaded directly
+from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
+(Link to the data: [eurusd.csv](https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010))
 
 The option '--usd' can be used to not translate pnl data into Euro.
 Per default balance adjustments are only output as total sum, you can use the option '--long'
@@ -31,9 +32,6 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the '--assume-individual-stock' option to assume individual stock for all unknown symbols.
 
-If you remove the 'eurusd.csv' file, a current version is downloaded directly
-from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
-(Link to the data: [eurusd.csv](https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010))
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
@@ -48,18 +46,20 @@ TODO
 
 Important:
 
-- If a long option is assigned, the buy price should be added to
+- If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
 - Output new CSV file with all transactions plus year-end pnl data and also
   pnl in $ and pnl in Euro.
-- Break up report into: dividends, withholding-tax, interest, fees, stocks, other.
+- Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Filter out tax gains due to currency changes for an extra report. If the pnl
   lists currency gains separate, can they be used up to 600 € for tax-free income?
 - Does not work with futures.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
+- For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
 - Add net total including open positions.
+- Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Check if dates are truely ascending.
