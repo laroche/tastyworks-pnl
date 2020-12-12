@@ -17,7 +17,8 @@ Newest entries in the csv file should be on the top and it should contain the co
 history over all years. The csv file has the following first line:
 
 <code>
-Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
+Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,\
+Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
 </code>
 
 If you delete the __eurusd.csv__ file, a current version is downloaded directly
