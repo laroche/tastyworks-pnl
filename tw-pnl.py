@@ -33,7 +33,7 @@ import pandas
 
 convert_currency = True
 
-# For an unknown symbol (underlying), assume it is a individual/ normal stock.
+# For an unknown symbol (underlying), assume it is a individual/normal stock.
 # Otherwise you need to adjust the hardcoded list in this script.
 assume_stock = False
 
@@ -391,7 +391,7 @@ def check(wk, long, verbose):
 
     #print(wk)
 
-def help():
+def usage():
     print('tw-pnl.py [--assume-individual-stock][--long][--usd][--help][--verbose] *.csv')
 
 def main(argv):
@@ -401,14 +401,14 @@ def main(argv):
         opts, args = getopt.getopt(argv, 'hluv',
             ['assume-individual-stock', 'help', 'long', 'usd', 'verbose'])
     except getopt.GetoptError:
-        help()
+        usage()
         sys.exit(2)
     for opt, arg in opts:
         if opt == '--assume-individual-stock':
             global assume_stock
             assume_stock = True
         elif opt in ('-h', '--help'):
-            help()
+            usage()
             sys.exit()
         elif opt in ('-l', '--long'):
             long = True
