@@ -31,6 +31,9 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the '--assume-individual-stock' option to assume individual stock for all unknown symbols.
 
+If you remove the 'eurusd.csv' file, a current version is downloaded directly
+from <https://www.bundesbank.de/>. (Link to the data: [eurusd.csv](https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010))
+
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
 
