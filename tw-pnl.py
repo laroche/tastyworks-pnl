@@ -240,9 +240,13 @@ def check(wk, long, verbose):
     cur_year = None
     check_account_ref = None
     for i in range(len(wk) - 1, -1, -1):
-        datetime = wk['Date/Time'][i]
-        date = str(datetime)[:10]
-        if cur_year != str(datetime)[:4]:
+        datetime = str(wk['Date/Time'][i])
+        # datetime does not have any seconds, minimum output is minutes:
+        if datetime[16:] != ':00':
+            raise
+        datetime = datetime[:16]
+        date = datetime[:10] # year-month-day but no time
+        if cur_year != datetime[:4]:
             if cur_year is not None:
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
                     withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
@@ -257,7 +261,7 @@ def check(wk, long, verbose):
                 pnl = .0
                 usd = .0
                 total_fees = .0
-            cur_year = str(datetime)[:4]
+            cur_year = datetime[:4]
         tcode = wk['Transaction Code'][i]
         tsubcode = wk['Transaction Subcode'][i]
         description = wk['Description'][i]
