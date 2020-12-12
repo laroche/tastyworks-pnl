@@ -421,6 +421,9 @@ def main(argv):
             convert_currency = False
         elif opt in ('-v', '--verbose'):
             verbose = True
+    if len(args) == 0:
+        usage()
+        sys.exit()
     read_eurusd()
     args.reverse()
     for csv_file in args:
