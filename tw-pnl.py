@@ -222,6 +222,9 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
 
 def check(wk, long, verbose):
     #print(wk)
+    curr_sym = '€'
+    if not convert_currency:
+        curr_sym = '$'
     fifos = {}
     total_fees = .0           # sum of all fees paid
     total = .0                # account total
@@ -289,9 +292,6 @@ def check(wk, long, verbose):
         if price < .0:
             raise
 
-        curr_sym = '€'
-        if not convert_currency:
-            curr_sym = '$'
         header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount:10.2f}' + '$')
         if verbose:
             header += ' %s' % f'{get_eurusd(date):8.4f}'
