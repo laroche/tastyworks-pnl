@@ -87,6 +87,10 @@ def check_tcode(tcode, tsubcode, description):
         if tsubcode not in ['Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise']:
             raise
+        if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
+            raise
+        if tsubcode == 'Exercise' and description != 'Removal of option due to exercise':
+            raise
 
 def check_param(buysell, openclose, callput):
     if str(buysell) not in ['nan', 'Buy', 'Sell']:
