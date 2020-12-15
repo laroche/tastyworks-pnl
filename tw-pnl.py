@@ -201,7 +201,7 @@ def print_fifos(fifos):
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-        pnl, usd, total_fees, total, fifos, verbose):
+        pnl, account_usd, total_fees, total, fifos, verbose):
     print()
     print('Total sums paid and received in the year %s:' % cur_year)
     if dividends != .0 or withholding_tax != .0 or verbose:
@@ -216,7 +216,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     if pnl_stocks != .0 or verbose:
         print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
     print('pnl other:            ', f'{pnl:10.2f}' + curr_sym)
-    print('USD currency gains:   ', f'{int(usd / 10000):7d}')
+    print('USD currency gains:   ', f'{int(account_usd / 10000):7d}')
     print()
     print('New end sums and open positions:')
     print('total fees paid:      ', f'{total_fees:10.2f}' + curr_sym)
@@ -240,7 +240,7 @@ def check(wk, long, verbose):
     fee_adjustments = .0
     pnl_stocks = .0
     pnl = .0
-    usd = .0
+    account_usd = .0
     cur_year = None
     check_account_ref = None
     for i in range(len(wk) - 1, -1, -1):
@@ -254,7 +254,7 @@ def check(wk, long, verbose):
             if cur_year is not None:
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
                     withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-                    pnl, usd, total_fees, total, fifos, verbose)
+                    pnl, account_usd, total_fees, total, fifos, verbose)
                 dividends = .0
                 withholding_tax = .0
                 withdrawal = .0
@@ -263,7 +263,7 @@ def check(wk, long, verbose):
                 fee_adjustments = .0
                 pnl_stocks = .0
                 pnl = .0
-                usd = .0
+                account_usd = .0
                 total_fees = .0
             cur_year = datetime[:4]
         tcode = wk['Transaction Code'][i]
@@ -284,7 +284,7 @@ def check(wk, long, verbose):
         amount = float(wk['Amount'][i])
         total += amount - fees
         eur_amount = usd2eur(amount, date)
-        usd += fifo_add(fifos, int((amount - fees) * 10000), 1 / get_eurusd(date), 'account-usd')
+        account_usd += fifo_add(fifos, int((amount - fees) * 10000), 1 / get_eurusd(date), 'account-usd')
 
         quantity = wk['Quantity'][i]
         if str(quantity) != 'nan':
@@ -395,7 +395,7 @@ def check(wk, long, verbose):
 
     print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-        pnl, usd, total_fees, total, fifos, verbose)
+        pnl, account_usd, total_fees, total, fifos, verbose)
 
     #print(wk)
 
