@@ -139,7 +139,10 @@ def sign(x):
 # 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
-def fifo_add(fifos, quantity, price, asset, debug=False):
+def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
+    pnl = .0
+    if quantity == 0:
+        return pnl
     if debug:
         print_fifos(fifos)
         print('fifo_add', quantity, price, asset)
@@ -147,7 +150,6 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     # we have to pay taxes for selling an option:
     # This is a gross hack, should we check the 'expire' param?
     is_option = (len(asset) > 10)
-    pnl = .0
     # Find the right FIFO queue for our asset:
     if fifos.get(asset) is None:
         fifos[asset] = deque()
@@ -166,7 +168,10 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
             if is_option and quantity > 0:
                 pnl -= quantity * price
             else:
-                pnl += quantity * (fifo[0][0] - price)
+                pnl -= quantity * (price - fifo[0][0])
+            if debugfifo:
+                print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
+                    % (asset, quantity, fifo[0][0], price, pnl))
             fifo[0][1] += quantity
             if fifo[0][1] == 0:
                 fifo.popleft()
@@ -180,6 +185,9 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
             pnl += fifo[0][1] * price
         else:
             pnl += fifo[0][1] * (price - fifo[0][0])
+        if debugfifo:
+            print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
+                % (asset, -fifo[0][1], fifo[0][0], price, pnl))
         quantity += fifo[0][1]
         fifo.popleft()
     # Just add this to the FIFO queue:
@@ -187,6 +195,9 @@ def fifo_add(fifos, quantity, price, asset, debug=False):
     # selling an option is taxed directly as income
     if is_option and quantity < 0:
         pnl -= quantity * price
+    if debugfifo:
+        print('DEBUG FIFO: %s: add %7d * %8.2f = %8.2f pnl' \
+            % (asset, quantity, price, pnl))
     return pnl
 
 # Check if the first entry in the FIFO
@@ -284,7 +295,8 @@ def check(wk, long, verbose):
         amount = float(wk['Amount'][i])
         total += amount - fees
         eur_amount = usd2eur(amount, date)
-        account_usd += fifo_add(fifos, int((amount - fees) * 10000), 1 / get_eurusd(date), 'account-usd')
+        account_usd += fifo_add(fifos, int((amount - fees) * 10000),
+            1 / get_eurusd(date), 'account-usd')
 
         quantity = wk['Quantity'][i]
         if str(quantity) != 'nan':
