@@ -254,12 +254,15 @@ def check(wk, long, verbose):
     account_usd = .0
     cur_year = None
     check_account_ref = None
-    for i in range(len(wk) - 1, -1, -1):
-        datetime = str(wk['Date/Time'][i])
-        # datetime does not have any seconds, minimum output is minutes:
-        if datetime[16:] != ':00':
+    for i in reversed(wk.index):
+        # Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,\
+        #   Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,\
+        #   Account Reference
+        (datetime, tcode, tsubcode, symbol, buysell, openclose, quantity, expire, strike,
+            callput, price, fees, amount, description, account_ref) = wk.iloc[i]
+        if str(datetime)[16:] != ':00': # minimum output is minutes
             raise
-        datetime = datetime[:16]
+        datetime = str(datetime)[:16]
         date = datetime[:10] # year-month-day but no time
         if cur_year != datetime[:4]:
             if cur_year is not None:
@@ -277,36 +280,23 @@ def check(wk, long, verbose):
                 account_usd = .0
                 total_fees = .0
             cur_year = datetime[:4]
-        tcode = wk['Transaction Code'][i]
-        tsubcode = wk['Transaction Subcode'][i]
-        description = wk['Description'][i]
         check_tcode(tcode, tsubcode, description)
-        buysell = wk['Buy/Sell'][i]
-        openclose = wk['Open/Close'][i]
-        callput = wk['Call/Put'][i]
         check_param(buysell, openclose, callput)
-        account_ref = wk['Account Reference'][i]
         if check_account_ref is None:
             check_account_ref = account_ref
         if account_ref != check_account_ref: # check if this does not change over time
             raise
-        fees = float(wk['Fees'][i])
+        (amount, fees) = (float(amount), float(fees))
         total_fees += usd2eur(fees, date)
-        amount = float(wk['Amount'][i])
         total += amount - fees
         eur_amount = usd2eur(amount, date)
         account_usd += fifo_add(fifos, int((amount - fees) * 10000),
             1 / get_eurusd(date), 'account-usd')
 
-        quantity = wk['Quantity'][i]
         if str(quantity) != 'nan':
             if int(quantity) != quantity:
                 raise
             quantity = int(quantity)
-        symbol = wk['Symbol'][i]
-        expire = wk['Expiration Date'][i]
-        strike = wk['Strike'][i]
-        price = wk['Price'][i]
         if str(price) == 'nan':
             price = .0
         if price < .0:
