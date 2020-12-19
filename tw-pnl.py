@@ -293,10 +293,13 @@ def check(wk, long, verbose):
         account_usd += fifo_add(fifos, int((amount - fees) * 10000),
             1 / get_eurusd(date), 'account-usd')
 
-        if str(quantity) != 'nan':
+        if str(quantity) == 'nan':
+            quantity = 1
+        else:
             if int(quantity) != quantity:
                 raise
             quantity = int(quantity)
+
         if str(price) == 'nan':
             price = .0
         if price < .0:
@@ -305,8 +308,6 @@ def check(wk, long, verbose):
         header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount:10.2f}' + '$')
         if verbose:
             header += ' %s' % f'{get_eurusd(date):8.4f}'
-        if str(quantity) == 'nan':
-            quantity = 1
         header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
@@ -366,7 +367,7 @@ def check(wk, long, verbose):
             if str(expire) != 'nan':
                 expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
                 price *= 100.0
-                if int(strike) == strike:
+                if int(strike) == strike: # convert to integer for full numbers
                     strike = int(strike)
                 asset = '%s %s%s %s' % (symbol, callput, strike, expire)
                 check_stock = False
