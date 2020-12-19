@@ -311,6 +311,8 @@ def check(wk, long, verbose):
         header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
+            if tsubcode != 'Transfer' and fees != .0:
+                raise
             if tsubcode == 'Transfer':
                 print(header, 'transferred:', description)
             elif tsubcode  in ['Deposit', 'Credit Interest']:
@@ -327,15 +329,11 @@ def check(wk, long, verbose):
                     else:
                         withholding_tax += eur_amount
                         print(header, 'withholding tax: %s,' % symbol, description)
-                if fees != .0:
-                    raise
             elif tsubcode == 'Balance Adjustment':
                 if long:
                     print(header, 'balance adjustment')
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
-                if fees != .0:
-                    raise
             elif tsubcode == 'Fee':
                 # XXX Additional fees for dividends paid in short stock? Interest fees?
                 print(header, 'fees: %s,' % symbol, description)
@@ -343,15 +341,11 @@ def check(wk, long, verbose):
                 total_fees += eur_amount
                 if amount >= .0:
                     raise
-                if fees != .0:
-                    raise
             elif tsubcode == 'Withdrawal':
                 # XXX In my case dividends paid for short stock:
                 print(header, 'dividends paid: %s,' % symbol, description)
                 withdrawal += eur_amount
                 if amount >= .0:
-                    raise
-                if fees != .0:
                     raise
             elif tsubcode == 'Dividend':
                 if amount > .0:
@@ -360,8 +354,6 @@ def check(wk, long, verbose):
                 else:
                     withholding_tax += eur_amount
                     print(header, 'withholding tax: %s,' % symbol, description)
-                if fees != .0:
-                    raise
         else:
             asset = symbol
             if str(expire) != 'nan':
