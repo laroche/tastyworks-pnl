@@ -47,12 +47,12 @@ CSV and Excel Output
 
 The script can also output all data again as CSV file or as Excel file.
 (CSV should be most robust, I don't have much experience with excel. I'd recommend CSV
-and just reading it into a new Excel yourself. Both data types contain the same output.)
+and just reading it into a new Excel sheet yourself. Both data types contain the same output.)
 
 The options for this are __--output-csv=file.csv__ and __--output-excel=file.xlsx__.
 
 The output contains the important original data from the Tastyworks csv file plus
-pnl generated data as well as eurusd conversion data. You probaböy do not have to
+pnl generated data as well as eurusd conversion data. You probably do not have to
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
 Here the new Tastyworks transaction data in detail:
@@ -61,9 +61,9 @@ Here the new Tastyworks transaction data in detail:
   of the transaction
 - __pnl__: pnl for tax payments for this transaction based on FIFO
 - __eur_amount__: 'amount - fees' converted into Euro currency
-- __amount__:  as given from Tastyworks
-- __fees__: cost of transaction that needs to be subtracted from amount
-- __eurusd__: official eurusd conversion rate for the transaction date from bundesbank.de
+- __amount__: transaction amount in USD
+- __fees__: cost of transaction in USD that needs to be subtracted from amount
+- __eurusd__: official eurusd conversion rate for this transaction date from bundesbank.de
 - __quantity__: number of buys or sells
 - __asset__: what is bought (stock symbol or something like 'SPY P310 20-12-18' for an option
 - __symbol__: base asset that is traded. This is included to be able to generate summary overviews
