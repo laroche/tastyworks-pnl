@@ -26,6 +26,9 @@ from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
 
 The option __--usd__ can be used to not translate pnl data into Euro.
 
+The option __--verbose__ adds eurusd currency conversion info and also currency gains
+for the Tastyworks account into each transaction.
+
 Per default balance adjustments are only output as total sum, you can use the option __--long__
 to include balance adjustments into the list of transactions.
 
