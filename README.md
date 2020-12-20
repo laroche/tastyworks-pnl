@@ -101,6 +101,7 @@ Important:
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Check if dates are truely ascending.
 - Are we rounding output correctly?
+- Is the time output correctly with the correct timezone?
 
 Nice:
 
