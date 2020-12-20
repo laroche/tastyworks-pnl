@@ -42,6 +42,42 @@ sudo apt-get install python3-pandas
 </code>
 
 
+CSV and Excel Output
+--------------------
+
+The script can also output all data again as CSV file or as Excel file.
+(CSV should be most robust, I don't have much experience with excel. I'd recommend CSV
+and just reading it into a new Excel yourself. Both data types contain the same output.)
+
+The options for this are __--output-csv=file.csv__ and __--output-excel=file.xlsx__.
+
+The output contains the important original data from the Tastyworks csv file plus
+pnl generated data as well as eurusd conversion data. You probaböy do not have to
+provide all data in a tax statement, some is only added for further data processing
+convenience in your spreadsheet program.
+Here the new Tastyworks transaction data in detail:
+
+- __datetime__: Date and time (Tastyworks gives minutes for this, no exact seconds)
+  of the transaction
+- __pnl__: pnl for tax payments for this transaction based on FIFO
+- __eur_amount__: 'amount - fees' converted into Euro currency
+- __amount__:  as given from Tastyworks
+- __fees__: cost of transaction that needs to be subtracted from amount
+- __eurusd__: official eurusd conversion rate for the transaction date from bundesbank.de
+- __quantity__: number of buys or sells
+- __asset__: what is bought (stock symbol or something like 'SPY P310 20-12-18' for an option
+- __symbol__: base asset that is traded. This is included to be able to generate summary overviews
+  for e.g. all transactions in SPY with stocks and options combined.
+- __description__: additional informational text for the transaction
+- __account_total__: account total at this time. This is the previous account total plus 'amount - fees'
+  from this transaction. This is purely informational and not needed for tax data.
+  Best looked at to check if this script calculates the same total sum as shown in your Tastyworks
+  current total.
+
+Please note that I am not personally using this CSV/Excel output, so please give feedback on
+what/how this data is output and make sure you review the data before using it.
+
+
 TODO
 ----
 
@@ -50,8 +86,8 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
-- Output new CSV file with all transactions plus year-end pnl data and also
-  pnl in $ and pnl in Euro.
+- Can Excel output also include yearly summary data computed from Excel?
+  Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Filter out tax gains due to currency changes for an extra report. If the pnl
   lists currency gains separate, can they be used up to 600 € for tax-free income?

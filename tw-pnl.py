@@ -30,6 +30,7 @@ from collections import deque
 import math
 import datetime as pydatetime
 import pandas
+#import matplotlib.pyplot as plt
 
 convert_currency = True
 
@@ -235,7 +236,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, long, verbose):
+def check(wk, output_csv, output_excel, long, verbose):
     #print(wk)
     curr_sym = '€'
     if not convert_currency:
@@ -254,6 +255,7 @@ def check(wk, long, verbose):
     account_usd = .0
     cur_year = None
     check_account_ref = None
+    new_wk = []
     for i in reversed(wk.index):
         # Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,\
         #   Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,\
@@ -289,9 +291,11 @@ def check(wk, long, verbose):
         (amount, fees) = (float(amount), float(fees))
         total_fees += usd2eur(fees, date)
         total += amount - fees
-        eur_amount = usd2eur(amount, date)
+        eur_amount = usd2eur(amount - fees, date)
         account_usd += fifo_add(fifos, int((amount - fees) * 10000),
             1 / get_eurusd(date), 'account-usd')
+        asset = ''
+        newdescription = ''
 
         if str(quantity) == 'nan':
             quantity = 1
@@ -305,18 +309,23 @@ def check(wk, long, verbose):
         if price < .0:
             raise
 
-        header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount:10.2f}' + '$')
+        header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount - fees:10.2f}' + '$')
         if verbose:
             header += ' %s' % f'{get_eurusd(date):8.4f}'
         header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
+            local_pnl = '%.4f' % eur_amount
             if tsubcode != 'Transfer' and fees != .0:
                 raise
             if tsubcode == 'Transfer':
+                local_pnl = ''
+                asset = 'transfer'
+                newdescription = description
                 print(header, 'transferred:', description)
             elif tsubcode  in ['Deposit', 'Credit Interest']:
                 if description == 'INTEREST ON CREDIT BALANCE':
+                    asset = 'interest'
                     print(header, 'interest')
                     if amount > .0:
                         interest_recv += eur_amount
@@ -324,18 +333,24 @@ def check(wk, long, verbose):
                         interest_paid += eur_amount
                 else:
                     if amount > .0:
+                        asset = 'dividends for %s' % symbol
                         dividends += eur_amount
                         print(header, 'dividends: %s,' % symbol, description)
                     else:
+                        asset = 'withholding tax for %s' % symbol
                         withholding_tax += eur_amount
                         print(header, 'withholding tax: %s,' % symbol, description)
+                    newdescription = description
             elif tsubcode == 'Balance Adjustment':
+                asset = 'balance adjustment'
                 if long:
                     print(header, 'balance adjustment')
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
             elif tsubcode == 'Fee':
                 # XXX Additional fees for dividends paid in short stock? Interest fees?
+                asset = 'fees for %s' % symbol
+                newdescription = description
                 print(header, 'fees: %s,' % symbol, description)
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
@@ -343,17 +358,22 @@ def check(wk, long, verbose):
                     raise
             elif tsubcode == 'Withdrawal':
                 # XXX In my case dividends paid for short stock:
+                asset = 'dividends paid for %s' % symbol
+                newdescription = description
                 print(header, 'dividends paid: %s,' % symbol, description)
                 withdrawal += eur_amount
                 if amount >= .0:
                     raise
             elif tsubcode == 'Dividend':
                 if amount > .0:
+                    asset = 'dividends for %s' % symbol
                     dividends += eur_amount
                     print(header, 'dividends: %s,' % symbol, description)
                 else:
+                    asset = 'withholding tax for %s' % symbol
                     withholding_tax += eur_amount
                     print(header, 'withholding tax: %s,' % symbol, description)
+                newdescription = description
         else:
             asset = symbol
             if str(expire) != 'nan':
@@ -385,6 +405,10 @@ def check(wk, long, verbose):
                 pnl_stocks += local_pnl
             else:
                 pnl += local_pnl
+            description = ''
+            local_pnl = '%.4f' % local_pnl
+        new_wk.append([datetime, local_pnl, '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees,
+            '%.4f' % get_eurusd(date), quantity, asset, symbol, newdescription, '%.2f' % total])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
@@ -393,16 +417,28 @@ def check(wk, long, verbose):
         pnl, account_usd, total_fees, total, fifos, verbose)
 
     #print(wk)
+    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'eur_amount', 'amount',
+        'fees', 'eurusd', 'quantity', 'asset', 'symbol', 'description', 'account_total'))
+    if output_csv is not None:
+        with open(output_csv, 'w') as f:
+            new_wk.to_csv(f, index=False)
+    if output_excel is not None:
+        with pandas.ExcelWriter(output_excel) as f:
+            new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
+    #print(new_wk)
 
 def usage():
-    print('tw-pnl.py [--assume-individual-stock][--long][--usd][--help][--verbose] *.csv')
+    print('tw-pnl.py [--assume-individual-stock][--long][--usd][--output-csv=test.csv]' +
+        '[--output-excel=test.xlsx][--help][--verbose] *.csv')
 
 def main(argv):
     long = False
     verbose = False
+    output_csv = None
+    output_excel = None
     try:
-        opts, args = getopt.getopt(argv, 'hluv',
-            ['assume-individual-stock', 'help', 'long', 'usd', 'verbose'])
+        opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock', 'help', 'long',
+            'output-csv=', 'output-excel=', 'usd', 'verbose'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -415,6 +451,10 @@ def main(argv):
             sys.exit()
         elif opt in ('-l', '--long'):
             long = True
+        elif opt == '--output-csv':
+            output_csv = arg
+        elif opt == '--output-excel':
+            output_excel = arg
         elif opt in ('-u', '--usd'):
             global convert_currency
             convert_currency = False
@@ -427,7 +467,7 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, long, verbose)
+        check(wk, output_csv, output_excel, long, verbose)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
