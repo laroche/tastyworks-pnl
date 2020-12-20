@@ -127,7 +127,8 @@ def is_stock(symbol):
     # The conservative way is to through an exception if we are not sure.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
-        print('Use the option --assume-individual-stock to assume individual stock for all unknown symbols.')
+        print('Use the option --assume-individual-stock to assume ' +
+            'individual stock for all unknown symbols.')
         raise
     return True # Just assume this is a normal stock if not in the above list
 
@@ -309,7 +310,8 @@ def check(wk, output_csv, output_excel, long, verbose):
         if price < .0:
             raise
 
-        header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym, f'{amount - fees:10.2f}' + '$')
+        header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym,
+            f'{amount - fees:10.2f}' + '$')
         if verbose:
             header += ' %s' % f'{get_eurusd(date):8.4f}'
         header += ' %5d' % quantity
