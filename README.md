@@ -33,6 +33,9 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
 
+The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
+is the cummulative sum, not the real local change. (Bug in the output!)
+
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:

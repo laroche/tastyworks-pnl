@@ -241,7 +241,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, output_csv, output_excel, long, verbose):
+def check(wk, output_csv, output_excel, long, verbose, debugfifo):
     #print(wk)
     curr_sym = '€'
     if not convert_currency:
@@ -299,8 +299,7 @@ def check(wk, output_csv, output_excel, long, verbose):
         total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
         usd_gains = fifo_add(fifos, int((amount - fees) * 10000),
-            1 / conv_usd, 'account-usd') / 10000.0
-            #1 / conv_usd, 'account-usd', debugfifo=True) / 10000.0
+            1 / conv_usd, 'account-usd', debugfifo=debugfifo) / 10000.0
         account_usd += usd_gains
         asset = ''
         newdescription = ''
@@ -407,7 +406,7 @@ def check(wk, output_csv, output_excel, long, verbose):
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date, conv_usd)
-            local_pnl = fifo_add(fifos, quantity, price, asset)
+            local_pnl = fifo_add(fifos, quantity, price, asset, debugfifo=debugfifo)
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
                 header += ' %s' % f'{usd_gains:10.2f}' + '€'
@@ -449,11 +448,12 @@ def usage():
 def main(argv):
     long = False
     verbose = False
+    debugfifo = False
     output_csv = None
     output_excel = None
     try:
         opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock', 'help', 'long',
-            'output-csv=', 'output-excel=', 'usd', 'verbose'])
+            'output-csv=', 'output-excel=', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -475,6 +475,8 @@ def main(argv):
             convert_currency = False
         elif opt in ('-v', '--verbose'):
             verbose = True
+        elif opt == '--debug-fifo':
+            debugfifo = True
     if len(args) == 0:
         usage()
         sys.exit()
@@ -482,7 +484,7 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, long, verbose)
+        check(wk, output_csv, output_excel, long, verbose, debugfifo)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
