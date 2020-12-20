@@ -62,14 +62,18 @@ def get_eurusd(date, debug=False):
             print('EURUSD conversion not found for', date)
         date = str(pydatetime.date(*map(int, date.split('-'))) - pydatetime.timedelta(days=1))
 
-def eur2usd(x, date):
+def eur2usd(x, date, conv=None):
     if convert_currency:
-        return x * get_eurusd(date)
+        if conv is None:
+            return x * get_eurusd(date)
+        return x * conv
     return x
 
-def usd2eur(x, date):
+def usd2eur(x, date, conv=None):
     if convert_currency:
-        return x / get_eurusd(date)
+        if conv is None:
+            return x / get_eurusd(date)
+        return x / conv
     return x
 
 def check_tcode(tcode, tsubcode, description):
@@ -151,7 +155,7 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
     # Detect if this is an option we are working with as
     # we have to pay taxes for selling an option:
     # This is a gross hack, should we check the 'expire' param?
-    is_option = (len(asset) > 10)
+    is_option = (len(asset) > 10 and asset != 'account-usd')
     # Find the right FIFO queue for our asset:
     if fifos.get(asset) is None:
         fifos[asset] = deque()
@@ -229,7 +233,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     if pnl_stocks != .0 or verbose:
         print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
     print('pnl other:            ', f'{pnl:10.2f}' + curr_sym)
-    print('USD currency gains:   ', f'{int(account_usd / 10000):7d}')
+    print('USD currency gains:   ', f'{account_usd:10.2f}' + curr_sym)
     print()
     print('New end sums and open positions:')
     print('total fees paid:      ', f'{total_fees:10.2f}' + curr_sym)
@@ -290,11 +294,14 @@ def check(wk, output_csv, output_excel, long, verbose):
         if account_ref != check_account_ref: # check if this does not change over time
             raise
         (amount, fees) = (float(amount), float(fees))
-        total_fees += usd2eur(fees, date)
+        conv_usd = get_eurusd(date)
+        total_fees += usd2eur(fees, date, conv_usd)
         total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
-        account_usd += fifo_add(fifos, int((amount - fees) * 10000),
-            1 / get_eurusd(date), 'account-usd')
+        usd_gains = fifo_add(fifos, int((amount - fees) * 10000),
+            1 / conv_usd, 'account-usd') / 10000.0
+            #1 / conv_usd, 'account-usd', debugfifo=True) / 10000.0
+        account_usd += usd_gains
         asset = ''
         newdescription = ''
 
@@ -310,10 +317,12 @@ def check(wk, output_csv, output_excel, long, verbose):
         if price < .0:
             raise
 
-        header = '%s %s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym,
-            f'{amount - fees:10.2f}' + '$')
+        header = '%s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym)
         if verbose:
-            header += ' %s' % f'{get_eurusd(date):8.4f}'
+            header += ' %s' % f'{usd_gains:10.2f}' + '€'
+        header += ' %s' % f'{amount - fees:10.2f}' + '$'
+        if verbose:
+            header += ' %s' % f'{conv_usd:8.4f}'
         header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
@@ -397,11 +406,14 @@ def check(wk, output_csv, output_excel, long, verbose):
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
-            price = usd2eur(price, date)
+            price = usd2eur(price, date, conv_usd)
             local_pnl = fifo_add(fifos, quantity, price, asset)
-            header = '%s %s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym, f'{amount-fees:10.2f}' + '$')
+            header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
-                header += ' %s' % f'{get_eurusd(date):8.4f}'
+                header += ' %s' % f'{usd_gains:10.2f}' + '€'
+            header += ' %s' % f'{amount-fees:10.2f}' + '$'
+            if verbose:
+                header += ' %s' % f'{conv_usd:8.4f}'
             print(header, '%5d' % quantity, asset)
             if check_stock:
                 pnl_stocks += local_pnl
@@ -409,8 +421,9 @@ def check(wk, output_csv, output_excel, long, verbose):
                 pnl += local_pnl
             description = ''
             local_pnl = '%.4f' % local_pnl
-        new_wk.append([datetime, local_pnl, '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees,
-            '%.4f' % get_eurusd(date), quantity, asset, symbol, newdescription, '%.2f' % total])
+        new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % eur_amount,
+            '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
+            newdescription, '%.2f' % total])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
@@ -419,8 +432,8 @@ def check(wk, output_csv, output_excel, long, verbose):
         pnl, account_usd, total_fees, total, fifos, verbose)
 
     #print(wk)
-    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'eur_amount', 'amount',
-        'fees', 'eurusd', 'quantity', 'asset', 'symbol', 'description', 'account_total'))
+    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains', 'eur_amount',
+        'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol', 'description', 'account_total'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)

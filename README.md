@@ -60,6 +60,7 @@ Here the new Tastyworks transaction data in detail:
 - __datetime__: Date and time (Tastyworks gives minutes for this, no exact seconds)
   of the transaction
 - __pnl__: pnl for tax payments for this transaction based on FIFO
+- __usd_gains__: currency conversion gains for the account in USD
 - __eur_amount__: 'amount - fees' converted into Euro currency
 - __amount__: transaction amount in USD
 - __fees__: cost of transaction in USD that needs to be subtracted from amount
@@ -91,6 +92,7 @@ Important:
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Filter out tax gains due to currency changes for an extra report. If the pnl
   lists currency gains separate, can they be used up to 600 € for tax-free income?
+  Is the current computation of currency gains accurate at all? Seems a bit too high right now.
 - Does not work with futures.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
