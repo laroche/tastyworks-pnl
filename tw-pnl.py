@@ -217,8 +217,8 @@ def print_fifos(fifos):
         print(fifo, fifos[fifo])
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
-        withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-        pnl, account_usd, total_fees, total, fifos, verbose):
+        withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
+        pnl_stocks_losses, pnl, account_usd, total_fees, total, fifos, verbose):
     print()
     print('Total sums paid and received in the year %s:' % cur_year)
     if dividends != .0 or withholding_tax != .0 or verbose:
@@ -230,8 +230,9 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     if interest_paid != .0:
         print('interest paid:        ', f'{-interest_paid:10.2f}' + curr_sym)
     print('fee adjustments:      ', f'{fee_adjustments:10.2f}' + curr_sym)
-    if pnl_stocks != .0 or verbose:
-        print('pnl stocks:           ', f'{pnl_stocks:10.2f}' + curr_sym)
+    if pnl_stocks_gains != .0 or pnl_stocks_losses != .0 or verbose:
+        print('pnl stocks gains:     ', f'{pnl_stocks_gains:10.2f}' + curr_sym)
+        print('pnl stocks losses:    ', f'{pnl_stocks_losses:10.2f}' + curr_sym)
     print('pnl other:            ', f'{pnl:10.2f}' + curr_sym)
     print('USD currency gains:   ', f'{account_usd:10.2f}' + curr_sym)
     print()
@@ -255,7 +256,8 @@ def check(wk, output_csv, output_excel, long, verbose, debugfifo):
     interest_recv = .0
     interest_paid = .0
     fee_adjustments = .0
-    pnl_stocks = .0
+    pnl_stocks_gains = .0
+    pnl_stocks_losses = .0
     pnl = .0
     account_usd = .0
     cur_year = None
@@ -274,15 +276,17 @@ def check(wk, output_csv, output_excel, long, verbose, debugfifo):
         if cur_year != datetime[:4]:
             if cur_year is not None:
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
-                    withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-                    pnl, account_usd, total_fees, total, fifos, verbose)
+                    withdrawal, interest_recv, interest_paid, fee_adjustments,
+                    pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd, total_fees,
+                    total, fifos, verbose)
                 dividends = .0
                 withholding_tax = .0
                 withdrawal = .0
                 interest_recv = .0
                 interest_paid = .0
                 fee_adjustments = .0
-                pnl_stocks = .0
+                pnl_stocks_gains = .0
+                pnl_stocks_losses = .0
                 pnl = .0
                 account_usd = .0
                 total_fees = .0
@@ -415,7 +419,10 @@ def check(wk, output_csv, output_excel, long, verbose, debugfifo):
                 header += ' %s' % f'{conv_usd:8.4f}'
             print(header, '%5d' % quantity, asset)
             if check_stock:
-                pnl_stocks += local_pnl
+                if local_pnl > .0:
+                    pnl_stocks_gains += local_pnl
+                else:
+                    pnl_stocks_losses += local_pnl
             else:
                 pnl += local_pnl
             description = ''
@@ -427,8 +434,8 @@ def check(wk, output_csv, output_excel, long, verbose, debugfifo):
     wk.drop('Account Reference', axis=1, inplace=True)
 
     print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
-        withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks,
-        pnl, account_usd, total_fees, total, fifos, verbose)
+        withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
+        pnl_stocks_losses, pnl, account_usd, total_fees, total, fifos, verbose)
 
     #print(wk)
     new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains', 'eur_amount',
