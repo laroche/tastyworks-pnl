@@ -80,6 +80,7 @@ Here the new Tastyworks transaction data in detail:
   from this transaction. This is purely informational and not needed for tax data.
   Best looked at to check if this script calculates the same total sum as shown in your Tastyworks
   current total.
+- __term_loss__: how much does this transaction contribute to the 'Verlustverrechnungstopf Termingeschäfte'
 
 Please note that I am not personally using this CSV/Excel output, so please give feedback on
 what/how this data is output and make sure you review the data before using it.
@@ -93,6 +94,8 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
+- Part of 'Verustverrechnungstopf Termingeschäfte' is implemented. Complete this
+  and verify if it is working correctly.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.

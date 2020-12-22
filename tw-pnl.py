@@ -146,9 +146,9 @@ def sign(x):
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
 def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
-    pnl = .0
+    (pnl, term_losses) = (.0, .0)
     if quantity == 0:
-        return pnl
+        return (pnl, term_losses)
     if debug:
         print_fifos(fifos)
         print('fifo_add', quantity, price, asset)
@@ -174,7 +174,11 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
             if is_option and quantity > 0:
                 pnl -= quantity * price
             else:
-                pnl -= quantity * (price - fifo[0][0])
+                p = quantity * (price - fifo[0][0])
+                pnl -= p
+                if is_option and quantity < 0 and p > .0:
+                    #print('Termingeschäft-Verlust von %.2f:' % p)
+                    term_losses += p
             if debugfifo:
                 print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
                     % (asset, quantity, fifo[0][0], price, pnl))
@@ -183,14 +187,19 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
                 fifo.popleft()
                 if len(fifo) == 0:
                     del fifos[asset]
-            return pnl
+            return (pnl, term_losses)
         # Remove the oldest FIFO entry and continue
         # the loop for further entries (or add the
         # remaining entries into the FIFO).
         if is_option and quantity > 0:
             pnl += fifo[0][1] * price
         else:
-            pnl += fifo[0][1] * (price - fifo[0][0])
+            p = fifo[0][1] * (price - fifo[0][0])
+            pnl +=  p
+            # XXX: verify this, not happening in my case:
+            if is_option and quantity < 0 and p < .0:
+                print('2Termingeschäft-Verlust von %.2f:' % -p)
+                term_losses -= p
         if debugfifo:
             print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
                 % (asset, -fifo[0][1], fifo[0][0], price, pnl))
@@ -204,7 +213,7 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
     if debugfifo:
         print('DEBUG FIFO: %s: add %7d * %8.2f = %8.2f pnl' \
             % (asset, quantity, price, pnl))
-    return pnl
+    return (pnl, term_losses)
 
 # Check if the first entry in the FIFO
 # is 'long' the underlying or 'short'.
@@ -218,7 +227,7 @@ def print_fifos(fifos):
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, pnl, account_usd, total_fees, total, fifos, verbose):
+        pnl_stocks_losses, pnl, account_usd, total_fees, term_losses, total, fifos, verbose):
     print()
     print('Total sums paid and received in the year %s:' % cur_year)
     if dividends != .0 or withholding_tax != .0 or verbose:
@@ -238,6 +247,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print()
     print('New end sums and open positions:')
     print('total fees paid:      ', f'{total_fees:10.2f}' + curr_sym)
+    print('Verlustverrechnungstopf Termingeschaefte: ', f'{term_losses:10.2f}' + curr_sym)
     print('account end total:    ', f'{total:10.2f}' + '$')
     print_fifos(fifos)
     print()
@@ -251,7 +261,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
     total = .0                # account total
     (pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd) = (.0, .0, .0, .0)
     (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
-    (withdrawal, fee_adjustments, total_fees) = (.0, .0, .0)
+    (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
     cur_year = None
     check_account_ref = None
     new_wk = []
@@ -270,10 +280,10 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
                     withdrawal, interest_recv, interest_paid, fee_adjustments,
                     pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd, total_fees,
-                    total, fifos, verbose)
+                    term_losses, total, fifos, verbose)
                 (pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd) = (.0, .0, .0, .0)
                 (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
-                (withdrawal, fee_adjustments, total_fees) = (.0, .0, .0)
+                (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
             cur_year = datetime[:4]
         check_tcode(tcode, tsubcode, description)
         check_param(buysell, openclose, callput)
@@ -288,7 +298,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
         eur_amount = usd2eur(amount - fees, date)
         # USD as a big integer number:
         usd_gains = fifo_add(fifos, int((amount - fees) * 10000),
-            1 / conv_usd, 'account-usd', debugfifo=debugfifo) / 10000.0
+            1 / conv_usd, 'account-usd', debugfifo=debugfifo)[0] / 10000.0
         account_usd += usd_gains
         asset = ''
         newdescription = ''
@@ -315,6 +325,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
 
         if tcode == 'Money Movement':
             local_pnl = '%.4f' % eur_amount
+            term_loss = .0
             if tsubcode != 'Transfer' and fees != .0:
                 raise
             if tsubcode == 'Transfer':
@@ -395,7 +406,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date, conv_usd)
-            local_pnl = fifo_add(fifos, quantity, price, asset, debugfifo=debugfifo)
+            (local_pnl, term_loss) = fifo_add(fifos, quantity, price, asset, debugfifo=debugfifo)
+            term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
                 header += ' %s' % f'{usd_gains:10.2f}' + '€'
@@ -414,17 +426,18 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
             local_pnl = '%.4f' % local_pnl
         new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % eur_amount,
             '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
-            newdescription, '%.2f' % total])
+            newdescription, '%.2f' % total, '%.2f' % term_loss])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
     print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, pnl, account_usd, total_fees, total, fifos, verbose)
+        pnl_stocks_losses, pnl, account_usd, total_fees, term_losses, total, fifos, verbose)
 
     #print(wk)
-    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains', 'eur_amount',
-        'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol', 'description', 'account_total'))
+    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains',
+        'eur_amount', 'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
+        'description', 'account_total', 'term_loss'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
