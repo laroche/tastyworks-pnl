@@ -249,17 +249,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
         curr_sym = '$'
     fifos = {}
     total = .0                # account total
-    dividends = .0
-    withholding_tax = .0      # withholding tax = German 'Quellensteuer'
-    withdrawal = .0
-    interest_recv = .0
-    interest_paid = .0
-    fee_adjustments = .0
-    pnl_stocks_gains = .0
-    pnl_stocks_losses = .0
-    pnl = .0
-    account_usd = .0
-    total_fees = .0           # sum of all fees paid
+    (pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd) = (.0, .0, .0, .0)
+    (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
+    (withdrawal, fee_adjustments, total_fees) = (.0, .0, .0)
     cur_year = None
     check_account_ref = None
     new_wk = []
@@ -279,17 +271,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
                     withdrawal, interest_recv, interest_paid, fee_adjustments,
                     pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd, total_fees,
                     total, fifos, verbose)
-                dividends = .0
-                withholding_tax = .0
-                withdrawal = .0
-                interest_recv = .0
-                interest_paid = .0
-                fee_adjustments = .0
-                pnl_stocks_gains = .0
-                pnl_stocks_losses = .0
-                pnl = .0
-                account_usd = .0
-                total_fees = .0
+                (pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd) = (.0, .0, .0, .0)
+                (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
+                (withdrawal, fee_adjustments, total_fees) = (.0, .0, .0)
             cur_year = datetime[:4]
         check_tcode(tcode, tsubcode, description)
         check_param(buysell, openclose, callput)
