@@ -242,13 +242,12 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, output_csv, output_excel, long, verbose, debugfifo):
+def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
     #print(wk)
     curr_sym = '€'
     if not convert_currency:
         curr_sym = '$'
     fifos = {}
-    total_fees = .0           # sum of all fees paid
     total = .0                # account total
     dividends = .0
     withholding_tax = .0      # withholding tax = German 'Quellensteuer'
@@ -260,6 +259,7 @@ def check(wk, output_csv, output_excel, long, verbose, debugfifo):
     pnl_stocks_losses = .0
     pnl = .0
     account_usd = .0
+    total_fees = .0           # sum of all fees paid
     cur_year = None
     check_account_ref = None
     new_wk = []
@@ -357,7 +357,7 @@ def check(wk, output_csv, output_excel, long, verbose, debugfifo):
                     newdescription = description
             elif tsubcode == 'Balance Adjustment':
                 asset = 'balance adjustment'
-                if long:
+                if opt_long:
                     print(header, 'balance adjustment')
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
@@ -453,7 +453,7 @@ def usage():
         '[--output-excel=test.xlsx][--help][--verbose] *.csv')
 
 def main(argv):
-    long = False
+    opt_long = False
     verbose = False
     debugfifo = False
     output_csv = None
@@ -472,7 +472,7 @@ def main(argv):
             usage()
             sys.exit()
         elif opt in ('-l', '--long'):
-            long = True
+            opt_long = True
         elif opt == '--output-csv':
             output_csv = arg
         elif opt == '--output-excel':
@@ -491,7 +491,7 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, long, verbose, debugfifo)
+        check(wk, output_csv, output_excel, opt_long, verbose, debugfifo)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
