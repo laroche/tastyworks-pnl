@@ -196,9 +196,8 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
         else:
             p = fifo[0][1] * (price - fifo[0][0])
             pnl +=  p
-            # XXX: verify this, not happening in my case:
             if is_option and quantity < 0 and p < .0:
-                print('2Termingeschäft-Verlust von %.2f:' % -p)
+                #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
         if debugfifo:
             print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
