@@ -261,7 +261,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
         #   Account Reference
         (datetime, tcode, tsubcode, symbol, buysell, openclose, quantity, expire, strike,
             callput, price, fees, amount, description, account_ref) = wk.iloc[i]
-        if str(datetime)[16:] != ':00': # minimum output is minutes
+        if str(datetime)[16:] != ':00': # minimum output is minutes, seconds are 00 here
             raise
         datetime = str(datetime)[:16]
         date = datetime[:10] # year-month-day but no time
@@ -286,6 +286,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
         total_fees += usd2eur(fees, date, conv_usd)
         total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
+        # USD as a big integer number:
         usd_gains = fifo_add(fifos, int((amount - fees) * 10000),
             1 / conv_usd, 'account-usd', debugfifo=debugfifo) / 10000.0
         account_usd += usd_gains
