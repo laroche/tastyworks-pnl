@@ -96,6 +96,7 @@ Important:
   message for this case for manual adjustments in this rather rare case.
 - Part of 'Verustverrechnungstopf Termingeschäfte' is implemented. Complete this
   and verify if it is working correctly.
+- Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
