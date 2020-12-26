@@ -218,26 +218,27 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
 def fifos_islong(fifos, asset):
     return fifos[asset][0][1] > 0
 
-def fifos_sum(fifos, total):
+def fifos_sum(fifos):
     sum = .0
     for fifo in fifos:
-        if fifo == 'account-usd':
-            # account-usd should always be the same as total together with
-            # EURUSD conversion data. So just as sanity check:
-            for (a, b) in fifos[fifo]:
-                total -= b / 10000
-        else:
+        if fifo != 'account-usd':
             for (a, b) in fifos[fifo]:
                 sum += a * b
-    if abs(total) > 0.004:
-        print(total)
-        raise
     return sum
 
 def print_fifos(fifos):
     print('open positions:')
     for fifo in fifos:
         print(fifo, fifos[fifo])
+
+# account-usd should always be the same as total together with
+# EURUSD conversion data. So just as sanity check:
+def check_total(fifos, total):
+    for (a, b) in fifos['account-usd']:
+        total -= b / 10000
+    if abs(total) > 0.004:
+        print(total)
+        raise
 
 def show_plt(df):
     import matplotlib.pyplot as plt
@@ -451,7 +452,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             description = ''
             local_pnl = '%.4f' % local_pnl
 
-        net_total = total + fifos_sum(fifos, total)
+        #check_total(fifos, total)
+
+        net_total = total + fifos_sum(fifos)
 
         new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % eur_amount,
             '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
