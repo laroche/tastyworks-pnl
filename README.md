@@ -87,8 +87,8 @@ Here the new Tastyworks transaction data in detail:
   This does not use current market data, but keeps asset prices at purchase cost.
   Best looked at to check if this script calculates the same total sum as shown in your
   Tastyworks current total.
-- __term_loss__: how much does this transaction contribute to the 'Verlustverrechnungstopf
-  Termingeschäfte'
+- __term_loss__: how much does this transaction contribute to losses in future
+  contracts ('Verlustverrechnungstopf Termingeschäfte')
 
 Please note that I am not personally using this CSV/Excel output, so please give feedback on
 what/how this data is output and make sure you review the data before using it.
