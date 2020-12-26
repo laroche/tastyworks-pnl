@@ -68,17 +68,18 @@ Here the new Tastyworks transaction data in detail:
 - __datetime__: Date and time (Tastyworks gives minutes for this, no exact seconds)
   of the transaction
 - __pnl__: pnl for tax payments for this transaction based on FIFO
-- __usd_gains__: currency conversion gains for the account in USD
+- __usd_gains__: currency conversion gains for the account in USD. Based on cash changes
+  in USD due to this transaction.
 - __eur_amount__: 'amount - fees' converted into Euro currency
 - __amount__: transaction amount in USD
 - __fees__: cost of transaction in USD that needs to be subtracted from amount
 - __eurusd__: official eurusd conversion rate for this transaction date from bundesbank.de
 - __quantity__: number of buys or sells
 - __asset__: what is bought (stock symbol or something like 'SPY P310 20-12-18' for an option
-- __symbol__: base asset that is traded. This is included to be able to generate summary
-  overviews for e.g. all transactions in SPY with stocks and options combined.
+- __symbol__: base asset (underlying) that is traded. This is included to be able to
+  generate summary overviews for e.g. all transactions in SPY with stocks and options combined.
 - __description__: additional informational text for the transaction
-- __account_total__: account total at this time. This is the previous account total plus
+- __account_total__: account total in USD at this time. This is the previous account total plus
   'amount - fees' from this transaction. (Cash amount at Tastyworks.)
   This is purely informational and not needed for tax data.
 - __net_total__: Sum in USD of account_total (cash) plus all assets (stocks, options)
