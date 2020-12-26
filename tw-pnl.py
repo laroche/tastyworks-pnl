@@ -30,7 +30,6 @@ from collections import deque
 import math
 import datetime as pydatetime
 import pandas
-#import matplotlib.pyplot as plt
 
 convert_currency = True
 
@@ -224,6 +223,17 @@ def print_fifos(fifos):
     for fifo in fifos:
         print(fifo, fifos[fifo])
 
+def show_plt(df):
+    import matplotlib.pyplot as plt
+    for i in ('account_total', 'pnl', 'usd_gains', 'term_loss'):
+        df[i] = pandas.to_numeric(df[i]) # df[i].astype(float)
+    #df.plot(x='datetime', y=['account_total', 'pnl', 'term_loss'])
+    df.plot(y=['account_total'])
+    df.plot(kind='bar', y=['pnl', 'usd_gains', 'term_loss'])
+    df.plot(kind='bar', y=['usd_gains'])
+    df.plot(kind='bar', y=['term_loss'])
+    plt.show()
+
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
         pnl_stocks_losses, pnl, account_usd, total_fees, term_losses, total, fifos, verbose):
@@ -251,7 +261,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
+def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
     curr_sym = '€'
     if not convert_currency:
@@ -445,6 +455,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, debugfifo):
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
     #print(new_wk)
 
+    if show:
+        show_plt(new_wk)
+
 def usage():
     print('tw-pnl.py [--assume-individual-stock][--long][--usd][--output-csv=test.csv]' +
         '[--output-excel=test.xlsx][--help][--verbose] *.csv')
@@ -455,9 +468,10 @@ def main(argv):
     debugfifo = False
     output_csv = None
     output_excel = None
+    show = False
     try:
         opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock', 'help', 'long',
-            'output-csv=', 'output-excel=', 'usd', 'verbose', 'debug-fifo'])
+            'output-csv=', 'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -479,6 +493,8 @@ def main(argv):
             convert_currency = False
         elif opt in ('-v', '--verbose'):
             verbose = True
+        elif opt == '--show':
+            show = True
         elif opt == '--debug-fifo':
             debugfifo = True
     if len(args) == 0:
@@ -488,7 +504,7 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, opt_long, verbose, debugfifo)
+        check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
