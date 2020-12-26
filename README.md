@@ -75,14 +75,19 @@ Here the new Tastyworks transaction data in detail:
 - __eurusd__: official eurusd conversion rate for this transaction date from bundesbank.de
 - __quantity__: number of buys or sells
 - __asset__: what is bought (stock symbol or something like 'SPY P310 20-12-18' for an option
-- __symbol__: base asset that is traded. This is included to be able to generate summary overviews
-  for e.g. all transactions in SPY with stocks and options combined.
+- __symbol__: base asset that is traded. This is included to be able to generate summary
+  overviews for e.g. all transactions in SPY with stocks and options combined.
 - __description__: additional informational text for the transaction
-- __account_total__: account total at this time. This is the previous account total plus 'amount - fees'
-  from this transaction. This is purely informational and not needed for tax data.
-  Best looked at to check if this script calculates the same total sum as shown in your Tastyworks
-  current total.
-- __term_loss__: how much does this transaction contribute to the 'Verlustverrechnungstopf Termingeschäfte'
+- __account_total__: account total at this time. This is the previous account total plus
+  'amount - fees' from this transaction. (Cash amount at Tastyworks.)
+  This is purely informational and not needed for tax data.
+- __net_total__: Sum in USD of account_total (cash) plus all assets (stocks, options)
+  in your account.
+  This does not use current market data, but keeps asset prices at purchase cost.
+  Best looked at to check if this script calculates the same total sum as shown in your
+  Tastyworks current total.
+- __term_loss__: how much does this transaction contribute to the 'Verlustverrechnungstopf
+  Termingeschäfte'
 
 Please note that I am not personally using this CSV/Excel output, so please give feedback on
 what/how this data is output and make sure you review the data before using it.
@@ -96,26 +101,24 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
-- Part of 'Verustverrechnungstopf Termingeschäfte' is implemented. Complete this
-  and verify if it is working correctly.
+- Part of 'Verustverrechnungstopf Termingeschäfte' is implemented. (Done)
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Filter out tax gains due to currency changes for an extra report. If the pnl
   lists currency gains separate, can they be used up to 600 € for tax-free income?
-  Is the current computation of currency gains accurate at all? Seems a bit too high right now.
+  Verify currency gains?
 - Does not work with futures.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
 - For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
-- Add net total including open positions.
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Check if dates are truely ascending.
 - Are we rounding output correctly?
-- Is the time output correctly with the correct timezone?
+- Is the time output correct with the correct timezone?
 
 Nice:
 

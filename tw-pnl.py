@@ -218,6 +218,22 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
 def fifos_islong(fifos, asset):
     return fifos[asset][0][1] > 0
 
+def fifos_sum(fifos, total):
+    sum = .0
+    for fifo in fifos:
+        if fifo == 'account-usd':
+            # account-usd should always be the same as total together with
+            # EURUSD conversion data. So just as sanity check:
+            for (a, b) in fifos[fifo]:
+                total -= b / 10000
+        else:
+            for (a, b) in fifos[fifo]:
+                sum += a * b
+    if abs(total) > 0.004:
+        print(total)
+        raise
+    return sum
+
 def print_fifos(fifos):
     print('open positions:')
     for fifo in fifos:
@@ -225,9 +241,10 @@ def print_fifos(fifos):
 
 def show_plt(df):
     import matplotlib.pyplot as plt
-    for i in ('account_total', 'pnl', 'usd_gains', 'term_loss'):
+    for i in ('account_total', 'net_total', 'pnl', 'usd_gains', 'term_loss'):
         df[i] = pandas.to_numeric(df[i]) # df[i].astype(float)
     #df.plot(x='datetime', y=['account_total', 'pnl', 'term_loss'])
+    df.plot(y=['net_total'])
     df.plot(y=['account_total'])
     df.plot(kind='bar', y=['pnl', 'usd_gains', 'term_loss'])
     df.plot(kind='bar', y=['usd_gains'])
@@ -433,9 +450,12 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 pnl += local_pnl
             description = ''
             local_pnl = '%.4f' % local_pnl
+
+        net_total = total + fifos_sum(fifos, total)
+
         new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % eur_amount,
             '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
-            newdescription, '%.2f' % total, '%.2f' % term_loss])
+            newdescription, '%.2f' % total, '%.2f' % net_total, '%.2f' % term_loss])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
@@ -446,7 +466,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
     new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains',
         'eur_amount', 'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
-        'description', 'account_total', 'term_loss'))
+        'description', 'account_total', 'net_total', 'term_loss'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
