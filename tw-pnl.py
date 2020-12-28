@@ -349,8 +349,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if verbose:
             header += ' %s' % f'{usd_gains:10.2f}' + '€'
         header += ' %s' % f'{amount - fees:10.2f}' + '$'
-        if verbose:
-            header += ' %s' % f'{conv_usd:8.4f}'
+        #if verbose:
+        #    header += ' %s' % f'{conv_usd:8.4f}'
         header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
@@ -442,8 +442,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if verbose:
                 header += ' %s' % f'{usd_gains:10.2f}' + '€'
             header += ' %s' % f'{amount-fees:10.2f}' + '$'
-            if verbose:
-                header += ' %s' % f'{conv_usd:8.4f}'
+            #if verbose:
+            #    header += ' %s' % f'{conv_usd:8.4f}'
             print(header, '%5d' % quantity, asset)
             if check_stock:
                 if local_pnl > .0:
