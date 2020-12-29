@@ -35,6 +35,10 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
 
+Currency gains are only summed up within the first year, they are tax free if kept over a year.
+(They need to go into 'Anlage SO' within a German tax statement.)
+If you want to include them all, use the option __--all-currency-gains__.
+
 The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
 is the cummulative sum, not the real local change. (Bug in the output!)
 
@@ -101,14 +105,10 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
-- Part of 'Verustverrechnungstopf Termingeschäfte' is implemented. (Done)
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
-- Filter out tax gains due to currency changes for an extra report. If the pnl
-  lists currency gains separate, can they be used up to 600 € for tax-free income?
-  Verify currency gains?
 - Does not work with futures.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
@@ -117,6 +117,7 @@ Important:
 - Add performance reviews, graphs based on different time periods.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Check if dates are truely ascending.
+- Check if withholding tax is max 15% for US stocks as per DBA.
 - Are we rounding output correctly?
 - Is the time output correct with the correct timezone?
 

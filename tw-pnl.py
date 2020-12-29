@@ -140,11 +140,18 @@ def sign(x):
         return 1
     return -1
 
+# return date of one year earlier:
+def prev_year(date):
+    return str(int(date[:4]) - 1) + date[4:]
+
 # 'fifos' is a dictionary with 'asset' names. It contains a FIFO
 # 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
-def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
+def fifo_add(fifos, quantity, price, date, asset, debug=False, debugfifo=False):
+    prevyear = None
+    if date is not None:
+        prevyear = prev_year(date)
     (pnl, term_losses) = (.0, .0)
     if quantity == 0:
         return (pnl, term_losses)
@@ -174,7 +181,8 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
                 pnl -= quantity * price
             else:
                 p = quantity * (price - fifo[0][0])
-                pnl -= p
+                if date is None or fifo[0][2] >= prevyear:
+                    pnl -= p
                 if is_option and quantity < 0 and p > .0:
                     #print('Termingeschäft-Verlust von %.2f:' % p)
                     term_losses += p
@@ -194,7 +202,8 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
             pnl += fifo[0][1] * price
         else:
             p = fifo[0][1] * (price - fifo[0][0])
-            pnl +=  p
+            if date is None or fifo[0][2] >= prevyear:
+                pnl += p
             if is_option and quantity < 0 and p < .0:
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
@@ -204,7 +213,7 @@ def fifo_add(fifos, quantity, price, asset, debug=False, debugfifo=False):
         quantity += fifo[0][1]
         fifo.popleft()
     # Just add this to the FIFO queue:
-    fifo.append([price, quantity])
+    fifo.append([price, quantity, date])
     # selling an option is taxed directly as income
     if is_option and quantity < 0:
         pnl -= quantity * price
@@ -222,7 +231,7 @@ def fifos_sum(fifos):
     sum = .0
     for fifo in fifos:
         if fifo != 'account-usd':
-            for (a, b) in fifos[fifo]:
+            for (a, b, date) in fifos[fifo]:
                 sum += a * b
     return sum
 
@@ -270,10 +279,10 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         print('pnl stocks gains:        ', f'{pnl_stocks_gains:10.2f}' + curr_sym)
         print('pnl stocks losses:       ', f'{pnl_stocks_losses:10.2f}' + curr_sym)
     print('pnl other:               ', f'{pnl:10.2f}' + curr_sym)
-    print('USD currency gains:      ', f'{account_usd:10.2f}' + curr_sym)
     print('pnl total:               ', '%10.2f' % (dividends + withholding_tax + \
         withdrawal + interest_recv + interest_paid + fee_adjustments + \
-        pnl_stocks_gains + pnl_stocks_losses + pnl + account_usd) + curr_sym)
+        pnl_stocks_gains + pnl_stocks_losses + pnl) + curr_sym)
+    print('USD currency gains:      ', f'{account_usd:10.2f}' + curr_sym)
     print('losses future contracts: ', f'{-term_losses:10.2f}' + curr_sym)
     print()
     print('New end sums and open positions:')
@@ -282,7 +291,8 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
+def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
+    verbose, show, debugfifo):
     #print(wk)
     curr_sym = '€'
     if not convert_currency:
@@ -326,9 +336,12 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         total_fees += usd2eur(fees, date, conv_usd)
         total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
+        date_currency = None
+        if all_currency_gains == False:
+            date_currency = date
         # USD as a big integer number:
-        usd_gains = fifo_add(fifos, int((amount - fees) * 10000),
-            1 / conv_usd, 'account-usd', debugfifo=debugfifo)[0] / 10000.0
+        usd_gains = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
+            date_currency, 'account-usd', debugfifo=debugfifo)[0] / 10000.0
         account_usd += usd_gains
         asset = ''
         newdescription = ''
@@ -436,7 +449,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date, conv_usd)
-            (local_pnl, term_loss) = fifo_add(fifos, quantity, price, asset, debugfifo=debugfifo)
+            (local_pnl, term_loss) = fifo_add(fifos, quantity, price, None, asset, debugfifo=debugfifo)
             term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
@@ -495,14 +508,18 @@ def main(argv):
     output_csv = None
     output_excel = None
     show = False
+    all_currency_gains = False
     try:
-        opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock', 'help', 'long',
-            'output-csv=', 'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
+        opts, args = getopt.getopt(argv, 'hluv', ['all-currency-gains',
+            'assume-individual-stock', 'help', 'long', 'output-csv=',
+            'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '--assume-individual-stock':
+        if opt == '--all-currency-gains':
+            all_currency_gains = True
+        elif opt == '--assume-individual-stock':
             global assume_stock
             assume_stock = True
         elif opt in ('-h', '--help'):
@@ -530,7 +547,8 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo)
+        check(wk, output_csv, output_excel, all_currency_gains, opt_long,
+            verbose, show, debugfifo)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
