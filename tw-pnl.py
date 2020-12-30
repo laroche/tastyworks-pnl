@@ -181,8 +181,10 @@ def fifo_add(fifos, quantity, price, date, asset, debug=False, debugfifo=False):
                 pnl -= quantity * price
             else:
                 p = quantity * (price - fifo[0][0])
-                if date is None or fifo[0][2] >= prevyear:
+                if date is None or fifo[0][2] > prevyear:
                     pnl -= p
+                #elif date is not None:
+                #    print(fifo[0][2], '%.2f' % (-p / 10000.0), 'over one year ago')
                 if is_option and quantity < 0 and p > .0:
                     #print('Termingeschäft-Verlust von %.2f:' % p)
                     term_losses += p
@@ -202,8 +204,10 @@ def fifo_add(fifos, quantity, price, date, asset, debug=False, debugfifo=False):
             pnl += fifo[0][1] * price
         else:
             p = fifo[0][1] * (price - fifo[0][0])
-            if date is None or fifo[0][2] >= prevyear:
+            if date is None or fifo[0][2] > prevyear:
                 pnl += p
+            #elif date is not None:
+            #    print(fifo[0][2], '%.2f' % (p / 10000.0), 'over one year ago')
             if is_option and quantity < 0 and p < .0:
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
