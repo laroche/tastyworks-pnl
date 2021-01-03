@@ -112,7 +112,6 @@ Important:
 - Does not work with futures.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Income from dividends/interest will not lead to currency gains for § 23.
-- Currrency gains can only be calculated if we sell positive currency. (credit not.)
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
 - For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.

@@ -160,7 +160,8 @@ def prev_year(date):
 # 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
-def fifo_add(fifos, quantity, price, date, asset, debug=False, debugfifo=False):
+def fifo_add(fifos, quantity, price, date, asset,
+    debug=False, debugfifo=False, debugcurr=True):
     prevyear = None
     if date is not None:
         prevyear = prev_year(date)
@@ -193,10 +194,11 @@ def fifo_add(fifos, quantity, price, date, asset, debug=False, debugfifo=False):
                 pnl -= quantity * price
             else:
                 p = quantity * (price - fifo[0][0])
-                if date is None or fifo[0][2] > prevyear:
+                if date is None or (fifo[0][2] > prevyear and quantity < 0):
                     pnl -= p
-                #elif date is not None:
-                #    print(fifo[0][2], '%.2f' % (-p / 10000.0), 'over one year ago')
+                elif date is not None and debugcurr:
+                    print(fifo[0][2], '%.2f' % (-p / 10000.0),
+                        'over one year ago or paying back loan')
                 if is_option and quantity < 0 and p > .0:
                     #print('Termingeschäft-Verlust von %.2f:' % p)
                     term_losses += p
@@ -216,10 +218,11 @@ def fifo_add(fifos, quantity, price, date, asset, debug=False, debugfifo=False):
             pnl += fifo[0][1] * price
         else:
             p = fifo[0][1] * (price - fifo[0][0])
-            if date is None or fifo[0][2] > prevyear:
+            if date is None or (fifo[0][2] > prevyear and quantity < 0):
                 pnl += p
-            #elif date is not None:
-            #    print(fifo[0][2], '%.2f' % (p / 10000.0), 'over one year ago')
+            elif date is not None and debugcurr:
+                print(fifo[0][2], '%.2f' % (p / 10000.0),
+                    'over one year ago or paying back loan')
             if is_option and quantity < 0 and p < .0:
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
