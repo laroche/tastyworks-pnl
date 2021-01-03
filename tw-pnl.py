@@ -160,7 +160,7 @@ def prev_year(date):
 # 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
-def fifo_add(fifos, quantity, price, date, asset,
+def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
     debug=False, debugfifo=False, debugcurr=True):
     prevyear = None
     if date is not None:
@@ -194,11 +194,12 @@ def fifo_add(fifos, quantity, price, date, asset,
                 pnl -= quantity * price
             else:
                 p = quantity * (price - fifo[0][0])
-                if date is None or (fifo[0][2] > prevyear and quantity < 0):
+                if date is None or \
+                    (fifo[0][2] > prevyear and quantity < 0 and fifo[0][3] == False):
                     pnl -= p
                 elif date is not None and debugcurr:
                     print(fifo[0][2], '%.2f' % (-p / 10000.0),
-                        'over one year ago or paying back loan')
+                        'over one year ago or paying back loan or tax free')
                 if is_option and quantity < 0 and p > .0:
                     #print('Termingeschäft-Verlust von %.2f:' % p)
                     term_losses += p
@@ -218,11 +219,12 @@ def fifo_add(fifos, quantity, price, date, asset,
             pnl += fifo[0][1] * price
         else:
             p = fifo[0][1] * (price - fifo[0][0])
-            if date is None or (fifo[0][2] > prevyear and quantity < 0):
+            if date is None or \
+                (fifo[0][2] > prevyear and quantity < 0 and fifo[0][3] == False):
                 pnl += p
             elif date is not None and debugcurr:
                 print(fifo[0][2], '%.2f' % (p / 10000.0),
-                    'over one year ago or paying back loan')
+                    'over one year ago or paying back loan or tax free')
             if is_option and quantity < 0 and p < .0:
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
@@ -232,7 +234,7 @@ def fifo_add(fifos, quantity, price, date, asset,
         quantity += fifo[0][1]
         fifo.popleft()
     # Just add this to the FIFO queue:
-    fifo.append([price, quantity, date])
+    fifo.append([price, quantity, date, tax_free])
     # selling an option is taxed directly as income
     if is_option and quantity < 0:
         pnl -= quantity * price
@@ -250,7 +252,7 @@ def fifos_sum(fifos):
     sum = .0
     for fifo in fifos:
         if fifo != 'account-usd':
-            for (a, b, date) in fifos[fifo]:
+            for (a, b, date, tax_free) in fifos[fifo]:
                 sum += a * b
     return sum
 
@@ -355,12 +357,16 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         total_fees += usd2eur(fees, date, conv_usd)
         total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
+        # look at currency conversion gains:
         date_currency = None
         if all_currency_gains == False:
             date_currency = date
+        tax_free = False
+        if tsubcode in ['Deposit', 'Credit Interest', 'Dividend']:
+            tax_free = True
         # USD as a big integer number:
         usd_gains = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
-            date_currency, 'account-usd', debugfifo=debugfifo)[0] / 10000.0
+            date_currency, 'account-usd', tax_free=tax_free, debugfifo=debugfifo)[0] / 10000.0
         account_usd += usd_gains
         asset = ''
         newdescription = ''
@@ -395,7 +401,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
                 asset = 'transfer'
                 newdescription = description
                 print(header, 'transferred:', description)
-            elif tsubcode  in ['Deposit', 'Credit Interest']:
+            elif tsubcode in ['Deposit', 'Credit Interest']:
                 if description == 'INTEREST ON CREDIT BALANCE':
                     asset = 'interest'
                     print(header, 'interest')
