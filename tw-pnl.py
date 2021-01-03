@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2020 Florian La Roche <Florian.LaRoche@gmail.com>
+# Copyright (C) 2020-2021 Florian La Roche <Florian.LaRoche@gmail.com>
 #
 # Generate data for a German tax income statement from Tastyworks trade history.
 #
