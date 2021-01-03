@@ -23,6 +23,7 @@
 # pylint: disable=C0103,C0114,C0116
 #
 
+import enum
 import sys
 import os
 import getopt
@@ -115,25 +116,36 @@ def check_trade(tsubcode, check_amount, amount):
         if str(check_amount) != 'nan' and check_amount != .0:
             raise
 
+class AssetType(enum.Enum):
+    Option = 1
+    IndStock = 2
+    AktienFond = 3
+    MischFond = 4
+    ImmobilienFond = 5
+    OtherStock = 6
+
 # Is the symbol a individual stock or anything else
 # like an ETF or fond?
 def is_stock(symbol):
     # Well known ETFs:
     if symbol in ['DXJ','EEM','EFA','EFA','EWZ','FEZ','FXB','FXE','FXI',
-        'GDX','GDXJ','GLD','HYG','IEF','IWM','IYR','KRE','OIH','QQQ',
-        'RSX','SLV','SMH','SPY','TLT','UNG','USO','VXX','XBI','XHB','XLB',
+        'GDX','GDXJ','IEF','IWM','IYR','KRE','OIH','QQQ',
+        'RSX','SMH','SPY','UNG','XBI','XHB','XLB',
         'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT']:
-        return False
+        return AssetType.OtherStock # AktienFond
+    if symbol in ['TLT','HYG','GLD','SLV','VXX','USO']:
+        return AssetType.OtherStock
     # Well known stock names:
     if symbol in ['M','AAPL','TSLA']:
-        return True
+        return AssetType.IndStock
     # The conservative way is to through an exception if we are not sure.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
         print('Use the option --assume-individual-stock to assume ' +
             'individual stock for all unknown symbols.')
         raise
-    return True # Just assume this is a normal stock if not in the above list
+    # Just assume this is a normal stock if not in the above list
+    return AssetType.IndStock
 
 def sign(x):
     if x >= 0:
@@ -245,7 +257,7 @@ def print_fifos(fifos):
         print(fifo, fifos[fifo])
 
 # account-usd should always be the same as total together with
-# EURUSD conversion data. So just as sanity check:
+# EURUSD conversion data. So just a sanity check:
 def check_total(fifos, total):
     for (a, b) in fifos['account-usd']:
         total -= b / 10000
@@ -439,9 +451,9 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
                 if int(strike) == strike: # convert to integer for full numbers
                     strike = int(strike)
                 asset = '%s %s%s %s' % (symbol, callput, strike, expire)
-                check_stock = False
+                asset_type = AssetType.Option
             else:
-                check_stock = is_stock(symbol)
+                asset_type = is_stock(symbol)
             # 'buysell' is not set correctly for 'Expiration'/'Exercise'/'Assignment' entries,
             # so we look into existing positions to check if we are long or short (we cannot
             # be both, so this test should be safe):
@@ -462,12 +474,19 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             #if verbose:
             #    header += ' %s' % f'{conv_usd:8.4f}'
             print(header, '%5d' % quantity, asset)
-            if check_stock:
+            if asset_type == AssetType.IndStock:
                 if local_pnl > .0:
                     pnl_stocks_gains += local_pnl
                 else:
                     pnl_stocks_losses += local_pnl
             else:
+                if cur_year >= '2018':
+                    if asset_type == AssetType.AktienFond:
+                        local_pnl *= 0.70
+                    elif asset_type == AssetType.MischFond:
+                        local_pnl *= 0.85
+                    elif asset_type == AssetType.ImmobilienFond:
+                        local_pnl *= 0.20
                 pnl += local_pnl
             description = ''
             local_pnl = '%.4f' % local_pnl
