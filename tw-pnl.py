@@ -362,7 +362,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         if all_currency_gains == False:
             date_currency = date
         tax_free = False
-        if tsubcode in ['Deposit', 'Credit Interest', 'Dividend']:
+        if amount > .0 and tsubcode in ['Deposit', 'Credit Interest', 'Dividend']:
             tax_free = True
         # USD as a big integer number:
         usd_gains = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
@@ -506,7 +506,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
 
         new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % eur_amount,
             '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
-            newdescription, '%.2f' % total, '%.2f' % net_total, '%.2f' % term_loss])
+            newdescription, '%.2f' % total, '%.2f' % net_total, '%.2f' % term_loss, tax_free])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
@@ -517,7 +517,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
     #print(wk)
     new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains',
         'eur_amount', 'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
-        'description', 'account_total', 'net_total', 'term_loss'))
+        'description', 'account_total', 'net_total', 'term_loss', 'tax_free'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
