@@ -165,9 +165,9 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
     prevyear = None
     if date is not None:
         prevyear = prev_year(date)
-    (pnl, term_losses) = (.0, .0)
+    (pnl, pnl_notax, term_losses) = (.0, .0, .0)
     if quantity == 0:
-        return (pnl, term_losses)
+        return (pnl, pnl_notax, term_losses)
     if debug:
         print_fifos(fifos)
         print('fifo_add', quantity, price, asset)
@@ -198,9 +198,11 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
                     (fifo[0][2] > prevyear and quantity < 0 and \
                     fifo[0][3] == False and tax_free == False):
                     pnl -= p
-                elif date is not None and debugcurr:
-                    print(fifo[0][2], '%.2f' % (-p / 10000.0),
-                        'over one year ago or paying back loan or tax free')
+                else:
+                    pnl_notax -= p
+                    if date is not None and debugcurr:
+                        print(fifo[0][2], '%.2f' % (-p / 10000.0),
+                            'over one year ago or paying back loan or tax free')
                 if is_option and quantity < 0 and p > .0:
                     #print('Termingeschäft-Verlust von %.2f:' % p)
                     term_losses += p
@@ -212,7 +214,7 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
                 fifo.popleft()
                 if len(fifo) == 0:
                     del fifos[asset]
-            return (pnl, term_losses)
+            return (pnl, pnl_notax, term_losses)
         # Remove the oldest FIFO entry and continue
         # the loop for further entries (or add the
         # remaining entries into the FIFO).
@@ -224,9 +226,11 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
                 (fifo[0][2] > prevyear and quantity < 0 and \
                 fifo[0][3] == False and tax_free == False):
                 pnl += p
-            elif date is not None and debugcurr:
-                print(fifo[0][2], '%.2f' % (p / 10000.0),
-                    'over one year ago or paying back loan or tax free')
+            else:
+                pnl_notax += p
+                if date is not None and debugcurr:
+                    print(fifo[0][2], '%.2f' % (p / 10000.0),
+                        'over one year ago or paying back loan or tax free')
             if is_option and quantity < 0 and p < .0:
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
@@ -243,7 +247,7 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
     if debugfifo:
         print('DEBUG FIFO: %s: add %7d * %8.2f = %8.2f pnl' \
             % (asset, quantity, price, pnl))
-    return (pnl, term_losses)
+    return (pnl, pnl_notax, term_losses)
 
 # Check if the first entry in the FIFO
 # is 'long' the underlying or 'short'.
@@ -286,7 +290,8 @@ def show_plt(df):
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, pnl, account_usd, total_fees, term_losses, total, fifos, verbose):
+        pnl_stocks_losses, pnl, account_usd, account_usd_notax, total_fees,
+        term_losses, total, fifos, verbose):
     print()
     print('Total sums paid and received in the year %s:' % cur_year)
     if dividends != .0 or withholding_tax != .0 or verbose:
@@ -306,6 +311,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal + interest_recv + interest_paid + fee_adjustments + \
         pnl_stocks_gains + pnl_stocks_losses + pnl) + curr_sym)
     print('USD currency gains:      ', f'{account_usd:10.2f}' + curr_sym)
+    print('USD curr. gains (no tax):', f'{account_usd_notax:10.2f}' + curr_sym)
     print('losses future contracts: ', f'{-term_losses:10.2f}' + curr_sym)
     print()
     print('New end sums and open positions:')
@@ -322,7 +328,8 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         curr_sym = '$'
     fifos = {}
     total = .0                # account total
-    (pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd) = (.0, .0, .0, .0)
+    (pnl_stocks_gains, pnl_stocks_losses, pnl) = (.0, .0, .0)
+    (account_usd, account_usd_notax) = (.0, .0)
     (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
     (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
     cur_year = None
@@ -342,9 +349,10 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             if cur_year is not None:
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
                     withdrawal, interest_recv, interest_paid, fee_adjustments,
-                    pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd, total_fees,
-                    term_losses, total, fifos, verbose)
-                (pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd) = (.0, .0, .0, .0)
+                    pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd, account_usd_notax,
+                    total_fees, term_losses, total, fifos, verbose)
+                (pnl_stocks_gains, pnl_stocks_losses, pnl) = (.0, .0, .0)
+                (account_usd, account_usd_notax) = (.0, .0)
                 (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
                 (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
             cur_year = datetime[:4]
@@ -367,9 +375,11 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         if tsubcode in ['Deposit', 'Credit Interest', 'Dividend', 'Fee', 'Withdrawal']:
             tax_free = True
         # USD as a big integer number:
-        usd_gains = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
-            date_currency, 'account-usd', tax_free=tax_free, debugfifo=debugfifo)[0] / 10000.0
+        (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
+            date_currency, 'account-usd', tax_free=tax_free, debugfifo=debugfifo)
+        (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
+        account_usd_notax += usd_gains_notax
         asset = ''
         newdescription = ''
 
@@ -476,7 +486,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date, conv_usd)
-            (local_pnl, term_loss) = fifo_add(fifos, quantity, price, None, asset, debugfifo=debugfifo)
+            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, None, asset, debugfifo=debugfifo)
             term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
@@ -506,7 +516,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
 
         net_total = total + fifos_sum(fifos)
 
-        new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % eur_amount,
+        new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % usd_gains_notax, '%.2f' % eur_amount,
             '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
             newdescription, '%.2f' % total, '%.2f' % net_total, '%.2f' % term_loss, tax_free])
 
@@ -514,10 +524,11 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
 
     print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, pnl, account_usd, total_fees, term_losses, total, fifos, verbose)
+        pnl_stocks_losses, pnl, account_usd, account_usd_notax, total_fees, term_losses,
+        total, fifos, verbose)
 
     #print(wk)
-    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains',
+    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains', 'usd_gains_notax',
         'eur_amount', 'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
         'description', 'account_total', 'net_total', 'term_loss', 'tax_free'))
     if output_csv is not None:

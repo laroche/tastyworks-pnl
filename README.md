@@ -73,6 +73,7 @@ Here the new Tastyworks transaction data in detail:
 - __pnl__: pnl for tax payments for this transaction based on FIFO
 - __usd_gains__: currency conversion gains for the account in USD. Based on cash changes
   in USD due to this transaction.
+- __usd_gains_notax__: as above, but not part of German tax law
 - __eur_amount__: 'amount - fees' converted into Euro currency
 - __amount__: transaction amount in USD
 - __fees__: cost of transaction in USD that needs to be subtracted from amount
