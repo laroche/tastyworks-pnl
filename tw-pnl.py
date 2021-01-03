@@ -161,7 +161,7 @@ def prev_year(date):
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
 def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
-    debug=False, debugfifo=False, debugcurr=True):
+    debug=False, debugfifo=False, debugcurr=False):
     prevyear = None
     if date is not None:
         prevyear = prev_year(date)
