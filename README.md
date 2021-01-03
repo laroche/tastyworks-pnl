@@ -111,6 +111,7 @@ Important:
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Does not work with futures.
+- For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
