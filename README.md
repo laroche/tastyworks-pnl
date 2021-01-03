@@ -92,7 +92,7 @@ Here the new Tastyworks transaction data in detail:
   Tastyworks current total.
 - __term_loss__: how much does this transaction contribute to losses in future
   contracts ('Verlustverrechnungstopf Termingeschäfte')
-- __tax_free__: are further currency changes tax free
+- __tax_free__: are further currency changes tax free (German: steuerneutral)
 
 Please note that I am not personally using this CSV/Excel output, so please give feedback on
 what/how this data is output and make sure you review the data before using it.

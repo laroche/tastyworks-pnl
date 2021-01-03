@@ -195,7 +195,8 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
             else:
                 p = quantity * (price - fifo[0][0])
                 if date is None or \
-                    (fifo[0][2] > prevyear and quantity < 0 and fifo[0][3] == False):
+                    (fifo[0][2] > prevyear and quantity < 0 and \
+                    fifo[0][3] == False and tax_free == False):
                     pnl -= p
                 elif date is not None and debugcurr:
                     print(fifo[0][2], '%.2f' % (-p / 10000.0),
@@ -220,7 +221,8 @@ def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
         else:
             p = fifo[0][1] * (price - fifo[0][0])
             if date is None or \
-                (fifo[0][2] > prevyear and quantity < 0 and fifo[0][3] == False):
+                (fifo[0][2] > prevyear and quantity < 0 and \
+                fifo[0][3] == False and tax_free == False):
                 pnl += p
             elif date is not None and debugcurr:
                 print(fifo[0][2], '%.2f' % (p / 10000.0),
@@ -362,7 +364,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         if all_currency_gains == False:
             date_currency = date
         tax_free = False
-        if amount > .0 and tsubcode in ['Deposit', 'Credit Interest', 'Dividend']:
+        if tsubcode in ['Deposit', 'Credit Interest', 'Dividend', 'Fee', 'Withdrawal']:
             tax_free = True
         # USD as a big integer number:
         usd_gains = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
