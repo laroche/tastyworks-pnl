@@ -372,7 +372,9 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         if all_currency_gains == False:
             date_currency = date
         tax_free = False
-        if tsubcode in ['Deposit', 'Credit Interest', 'Dividend', 'Fee', 'Withdrawal']:
+        if tsubcode in ['Deposit', 'Credit Interest', 'Dividend', 'Fee']:
+            tax_free = True
+        if tsubcode == 'Withdrawal' and str(symbol) != 'nan':
             tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
@@ -447,13 +449,20 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
                 if amount >= .0:
                     raise
             elif tsubcode == 'Withdrawal':
-                # XXX In my case dividends paid for short stock:
-                asset = 'dividends paid for %s' % symbol
-                newdescription = description
-                print(header, 'dividends paid: %s,' % symbol, description)
-                withdrawal += eur_amount
-                if amount >= .0:
-                    raise
+                if str(symbol) != 'nan':
+                    # XXX In my case dividends paid for short stock:
+                    asset = 'dividends paid for %s' % symbol
+                    newdescription = description
+                    print(header, 'dividends paid: %s,' % symbol, description)
+                    withdrawal += eur_amount
+                    if amount >= .0:
+                        raise
+                else:
+                    # account deposit/withdrawal
+                    local_pnl = ''
+                    asset = 'transfer'
+                    newdescription = description
+                    print(header, 'transferred:', description)
             elif tsubcode == 'Dividend':
                 if amount > .0:
                     asset = 'dividends for %s' % symbol
