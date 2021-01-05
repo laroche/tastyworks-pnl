@@ -160,7 +160,7 @@ def prev_year(date):
 # 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
 # of the asset.
 # https://docs.python.org/3/library/collections.html?#collections.deque
-def fifo_add(fifos, quantity, price, date, asset, tax_free=False,
+def fifo_add(fifos, quantity, price, asset, date=None, tax_free=False,
     debug=False, debugfifo=False, debugcurr=False):
     prevyear = None
     if date is not None:
@@ -376,7 +376,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
-            date_currency, 'account-usd', tax_free=tax_free, debugfifo=debugfifo)
+            'account-usd', date_currency, tax_free, debugfifo=debugfifo)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
         account_usd_notax += usd_gains_notax
@@ -486,7 +486,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date, conv_usd)
-            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, None, asset, debugfifo=debugfifo)
+            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, asset, debugfifo=debugfifo)
             term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
