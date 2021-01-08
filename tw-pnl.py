@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 #
 # Copyright (C) 2020-2021 Florian La Roche <Florian.LaRoche@gmail.com>
+# https://github.com/laroche/tastyworks-pnl
 #
 # Generate data for a German tax income statement from Tastyworks trade history.
 #
@@ -53,10 +54,13 @@ def read_eurusd():
         usecols=['date', 'eurusd'], na_values=['.'], engine='python')
     eurusd = dict(eurusd.values.tolist())
 
+def isnan(x):
+    return str(x) == 'nan'
+
 def get_eurusd(date, debug=False):
     while True:
         x = eurusd[date]
-        if str(x) != 'nan':
+        if not isnan(x):
             return x
         if debug:
             print('EURUSD conversion not found for', date)
@@ -111,9 +115,9 @@ def check_trade(tsubcode, check_amount, amount):
         if not math.isclose(check_amount, amount, abs_tol=0.00001):
             raise
     else:
-        if str(amount) != 'nan' and amount != .0:
+        if not isnan(amount) and amount != .0:
             raise
-        if str(check_amount) != 'nan' and check_amount != .0:
+        if not isnan(check_amount) and check_amount != .0:
             raise
 
 class AssetType(enum.Enum):
@@ -374,7 +378,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         tax_free = False
         if tsubcode in ['Deposit', 'Credit Interest', 'Dividend', 'Fee']:
             tax_free = True
-        if tsubcode == 'Withdrawal' and str(symbol) != 'nan':
+        if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
@@ -385,14 +389,14 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         asset = ''
         newdescription = ''
 
-        if str(quantity) == 'nan':
+        if isnan(quantity):
             quantity = 1
         else:
             if int(quantity) != quantity:
                 raise
             quantity = int(quantity)
 
-        if str(price) == 'nan':
+        if isnan(price):
             price = .0
         if price < .0:
             raise
@@ -449,7 +453,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
                 if amount >= .0:
                     raise
             elif tsubcode == 'Withdrawal':
-                if str(symbol) != 'nan':
+                if not isnan(symbol):
                     # XXX In my case dividends paid for short stock:
                     asset = 'dividends paid for %s' % symbol
                     newdescription = description
@@ -475,7 +479,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
                 newdescription = description
         else:
             asset = symbol
-            if str(expire) != 'nan':
+            if not isnan(expire):
                 expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
                 price *= 100.0
                 if int(strike) == strike: # convert to integer for full numbers
