@@ -372,8 +372,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
         # USD as a big integer number:
-        (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
-            'account-usd', False, date, tax_free, debugfifo=debugfifo)
+        (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000),
+            1 / conv_usd, 'account-usd', False, date, tax_free, debugfifo=debugfifo)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
         account_usd_notax += usd_gains_notax
@@ -521,9 +521,10 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         net_total = total + fifos_sum(fifos)
 
-        new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % usd_gains_notax, '%.2f' % eur_amount,
-            '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd, quantity, asset, symbol,
-            newdescription, '%.2f' % total, '%.2f' % net_total, '%.2f' % term_loss, tax_free])
+        new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % usd_gains_notax,
+            '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+            quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
+            '%.2f' % term_loss, tax_free])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
