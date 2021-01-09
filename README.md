@@ -35,9 +35,9 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
 
-Currency gains are only summed up within the first year, they are tax free if kept over a year.
+Currency gains are only summed up within the first year and if no credit is paid back, otherwise
+they are tax free. Also if dividents or credit is received or account fees are paid.
 (They need to go into 'Anlage SO' within a German tax statement.)
-If you want to include them all, use the option __--all-currency-gains__.
 
 The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
 is the cummulative sum, not the real local change. (Bug in the output!)

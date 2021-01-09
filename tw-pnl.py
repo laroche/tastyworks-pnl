@@ -324,7 +324,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
+def check(wk, output_csv, output_excel, opt_long,
     verbose, show, debugfifo):
     #print(wk)
     curr_sym = '€'
@@ -372,9 +372,6 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
         # look at currency conversion gains:
-        date_currency = None
-        if all_currency_gains == False:
-            date_currency = date
         tax_free = False
         if tsubcode in ('Deposit', 'Credit Interest', 'Dividend', 'Fee'):
             tax_free = True
@@ -382,7 +379,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
-            'account-usd', date_currency, tax_free, debugfifo=debugfifo)
+            'account-usd', date, tax_free, debugfifo=debugfifo)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
         account_usd_notax += usd_gains_notax
@@ -566,18 +563,15 @@ def main(argv):
     output_csv = None
     output_excel = None
     show = False
-    all_currency_gains = False
     try:
-        opts, args = getopt.getopt(argv, 'hluv', ['all-currency-gains',
-            'assume-individual-stock', 'help', 'long', 'output-csv=',
+        opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock',
+            'help', 'long', 'output-csv=',
             'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
     for opt, arg in opts:
-        if opt == '--all-currency-gains':
-            all_currency_gains = True
-        elif opt == '--assume-individual-stock':
+        if opt == '--assume-individual-stock':
             global assume_stock
             assume_stock = True
         elif opt in ('-h', '--help'):
@@ -605,8 +599,7 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, all_currency_gains, opt_long,
-            verbose, show, debugfifo)
+        check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
