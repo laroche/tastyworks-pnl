@@ -158,17 +158,16 @@ def sign(x):
 
 # return date of one year earlier:
 def prev_year(date):
+    if date is None:
+        return None
     return str(int(date[:4]) - 1) + date[4:]
 
 # 'fifos' is a dictionary with 'asset' names. It contains a FIFO
-# 'deque()' with a list of 'price' (as float) and 'quantity' (as integer)
-# of the asset.
-# https://docs.python.org/3/library/collections.html?#collections.deque
+# 'deque()' with a list of 'price' (as float), 'quantity' (as integer),
+# 'date' of purchase and 'tax_free'.
 def fifo_add(fifos, quantity, price, asset, date=None, tax_free=False,
     debug=False, debugfifo=False, debugcurr=False):
-    prevyear = None
-    if date is not None:
-        prevyear = prev_year(date)
+    prevyear = prev_year(date)
     (pnl, pnl_notax, term_losses) = (.0, .0, .0)
     if quantity == 0:
         return (pnl, pnl_notax, term_losses)
