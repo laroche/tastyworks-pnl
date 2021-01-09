@@ -165,7 +165,7 @@ def prev_year(date):
 # 'fifos' is a dictionary with 'asset' names. It contains a FIFO
 # 'deque()' with a list of 'price' (as float), 'quantity' (as integer),
 # 'date' of purchase and 'tax_free'.
-def fifo_add(fifos, quantity, price, asset, date=None, tax_free=False,
+def fifo_add(fifos, quantity, price, asset, is_option, date=None, tax_free=False,
     debug=False, debugfifo=False, debugcurr=False):
     prevyear = prev_year(date)
     (pnl, pnl_notax, term_losses) = (.0, .0, .0)
@@ -174,10 +174,6 @@ def fifo_add(fifos, quantity, price, asset, date=None, tax_free=False,
     if debug:
         print_fifos(fifos)
         print('fifo_add', quantity, price, asset)
-    # Detect if this is an option we are working with as
-    # we have to pay taxes for selling an option:
-    # This is a gross hack, should we check the 'expire' param?
-    is_option = (len(asset) > 10 and asset != 'account-usd')
     # Find the right FIFO queue for our asset:
     if fifos.get(asset) is None:
         fifos[asset] = deque()
@@ -377,7 +373,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000), 1 / conv_usd,
-            'account-usd', date, tax_free, debugfifo=debugfifo)
+            'account-usd', False, date, tax_free, debugfifo=debugfifo)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
         account_usd_notax += usd_gains_notax
@@ -494,7 +490,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
             price = usd2eur(price, date, conv_usd)
-            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, asset, debugfifo=debugfifo)
+            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, asset,
+                asset_type == AssetType.Option, debugfifo=debugfifo)
             term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
