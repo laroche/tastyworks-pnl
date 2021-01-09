@@ -58,7 +58,7 @@ CSV and Excel Output
 
 The script can also output all data again as CSV file or as Excel file.
 (CSV should be most robust, I don't have much experience with excel. I'd recommend CSV
-and just reading it into a new Excel sheet yourself. Both data types contain the same output.)
+and just reading it into a new Excel sheet yourself. Both data types contain the same output data.)
 
 The options for this are __--output-csv=file.csv__ and __--output-excel=file.xlsx__.
 
@@ -66,7 +66,7 @@ The output contains the important original data from the Tastyworks csv file plu
 pnl generated data as well as eurusd conversion data. You probably do not have to
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
-Here the new Tastyworks transaction data in detail:
+Here the output transaction data in detail:
 
 - __datetime__: Date and time (Tastyworks gives minutes for this, no exact seconds)
   of the transaction
@@ -94,9 +94,6 @@ Here the new Tastyworks transaction data in detail:
 - __term_loss__: how much does this transaction contribute to losses in future
   contracts ('Verlustverrechnungstopf Termingeschäfte')
 - __tax_free__: are further currency changes tax free (German: steuerneutral)
-
-Please note that I am not personally using this CSV/Excel output, so please give feedback on
-what/how this data is output and make sure you review the data before using it.
 
 
 TODO

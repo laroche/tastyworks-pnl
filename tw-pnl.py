@@ -324,8 +324,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def check(wk, output_csv, output_excel, opt_long,
-    verbose, show, debugfifo):
+def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
     curr_sym = '€'
     if not convert_currency:
