@@ -81,20 +81,20 @@ def usd2eur(x, date, conv=None):
     return x
 
 def check_tcode(tcode, tsubcode, description):
-    if tcode not in ['Money Movement', 'Trade', 'Receive Deliver']:
+    if tcode not in ('Money Movement', 'Trade', 'Receive Deliver'):
         raise
     if tcode == 'Money Movement':
-        if tsubcode not in ['Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
-            'Fee', 'Withdrawal', 'Dividend']:
+        if tsubcode not in ('Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
+            'Fee', 'Withdrawal', 'Dividend'):
             raise
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment':
             raise
     elif tcode == 'Trade':
-        if tsubcode not in ['Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close']:
+        if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close'):
             raise
     elif tcode == 'Receive Deliver':
-        if tsubcode not in ['Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
-            'Expiration', 'Assignment', 'Exercise']:
+        if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
+            'Expiration', 'Assignment', 'Exercise'):
             raise
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise
@@ -102,16 +102,16 @@ def check_tcode(tcode, tsubcode, description):
             raise
 
 def check_param(buysell, openclose, callput):
-    if str(buysell) not in ['nan', 'Buy', 'Sell']:
+    if str(buysell) not in ('nan', 'Buy', 'Sell'):
         raise
-    if str(openclose) not in ['nan', 'Open', 'Close']:
+    if str(openclose) not in ('nan', 'Open', 'Close'):
         raise
-    if str(callput) not in ['nan', 'C', 'P']:
+    if str(callput) not in ('nan', 'C', 'P'):
         raise
 
 def check_trade(tsubcode, check_amount, amount):
     #print('FEHLER:', check_amount, amount)
-    if tsubcode not in ['Expiration', 'Assignment', 'Exercise']:
+    if tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
         if not math.isclose(check_amount, amount, abs_tol=0.00001):
             raise
     else:
@@ -132,15 +132,15 @@ class AssetType(enum.Enum):
 # like an ETF or fond?
 def is_stock(symbol):
     # Well known ETFs:
-    if symbol in ['DXJ','EEM','EFA','EFA','EWZ','FEZ','FXB','FXE','FXI',
+    if symbol in ('DXJ','EEM','EFA','EFA','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','IEF','IWM','IYR','KRE','OIH','QQQ',
         'RSX','SMH','SPY','UNG','XBI','XHB','XLB',
-        'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT']:
+        'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT'):
         return AssetType.OtherStock # AktienFond
-    if symbol in ['TLT','HYG','GLD','SLV','VXX','USO']:
+    if symbol in ('TLT','HYG','GLD','SLV','VXX','USO'):
         return AssetType.OtherStock
     # Well known stock names:
-    if symbol in ['M','AAPL','TSLA']:
+    if symbol in ('M','AAPL','TSLA'):
         return AssetType.IndStock
     # The conservative way is to through an exception if we are not sure.
     if not assume_stock:
@@ -376,7 +376,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
         if all_currency_gains == False:
             date_currency = date
         tax_free = False
-        if tsubcode in ['Deposit', 'Credit Interest', 'Dividend', 'Fee']:
+        if tsubcode in ('Deposit', 'Credit Interest', 'Dividend', 'Fee'):
             tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
@@ -419,7 +419,7 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
                 asset = 'transfer'
                 newdescription = description
                 print(header, 'transferred:', description)
-            elif tsubcode in ['Deposit', 'Credit Interest']:
+            elif tsubcode in ('Deposit', 'Credit Interest'):
                 if description == 'INTEREST ON CREDIT BALANCE':
                     asset = 'interest'
                     print(header, 'interest')
@@ -492,9 +492,9 @@ def check(wk, output_csv, output_excel, all_currency_gains, opt_long,
             # so we look into existing positions to check if we are long or short (we cannot
             # be both, so this test should be safe):
             if str(buysell) == 'Sell' or \
-                (tsubcode in ['Expiration', 'Exercise', 'Assignment'] and fifos_islong(fifos, asset)):
+                (tsubcode in ('Expiration', 'Exercise', 'Assignment') and fifos_islong(fifos, asset)):
                 quantity = - quantity
-            if tsubcode in ['Exercise', 'Assignment'] and quantity < 0:
+            if tsubcode in ('Exercise', 'Assignment') and quantity < 0:
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
             check_trade(tsubcode, - (quantity * price), amount)
             price = abs((amount - fees) / quantity)
