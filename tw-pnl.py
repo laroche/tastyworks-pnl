@@ -85,7 +85,7 @@ def check_tcode(tcode, tsubcode, description):
         raise
     if tcode == 'Money Movement':
         if tsubcode not in ('Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
-            'Fee', 'Withdrawal', 'Dividend'):
+            'Fee', 'Withdrawal', 'Dividend', 'Debit Interest'):
             raise
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment':
             raise
@@ -112,7 +112,7 @@ def check_param(buysell, openclose, callput):
 def check_trade(tsubcode, check_amount, amount):
     #print('FEHLER:', check_amount, amount)
     if tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
-        if not math.isclose(check_amount, amount, abs_tol=0.00001):
+        if not math.isclose(check_amount, amount, abs_tol=0.001): # XXX check again
             raise
     else:
         if not isnan(amount) and amount != .0:
@@ -132,12 +132,12 @@ class AssetType(enum.Enum):
 # like an ETF or fond?
 def is_stock(symbol):
     # Well known ETFs:
-    if symbol in ('DXJ','EEM','EFA','EFA','EWZ','FEZ','FXB','FXE','FXI',
+    if symbol in ('DIA','DXJ','EEM','EFA','EFA','EWW','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','IEF','IWM','IYR','KRE','OIH','QQQ',
         'RSX','SMH','SPY','UNG','XBI','XHB','XLB',
         'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT'):
         return AssetType.OtherStock # AktienFond
-    if symbol in ('TLT','HYG','GLD','SLV','VXX','USO'):
+    if symbol in ('TLT','HYG','GLD','SLV','VXX','UNG','USO'):
         return AssetType.OtherStock
     # Well known stock names:
     if symbol in ('M','AAPL','TSLA'):
@@ -367,7 +367,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         eur_amount = usd2eur(amount - fees, date)
         # look at currency conversion gains:
         tax_free = False
-        if tsubcode in ('Deposit', 'Credit Interest', 'Dividend', 'Fee'):
+        if tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest', 'Dividend', 'Fee'):
             tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
@@ -410,14 +410,18 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 asset = 'transfer'
                 newdescription = description
                 print(header, 'transferred:', description)
-            elif tsubcode in ('Deposit', 'Credit Interest'):
-                if description == 'INTEREST ON CREDIT BALANCE':
+            elif tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest'):
+                if isnan(symbol):
                     asset = 'interest'
-                    print(header, 'interest')
                     if amount > .0:
                         interest_recv += eur_amount
                     else:
                         interest_paid += eur_amount
+                    if description != 'INTEREST ON CREDIT BALANCE':
+                        newdescription = description
+                        print(header, 'interest:', description)
+                    else:
+                        print(header, 'interest')
                 else:
                     if amount > .0:
                         asset = 'dividends for %s' % symbol

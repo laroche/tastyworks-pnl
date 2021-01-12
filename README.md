@@ -96,6 +96,18 @@ Here the output transaction data in detail:
 - __tax_free__: are further currency changes tax free (German: steuerneutral)
 
 
+FAQ
+---
+
+- There is a calculation check with math.isclose() around line 116. I think people load
+  the CSV file into a spreadsheet which will round the numbers. Either load the real
+  numbers from Tastyworks or relax this check from "abs_tol=0.00001" to "abs_tol=0.001".
+- Maybe ACH transfers are not yet implemented. I don't use them, maybe email me
+  a sample transaction line, so that I can adjust the source code.
+- Either github issues or email works for me to enhance/fix this program. Sample data
+  is best to resolve issues.
+
+
 TODO
 ----
 
