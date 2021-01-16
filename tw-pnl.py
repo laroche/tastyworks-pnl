@@ -306,7 +306,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         print('pnl stocks gains:        ', f'{pnl_stocks_gains:10.2f}' + curr_sym)
         print('pnl stocks losses:       ', f'{pnl_stocks_losses:10.2f}' + curr_sym)
     print('pnl other:               ', f'{pnl:10.2f}' + curr_sym)
-    print('pnl total:               ', '%10.2f' % (dividends + withholding_tax + \
+    print('pnl total:               ', '%10.2f' % (dividends + \
         withdrawal + interest_recv + interest_paid + fee_adjustments + \
         pnl_stocks_gains + pnl_stocks_losses + pnl) + curr_sym)
     print('USD currency gains:      ', f'{account_usd:10.2f}' + curr_sym)
