@@ -367,7 +367,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         eur_amount = usd2eur(amount - fees, date)
         # look at currency conversion gains:
         tax_free = False
-        if tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest', 'Dividend', 'Fee'):
+        if tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest', 'Dividend',
+            'Fee', 'Balance Adjustment'):
             tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
@@ -525,10 +526,10 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         net_total = total + fifos_sum(fifos)
 
-        new_wk.append([datetime, local_pnl, '%.2f' % usd_gains, '%.2f' % usd_gains_notax,
-            '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+        new_wk.append([datetime, local_pnl, '%.4f' % usd_gains, '%.4f' % usd_gains_notax,
+            '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
             quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
-            '%.2f' % term_loss, tax_free])
+            '%.4f' % term_loss, tax_free])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
