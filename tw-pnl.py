@@ -133,11 +133,11 @@ class AssetType(enum.Enum):
 def is_stock(symbol):
     # Well known ETFs:
     if symbol in ('DIA','DXJ','EEM','EFA','EFA','EWW','EWZ','FEZ','FXB','FXE','FXI',
-        'GDX','GDXJ','IEF','IWM','IYR','KRE','OIH','QQQ',
+        'GDX','GDXJ','IWM','IYR','KRE','OIH','QQQ',
         'RSX','SMH','SPY','UNG','XBI','XHB','XLB',
         'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT'):
         return AssetType.OtherStock # AktienFond
-    if symbol in ('TLT','HYG','GLD','SLV','VXX','UNG','USO'):
+    if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO'):
         return AssetType.OtherStock
     # Well known stock names:
     if symbol in ('M','AAPL','TSLA'):
