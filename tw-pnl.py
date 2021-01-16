@@ -112,7 +112,7 @@ def check_param(buysell, openclose, callput):
 def check_trade(tsubcode, check_amount, amount):
     #print('FEHLER:', check_amount, amount)
     if tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
-        if not math.isclose(check_amount, amount, abs_tol=0.001): # XXX check again
+        if not math.isclose(check_amount, amount, abs_tol=0.001):
             raise
     else:
         if not isnan(amount) and amount != .0:
