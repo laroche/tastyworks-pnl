@@ -315,7 +315,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print()
     print('New end sums and open positions:')
     print('total fees paid:         ', f'{total_fees:10.2f}' + curr_sym)
-    print('account end total:       ', f'{total:10.2f}' + '$')
+    print('account cash balance:    ', f'{total:10.2f}' + '$')
     print_fifos(fifos)
     print()
 
@@ -440,17 +440,17 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
             elif tsubcode == 'Fee':
-                # XXX Additional fees for dividends paid in short stock? Interest fees?
-                asset = 'fees for %s' % symbol
+                # XXX In my case: stock borrow fee:
+                asset = 'stock borrow fees for %s' % symbol
                 newdescription = description
-                print(header, 'fees: %s,' % symbol, description)
+                print(header, 'stock borrow fees: %s,' % symbol, description)
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
                 if amount >= .0:
                     raise
             elif tsubcode == 'Withdrawal':
                 if not isnan(symbol):
-                    # XXX In my case dividends paid for short stock:
+                    # XXX In my case: dividends paid for short stock:
                     asset = 'dividends paid for %s' % symbol
                     newdescription = description
                     print(header, 'dividends paid: %s,' % symbol, description)
