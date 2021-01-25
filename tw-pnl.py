@@ -524,7 +524,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         #check_total(fifos, total)
 
-        net_total = total + fifos_sum(fifos)
+        # XXX: We should store original USD amounts, not convert from Euro to USD:
+        net_total = total + eur2usd(fifos_sum(fifos), date)
 
         new_wk.append([datetime, local_pnl, '%.4f' % usd_gains, '%.4f' % usd_gains_notax,
             '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
