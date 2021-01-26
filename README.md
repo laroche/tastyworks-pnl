@@ -118,8 +118,6 @@ Important:
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Does not work with futures.
-- net_total: price of stocks and options is calculated in Euro and than converted back into USD,
-  we should just add/store original USD price into FIFO as well.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.

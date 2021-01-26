@@ -163,10 +163,10 @@ def prev_year(date):
     return str(int(date[:4]) - 1) + date[4:]
 
 # 'fifos' is a dictionary with 'asset' names. It contains a FIFO
-# 'deque()' with a list of 'price' (as float), 'quantity' (as integer),
-# 'date' of purchase and 'tax_free'.
-def fifo_add(fifos, quantity, price, asset, is_option, date=None, tax_free=False,
-    debug=False, debugfifo=False, debugcurr=False):
+# 'deque()' with a list of 'price' (as float), 'price_usd' (as float),
+# 'quantity' (as integer), 'date' of purchase and 'tax_free'.
+def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
+    tax_free=False, debug=False, debugfifo=False, debugcurr=False):
     prevyear = prev_year(date)
     (pnl, pnl_notax, term_losses) = (.0, .0, .0)
     if quantity == 0:
@@ -183,24 +183,24 @@ def fifo_add(fifos, quantity, price, asset, is_option, date=None, tax_free=False
         # If we add assets into the same trading direction,
         # just add the asset into the queue. (Buy more if we are
         # already long, or sell more if we are already short.)
-        if sign(fifo[0][1]) == sign(quantity):
+        if sign(fifo[0][2]) == sign(quantity):
             break
         # Here we start removing entries from the FIFO.
         # Check if the FIFO queue has enough entries for
         # us to finish:
-        if abs(fifo[0][1]) >= abs(quantity):
+        if abs(fifo[0][2]) >= abs(quantity):
             if is_option and quantity > 0:
                 pnl -= quantity * price
             else:
                 p = quantity * (price - fifo[0][0])
                 if date is None or \
-                    (fifo[0][2] > prevyear and quantity < 0 and \
-                    fifo[0][3] == False and tax_free == False):
+                    (fifo[0][3] > prevyear and quantity < 0 and \
+                    fifo[0][4] == False and tax_free == False):
                     pnl -= p
                 else:
                     pnl_notax -= p
                     if date is not None and debugcurr:
-                        print(fifo[0][2], '%.2f' % (-p / 10000.0),
+                        print(fifo[0][3], '%.2f' % (-p / 10000.0),
                             'over one year ago or paying back loan or tax free')
                 if is_option and quantity < 0 and p > .0:
                     #print('Termingeschäft-Verlust von %.2f:' % p)
@@ -208,8 +208,8 @@ def fifo_add(fifos, quantity, price, asset, is_option, date=None, tax_free=False
             if debugfifo:
                 print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
                     % (asset, quantity, fifo[0][0], price, pnl))
-            fifo[0][1] += quantity
-            if fifo[0][1] == 0:
+            fifo[0][2] += quantity
+            if fifo[0][2] == 0:
                 fifo.popleft()
                 if len(fifo) == 0:
                     del fifos[asset]
@@ -218,28 +218,28 @@ def fifo_add(fifos, quantity, price, asset, is_option, date=None, tax_free=False
         # the loop for further entries (or add the
         # remaining entries into the FIFO).
         if is_option and quantity > 0:
-            pnl += fifo[0][1] * price
+            pnl += fifo[0][2] * price
         else:
-            p = fifo[0][1] * (price - fifo[0][0])
+            p = fifo[0][2] * (price - fifo[0][0])
             if date is None or \
-                (fifo[0][2] > prevyear and quantity < 0 and \
-                fifo[0][3] == False and tax_free == False):
+                (fifo[0][3] > prevyear and quantity < 0 and \
+                fifo[0][4] == False and tax_free == False):
                 pnl += p
             else:
                 pnl_notax += p
                 if date is not None and debugcurr:
-                    print(fifo[0][2], '%.2f' % (p / 10000.0),
+                    print(fifo[0][3], '%.2f' % (p / 10000.0),
                         'over one year ago or paying back loan or tax free')
             if is_option and quantity < 0 and p < .0:
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
         if debugfifo:
             print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
-                % (asset, -fifo[0][1], fifo[0][0], price, pnl))
-        quantity += fifo[0][1]
+                % (asset, -fifo[0][2], fifo[0][0], price, pnl))
+        quantity += fifo[0][2]
         fifo.popleft()
     # Just add this to the FIFO queue:
-    fifo.append([price, quantity, date, tax_free])
+    fifo.append([price, price_usd, quantity, date, tax_free])
     # selling an option is taxed directly as income
     if is_option and quantity < 0:
         pnl -= quantity * price
@@ -251,14 +251,14 @@ def fifo_add(fifos, quantity, price, asset, is_option, date=None, tax_free=False
 # Check if the first entry in the FIFO
 # is 'long' the underlying or 'short'.
 def fifos_islong(fifos, asset):
-    return fifos[asset][0][1] > 0
+    return fifos[asset][0][2] > 0
 
-def fifos_sum(fifos):
+def fifos_sum_usd(fifos):
     sum = .0
     for fifo in fifos:
         if fifo != 'account-usd':
-            for (a, b, date, tax_free) in fifos[fifo]:
-                sum += a * b
+            for (price, price_usd, quantity, date, tax_free) in fifos[fifo]:
+                sum += price_usd * quantity
     return sum
 
 def print_fifos(fifos):
@@ -269,8 +269,8 @@ def print_fifos(fifos):
 # account-usd should always be the same as total together with
 # EURUSD conversion data. So just a sanity check:
 def check_total(fifos, total):
-    for (a, b) in fifos['account-usd']:
-        total -= b / 10000
+    for (a, b, c) in fifos['account-usd']:
+        total -= c / 10000
     if abs(total) > 0.004:
         print(total)
         raise
@@ -374,7 +374,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000),
-            1 / conv_usd, 'account-usd', False, date, tax_free, debugfifo=debugfifo)
+            1 / conv_usd, 1, 'account-usd', False, date, tax_free, debugfifo=debugfifo)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
         account_usd_notax += usd_gains_notax
@@ -493,9 +493,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if tsubcode in ('Exercise', 'Assignment') and quantity < 0:
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
             check_trade(tsubcode, - (quantity * price), amount)
-            price = abs((amount - fees) / quantity)
-            price = usd2eur(price, date, conv_usd)
-            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, asset,
+            price_usd = abs((amount - fees) / quantity)
+            price = usd2eur(price_usd, date, conv_usd)
+            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
                 asset_type == AssetType.Option, debugfifo=debugfifo)
             term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
@@ -524,8 +524,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         #check_total(fifos, total)
 
-        # XXX: We should store original USD amounts, not convert from Euro to USD:
-        net_total = total + eur2usd(fifos_sum(fifos), date)
+        net_total = total + fifos_sum_usd(fifos)
 
         new_wk.append([datetime, local_pnl, '%.4f' % usd_gains, '%.4f' % usd_gains_notax,
             '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
