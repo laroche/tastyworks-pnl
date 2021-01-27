@@ -195,7 +195,7 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
                 p = quantity * (price - fifo[0][0])
                 if date is None or \
                     (fifo[0][3] > prevyear and quantity < 0 and \
-                    fifo[0][4] == False and tax_free == False):
+                    not fifo[0][4] and not tax_free):
                     pnl -= p
                 else:
                     pnl_notax -= p
@@ -223,7 +223,7 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
             p = fifo[0][2] * (price - fifo[0][0])
             if date is None or \
                 (fifo[0][3] > prevyear and quantity < 0 and \
-                fifo[0][4] == False and tax_free == False):
+                not fifo[0][4] and not tax_free):
                 pnl += p
             else:
                 pnl_notax += p
