@@ -269,8 +269,8 @@ def print_fifos(fifos):
 # account-usd should always be the same as total together with
 # EURUSD conversion data. So just a sanity check:
 def check_total(fifos, total):
-    for (a, b, c) in fifos['account-usd']:
-        total -= c / 10000
+    for (price, price_usd, quantity, date, tax_free) in fifos['account-usd']:
+        total -= quantity / 10000
     if abs(total) > 0.004:
         print(total)
         raise
