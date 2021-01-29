@@ -21,7 +21,7 @@
 # sudo apt-get install python3-pandas
 #
 #
-# pylint: disable=C0103,C0114,C0116
+# pylint: disable=C0103,C0111,C0114,C0116,C0326,C0330
 #
 
 import enum
@@ -254,12 +254,12 @@ def fifos_islong(fifos, asset):
     return fifos[asset][0][2] > 0
 
 def fifos_sum_usd(fifos):
-    sum = .0
+    sum_usd = .0
     for fifo in fifos:
         if fifo != 'account-usd':
             for (price, price_usd, quantity, date, tax_free) in fifos[fifo]:
-                sum += price_usd * quantity
-    return sum
+                sum_usd += price_usd * quantity
+    return sum_usd
 
 def print_fifos(fifos):
     print('open positions:')
