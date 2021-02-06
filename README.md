@@ -1,7 +1,7 @@
 Tastyworks PNL
 --------------
 
-This python script is used to generate data for a German tax income statement
+This python script is used to generate data for a private German tax income statement
 from Tastyworks csv-file with trade history.
 
 
@@ -14,7 +14,9 @@ Download your trade history as csv file from
 custom period of time and download it as csv file.)
 
 Newest entries in the csv file should be on the top and it should contain the complete
-history over all years. The csv file has the following first line:
+history over all years. (You can at most download data for a year, so for several years
+you have to download into several files and combine them into one file with a texteditor.)
+The csv file has the following first line:
 
 <code>
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
@@ -37,7 +39,7 @@ You can use the __--assume-individual-stock__ option to assume individual stock 
 
 Currency gains are only summed up within the first year and if no credit is paid back, otherwise
 they are tax free. Also if dividents or credit is received or account fees are paid.
-(They need to go into 'Anlage SO' within a German tax statement.)
+(They need to go into 'Anlage SO' within a private German tax statement.)
 
 The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
 is the cummulative sum, not the real local change. (Bug in the output!)
@@ -118,6 +120,7 @@ Important:
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Does not work with futures.
+- Stock splits are not supported.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
@@ -126,7 +129,7 @@ Important:
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
-- Check if dates are truely ascending.
+- Check if dates are truely ascending in the provided csv input files.
 - Check if withholding tax is max 15% for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid.
 - Are we rounding output correctly?
