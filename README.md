@@ -115,6 +115,7 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
+- Currently all we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
@@ -131,7 +132,7 @@ Important:
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Check if dates are truely ascending in the provided csv input files.
 - Check if withholding tax is max 15% for US stocks as per DBA.
-  Warn if e.g. 30% withholding tax is paid.
+  Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
 - Is the time output correct with the correct timezone?
 
