@@ -59,7 +59,12 @@ def isnan(x):
 
 def get_eurusd(date, debug=False):
     while True:
-        x = eurusd[date]
+        try:
+            x = eurusd[date]
+        except KeyError:
+            print('ERROR: No EURUSD conversion data available for %s,'
+                ' please download newer data into the file eurusd.csv.' % date)
+            sys.exit(1)
         if not isnan(x):
             return x
         if debug:
