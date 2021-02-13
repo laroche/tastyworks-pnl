@@ -199,6 +199,32 @@ NASDAQ100 = ('ATVI', 'ADBE', 'AMD', 'ALXN', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AE
     'ROST', 'SGEN', 'SIRI', 'SWKS', 'SPLK', 'SBUX', 'SNPS', 'TMUS', 'TSLA',
     'TXN', 'TCOM', 'VRSN', 'VRSK', 'VRTX', 'WBA', 'WDAY', 'XEL', 'XLNX', 'ZM')
 
+def read_sp500():
+    table = pandas.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    df = table[0]
+    df.drop('SEC filings', axis=1, inplace=True)
+    return df
+
+def print_sp500():
+    import pprint
+    df = read_sp500()
+    symbols = df['Symbol'].values.tolist()
+    symbols.sort()
+    p = pprint.pformat(symbols, width=79, compact=True, indent=4)
+    print(p)
+
+def read_nasdaq100():
+    table = pandas.read_html('https://en.wikipedia.org/wiki/NASDAQ-100')
+    df = table[3]
+    return df
+
+def print_nasdaq100():
+    import pprint
+    df = read_nasdaq100()
+    symbols = df['Ticker'].values.tolist()
+    p = pprint.pformat(symbols, width=79, compact=True, indent=4)
+    print(p)
+
 
 # Is the symbol a individual stock or anything else
 # like an ETF or fond?
