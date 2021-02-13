@@ -126,7 +126,8 @@ Important:
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
-- For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
+- Done: For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
+  How do we cope with historical data for this?
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
