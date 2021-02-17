@@ -107,6 +107,20 @@ FAQ
   is best to resolve issues.
 
 
+Currency gains in German tax law
+--------------------------------
+
+Discussion in German:
+
+Links:
+
+- https://www.wertpapier-forum.de/topic/45232-steuerliche-behandlung-fremdw%C3%A4hrungskonto-ib-oder-andere-broker/
+
+Summary:
+
+- not-yet-done
+
+
 TODO
 ----
 
@@ -121,8 +135,10 @@ Important:
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Does not work with futures.
-- Stock splits are not supported.
+- Stock splits and spinoffs are not supported.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
+- In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
+  als Zufluss und sind daher steuer-neutral.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.

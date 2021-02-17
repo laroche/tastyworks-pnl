@@ -470,6 +470,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
+        # XXX Stillhalterpraemien sind auch keine Anschaffung
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000),
             1 / conv_usd, 1, 'account-usd', False, date, tax_free, debugfifo=debugfifo)
