@@ -124,10 +124,10 @@ Links:
 - <http://www.iusconsulting.de/de/portal-eintrag/private-veraumluszligerungsgeschaumlfte>
 
 
-Zusammenfassung:
+Zusammenfassung Steuern im Privatvermögen bei Fremdwährungskonten:
 
 - Bei der Anschaffung und Veräußerung von Fremdwährungsbeträgen kann es sich um ein
-  privates Veräußerungsgeschäft i.S. des § 23 Abs. 1 Satz 1 Nr. 2 EStG handeln.
+  privates Veräußerungsgeschäft i.S. des [§ 23 Abs. 1 Satz 1 Nr. 2 EStG](https://www.gesetze-im-internet.de/estg/__23.html) handeln.
   Diese werden in der privaten Einkommensteuererklärung in der "Anlage SO" angegeben.
 - Da die Gewinne aus § 23 EStG nicht dem Steuerabzug unterliegen, ermitteln die inländischen
   Banken diese Gewinne in der Regel nicht. Die Einkünfte müssen daher eigenständig ermittelt
@@ -147,10 +147,11 @@ Zusammenfassung:
      <https://www.haufe.de/steuern/finanzverwaltung/veraeusserungsgewinne-bei-fremdwaehrungsgeschaeften-im-fokus_164_373742.html>
    - Bei der Berechnung der Spekulationsfrist wird der Tag der Anschaffung nicht mitgerechnet.
 - Freigrenze 600 Euro (für alle Spekulationsgewinne zusammen), darunter immer steuerfrei
-- Verluste werden in einem extra Verlustverrechnungstopf vom Finanzamt vorgetragen
+- Verluste werden in einem extra Verlustverrechnungstopf vom Finanzamt vorgetragen und können (auf Antrag) nur mit Gewinnen aus dem Vorjahr
+  verrechnet werden.
 - Dividendenauzahlungen/Optionsprämien/Zinsen in Fremdwährung sind keine "Anschaffung" von Währungsguthaben
-  im Sinne von §23 EStG (da gilt eine enge Auslegung des Anschaffungsbegriffs), sondern ein Zufluss (Der Zufluss an sich fällt ja unter §20 EStG als Kapitalertrag).
-  Die spätere Veräußerung von Währungsguthaben aus Dividendenzuflüssen ist somit nie nach §23 EStG steuerbar, weil es kein Anschaffungsgeschäft dazu gibt.
+  im Sinne von § 23 EStG (da gilt eine enge Auslegung des Anschaffungsbegriffs), sondern ein Zufluss (Der Zufluss an sich fällt ja unter § 20 EStG als Kapitalertrag).
+  Die spätere Veräußerung von Währungsguthaben aus Dividendenzuflüssen ist somit nie nach § 23 EStG steuerbar, weil es kein Anschaffungsgeschäft dazu gibt.
   Anschaffung = Erwerb von etwas Bestehendem von einem Dritten gegen Hingabe des Kaufpreises.
 - Abflüsse, die keine Veräußerung darstellen. Ich zähle dazu u.a. Kontogebühren, fremde Steuern, Zinsen etc. im Zusammenhang mit der Kapitalüberlassung
 
@@ -172,7 +173,7 @@ Important:
 - Stock splits and spinoffs are not supported.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
-  als Zufluss und sind daher steuer-neutral.
+  als Zufluss und sind daher steuer-neutral. Source Code existiert, ist aber auskommentiert.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
@@ -186,6 +187,8 @@ Important:
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
 - Is the time output correct with the correct timezone?
+- Does Tastyworks use BRK.B or BRK/B in transaction history?
+  Adjust the list of individual stocks accordingly.
 
 Nice:
 

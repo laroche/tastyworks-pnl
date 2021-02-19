@@ -208,6 +208,7 @@ def read_sp500():
 def print_sp500():
     import pprint
     df = read_sp500()
+    #df['Symbol'] = df['Symbol'].str.replace('.', '/')
     symbols = df['Symbol'].values.tolist()
     symbols.sort()
     p = pprint.pformat(symbols, width=79, compact=True, indent=4)
@@ -221,6 +222,7 @@ def read_nasdaq100():
 def print_nasdaq100():
     import pprint
     df = read_nasdaq100()
+    #df['Ticker'] = df['Ticker'].str.replace('.', '/')
     symbols = df['Ticker'].values.tolist()
     p = pprint.pformat(symbols, width=79, compact=True, indent=4)
     print(p)
@@ -470,13 +472,18 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
-        # XXX Stillhalterpraemien sind auch keine Anschaffung
+        # Stillhalterpraemien gelten als Zufluss und nicht als Anschaffung
+        # und sind daher steuer-neutral:
+        #if tcode != 'Money Movement' and \
+        #    not isnan(expire) and str(buysell) == 'Sell' and str(openclose) == 'Open':
+        #    tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000),
             1 / conv_usd, 1, 'account-usd', False, date, tax_free, debugfifo=debugfifo)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
         account_usd += usd_gains
         account_usd_notax += usd_gains_notax
+
         asset = ''
         newdescription = ''
 
