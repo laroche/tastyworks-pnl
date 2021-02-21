@@ -474,9 +474,14 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             tax_free = True
         # Stillhalterpraemien gelten als Zufluss und nicht als Anschaffung
         # und sind daher steuer-neutral:
-        #if tcode != 'Money Movement' and \
-        #    not isnan(expire) and str(buysell) == 'Sell' and str(openclose) == 'Open':
-        #    tax_free = True
+        # XXX We use "Sell-to-Open" to find all "Stillhaltergeschäfte". This works
+        # ok for me, but what happens if we have one long option and sell two? Will
+        # Tastyworks split this into two transactions or keep this? With keeping this
+        # as one transaction, we should split the currency gains transaction as well.
+        # Could we detect this bad case within transactions?
+        if tcode != 'Money Movement' and \
+            not isnan(expire) and str(buysell) == 'Sell' and str(openclose) == 'Open':
+            tax_free = True
         # USD as a big integer number:
         (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000),
             1 / conv_usd, 1, 'account-usd', False, date, tax_free, debugfifo=debugfifo)

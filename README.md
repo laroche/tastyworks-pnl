@@ -173,7 +173,11 @@ Important:
 - Stock splits and spinoffs are not supported.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
-  als Zufluss und sind daher steuer-neutral. Source Code existiert, ist aber auskommentiert.
+  als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
+  als "Sell-To-Open" verwendet. Was passiert aber,wenn man eine Option gekauft hat und dann 2 davon
+  verkauft? Bleibt das bei Tastyworks eine Transaktion oder finden hier dann zwei Transaktionen statt?
+  Dieser Fall tritt bei mir nicht auf. Der Source Code sollte zumindest diesen Fall detektieren und
+  eine Warnung ausgeben.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
