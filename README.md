@@ -186,7 +186,8 @@ Important:
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
-- Check if dates are truely ascending in the provided csv input files.
+- Done: Check if dates are truely ascending in the provided csv input files.
+- Check if input has duplicate transactions. Could they happen? (As warning only.)
 - Check if withholding tax is max 15% for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?

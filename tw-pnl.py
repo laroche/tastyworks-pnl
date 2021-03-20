@@ -431,6 +431,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
     (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
     cur_year = None
+    prev_datetime = None
     check_account_ref = None
     new_wk = []
     for i in reversed(wk.index):
@@ -442,6 +443,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if str(datetime)[16:] != ':00': # minimum output is minutes, seconds are 00 here
             raise
         datetime = str(datetime)[:16]
+        if prev_datetime is not None and prev_datetime > datetime:
+            raise
+        prev_datetime = datetime
         date = datetime[:10] # year-month-day but no time
         if cur_year != datetime[:4]:
             if cur_year is not None:
@@ -664,9 +668,20 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     if show:
         show_plt(new_wk)
 
+def check_csv(csv_file):
+    with open(csv_file) as f:
+        content = f.readlines()
+    if len(content) < 1 or content[0] != 'Date/Time,Transaction Code,' + \
+        'Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,' + \
+        'Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,' + \
+        'Account Reference\n':
+        print('ERROR: Wrong first line in csv file.')
+        sys.exit(1)
+
 def usage():
-    print('tw-pnl.py [--assume-individual-stock][--long][--usd][--output-csv=test.csv]' +
-        '[--output-excel=test.xlsx][--help][--verbose] *.csv')
+    print('tw-pnl.py [--assume-individual-stock][--long][--usd]' + \
+        '[--output-csv=test.csv][--output-excel=test.xlsx][--help]' + \
+        '[--verbose] *.csv')
 
 def main(argv):
     opt_long = False
@@ -710,6 +725,7 @@ def main(argv):
     read_eurusd()
     args.reverse()
     for csv_file in args:
+        check_csv(csv_file)
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
         check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo)
 
