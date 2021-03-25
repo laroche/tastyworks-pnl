@@ -194,6 +194,9 @@ Important:
 - Is the time output correct with the correct timezone?
 - Does Tastyworks use BRK.B or BRK/B in transaction history?
   Adjust the list of individual stocks accordingly.
+- Look at other libraries for currency conversion:
+  <https://github.com/alexprengere/currencyconverter> or
+  <https://github.com/flaxandteal/moneypandas>
 
 Nice:
 
