@@ -164,7 +164,7 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
-- Currently all we only make one pass over the data. Better allow several data passes/computations.
+- Currently we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
@@ -172,9 +172,11 @@ Important:
 - Does not work with futures.
 - Stock splits and spinoffs are not supported.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
+- For currency gains tax calculation you can reorder all transactions of one day and use the best
+  order to minimize tax payments. This is currently not done with the current source code.
 - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
   als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
-  als "Sell-To-Open" verwendet. Was passiert aber,wenn man eine Option gekauft hat und dann 2 davon
+  als "Sell-To-Open" verwendet. Was passiert aber, wenn man eine Option gekauft hat und dann 2 davon
   verkauft? Bleibt das bei Tastyworks eine Transaktion oder finden hier dann zwei Transaktionen statt?
   Dieser Fall tritt bei mir nicht auf. Der Source Code sollte zumindest diesen Fall detektieren und
   eine Warnung ausgeben.
@@ -184,14 +186,14 @@ Important:
 - Done: For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
   How do we cope with historical data for this?
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
-- Add performance reviews, graphs based on different time periods.
+- Add performance reviews, graphs based on different time periods and underlyings.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Done: Check if dates are truely ascending in the provided csv input files.
 - Check if input has duplicate transactions. Could they happen? (As warning only.)
 - Check if withholding tax is max 15% for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
-- Is the time output correct with the correct timezone?
+- Is the time output using the correct timezone?
 - Does Tastyworks use BRK.B or BRK/B in transaction history?
   Adjust the list of individual stocks accordingly.
 - Look at other libraries for currency conversion:
