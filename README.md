@@ -126,12 +126,15 @@ Links:
 
 Zusammenfassung Steuern im Privatvermögen bei Fremdwährungskonten:
 
+- Private Veräußerungsgeschäfte werden in [§ 23 EStG](https://www.gesetze-im-internet.de/estg/__23.html) behandelt. (EStG = Einkommensteuergesetz)
 - Bei der Anschaffung und Veräußerung von Fremdwährungsbeträgen kann es sich um ein
-  privates Veräußerungsgeschäft i.S. des [§ 23 Abs. 1 Satz 1 Nr. 2 EStG](https://www.gesetze-im-internet.de/estg/__23.html) handeln.
-  Diese werden in der privaten Einkommensteuererklärung in der "Anlage SO" angegeben.
+  privates Veräußerungsgeschäft i.S. des [§ 23 Abs. 1 Nr. 2 EStG](https://www.gesetze-im-internet.de/estg/__23.html) handeln.
+  Diese werden in der privaten Einkommensteuererklärung in der
+  [Anlage SO](https://www.formulare-bfinv.de/ffw/catalog/openForm.do?path=catalog%3A%2F%2FBuerger%2Fsteuern%2Fest%2Fest20%2F034029_20)
+  in Zeile 49 angegeben.
 - Da die Gewinne aus § 23 EStG nicht dem Steuerabzug unterliegen, ermitteln die inländischen
   Banken diese Gewinne in der Regel nicht. Die Einkünfte müssen daher eigenständig ermittelt
-  werden und - sofern die Freigrenze des § 23 Abs. 3 EStG von 600 € überschritten ist - in der
+  werden und - sofern die Freigrenze des § 23 Abs. 3 Satz 5 EStG von 600 € überschritten ist - in der
   Einkommensteuererklärung (Anlage SO) erklärt werden. BMF, Schreiben v. 18.1.2016 - IV C 1 - S
   2252/08/1004:017, BStBl 2016 I S. 85 NWB WAAF-66193, Rz 131.
 - Unterliegen nicht der Abgeltungssteuer sondern dem persönlichen Steuersatz.
@@ -149,7 +152,7 @@ Zusammenfassung Steuern im Privatvermögen bei Fremdwährungskonten:
 - Freigrenze 600 Euro (für alle Spekulationsgewinne zusammen), darunter immer steuerfrei
 - Verluste werden in einem extra Verlustverrechnungstopf vom Finanzamt vorgetragen und können (auf Antrag) nur mit Gewinnen aus dem Vorjahr
   verrechnet werden.
-- Dividendenauzahlungen/Optionsprämien/Zinsen in Fremdwährung sind keine "Anschaffung" von Währungsguthaben
+- Dividendenauszahlungen/Optionsprämien/Zinsen in Fremdwährung sind keine "Anschaffung" von Währungsguthaben
   im Sinne von § 23 EStG (da gilt eine enge Auslegung des Anschaffungsbegriffs), sondern ein Zufluss (Der Zufluss an sich fällt ja unter § 20 EStG als Kapitalertrag).
   Die spätere Veräußerung von Währungsguthaben aus Dividendenzuflüssen ist somit nie nach § 23 EStG steuerbar, weil es kein Anschaffungsgeschäft dazu gibt.
   Anschaffung = Erwerb von etwas Bestehendem von einem Dritten gegen Hingabe des Kaufpreises.
