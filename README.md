@@ -14,8 +14,8 @@ Download your trade history as csv file from
 custom period of time and download it as csv file.)
 
 Newest entries in the csv file should be on the top and it should contain the complete
-history over all years. (You can at most download data for a year, so for several years
-you have to download into several files and combine them into one file with a texteditor.)
+history over all years. (You can at most download data for one year, so for several years
+you have to download into several files and combine them into one file with a text editor.)
 The csv file has the following first line:
 
 <code>
@@ -37,9 +37,11 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
 
-Currency gains are only summed up within the first year and if no credit is paid back, otherwise
-they are tax free. Also if dividents or credit is received or account fees are paid.
-(They need to go into 'Anlage SO' within a private German tax statement.)
+All currency gains are classified as either tax-free or they need to go into the 'Anlage SO' within
+a private German tax statement.
+Currency gains are computed via FIFO as with other assets. They are tax free if hold more than one year
+or if credit is paid back (negative cash balance). They are also tax free for dividends, credit payments and
+sold options as well as account fees.
 
 The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
 is the cummulative sum, not the real local change. (Bug in the output!)
@@ -167,6 +169,7 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
+- If option writing is cash-settled this must go into "Termingeschäftsverluste".
 - Currently we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
