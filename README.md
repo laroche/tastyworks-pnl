@@ -150,6 +150,10 @@ Zusammenfassung Steuern im Privatvermögen bei Fremdwährungskonten:
    - Zur 10-Jahresverlängerung: Meines Wissens (Hinweis meiner Bank) gibt es vom BayLfSt die Verfügung vom 10.3.2016 die darlegt,
      dass die Erhöhung der Spekulationsfrist auf 10 Jahre (bei Festgeldverzinsung) nicht greift.
      <https://www.haufe.de/steuern/finanzverwaltung/veraeusserungsgewinne-bei-fremdwaehrungsgeschaeften-im-fokus_164_373742.html>
+   - <https://www.wertpapier-forum.de/topic/53676-versteuerung-bei-ausl-aktien-mit-w%C3%A4hrungstausch/?do=findComment&comment=1354931>:
+     Ein Nebeneffekt ist, dass verzinsliche Währungsguthaben dennoch nur der Ein-Jahresfrist in § 23 EStG unterliegen (und nicht verlängert),
+     weil die Zinsen ja nicht für das Wirtschaftsgut "Währungsguthaben", sondern für die darunter liegende Forderung an sich bezahlt werden.
+     Zinsen fallen unter § 20 EStG.
    - Bei der Berechnung der Spekulationsfrist wird der Tag der Anschaffung nicht mitgerechnet.
 - Freigrenze 600 Euro (für alle Spekulationsgewinne zusammen), darunter immer steuerfrei
 - Verluste werden in einem extra Verlustverrechnungstopf vom Finanzamt vorgetragen und können (auf Antrag) nur mit Gewinnen aus dem Vorjahr
