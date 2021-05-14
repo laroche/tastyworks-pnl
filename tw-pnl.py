@@ -284,8 +284,6 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
 # Check if the first entry in the FIFO
 # is 'long' the underlying or 'short'.
 def fifos_islong(fifos, asset):
-    if fifos.get(asset, None) == None:
-        return False
     return fifos[asset][0][2] > 0
 
 def fifos_sum_usd(fifos):
