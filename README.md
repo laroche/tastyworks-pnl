@@ -43,6 +43,10 @@ Currency gains are computed via FIFO as with other assets. They are tax free if 
 or if credit is paid back (negative cash balance). They are also tax free for dividends, credit payments and
 sold options as well as account fees.
 
+The summary output lists all assets at the end of each year. 'account-usd' contains a FIFO list of all
+USD buys and the conversion price for Euro. This entry might be very long and look complicated. You might
+want to ignore this line.
+
 The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
 is the cummulative sum, not the real local change. (Bug in the output!)
 
@@ -54,6 +58,12 @@ If you work on Linux with Ubuntu/Debian, you need to make sure
 
 <code>
 sudo apt-get install python3-pandas
+</code>
+
+Or use pip for a local install:
+
+<code>
+pip install pandas
 </code>
 
 
