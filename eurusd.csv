@@ -2,7 +2,7 @@
 "",Euro foreign exchange reference rate of the ECB / EUR 1 = USD ... / United States,
 unit,USD,
 unit multiplier,one,
-last update,2021-05-06 15:59:52,
+last update,2021-05-20 16:02:07,
 2010-01-01,.,No value available
 2010-01-02,.,No value available
 2010-01-03,.,No value available
@@ -4147,5 +4147,19 @@ last update,2021-05-06 15:59:52,
 2021-05-04,1.2021,
 2021-05-05,1.2005,
 2021-05-06,1.2060,
+2021-05-07,1.2059,
+2021-05-08,.,No value available
+2021-05-09,.,No value available
+2021-05-10,1.2169,
+2021-05-11,1.2170,
+2021-05-12,1.2118,
+2021-05-13,1.2081,
+2021-05-14,1.2123,
+2021-05-15,.,No value available
+2021-05-16,.,No value available
+2021-05-17,1.2143,
+2021-05-18,1.2222,
+2021-05-19,1.2212,
+2021-05-20,1.2203,
 "","General: The ECB publishes daily euro foreign exchange reference rates, which are calculated on the basis of the concertation between central banks at 14.15.",
 "",Source: European Central Bank (ECB).,
