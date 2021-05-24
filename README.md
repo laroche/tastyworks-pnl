@@ -195,6 +195,7 @@ Important:
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Sell,Close,54,,,,,0.00,9940.86,Forward split: Close 54.0 TQQQ,xxx...00
 </pre>
+- Assumption: stock/option splits are tax neutral.
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - For currency gains tax calculation you can reorder all transactions of one day and use the best
   order to minimize tax payments. This is currently not done with the current source code.

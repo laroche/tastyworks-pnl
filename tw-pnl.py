@@ -421,6 +421,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
 
 def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
+    splits = {}
     curr_sym = '€'
     if not convert_currency:
         curr_sym = '$'
@@ -465,6 +466,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if account_ref != check_account_ref: # check if this does not change over time
             raise
         (amount, fees) = (float(amount), float(fees))
+        if tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+            (amount, fees) = (.0, .0)
         conv_usd = get_eurusd(date)
         total_fees += usd2eur(fees, date, conv_usd)
         total += amount - fees
@@ -499,9 +502,12 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if isnan(quantity):
             quantity = 1
         else:
-            if int(quantity) != quantity:
+            if tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+                pass
+            elif int(quantity) != quantity:
                 raise
-            quantity = int(quantity)
+            else:
+                quantity = int(quantity)
 
         if isnan(price):
             price = .0
@@ -514,7 +520,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         header += ' %s' % f'{amount - fees:10.2f}' + '$'
         #if verbose:
         #    header += ' %s' % f'{conv_usd:8.4f}'
-        header += ' %5d' % quantity
+        if tcode != 'Receive Deliver' or tsubcode != 'Forward Split':
+            header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
             local_pnl = '%.4f' % eur_amount
@@ -588,6 +595,15 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     withholding_tax += eur_amount
                     print(header, 'withholding tax: %s,' % symbol, description)
                 newdescription = description
+        elif tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+            x = symbol + '-' + date
+            if str(buysell) == 'Sell':
+                splits[x] = quantity
+            else:
+                oldquantity = splits[x]
+                ratio = quantity / oldquantity
+                #print(symbol, quantity, oldquantity, ratio)
+                # XXX: change existing stock and options for this
         else:
             asset = symbol
             if not isnan(expire):
