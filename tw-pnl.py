@@ -361,6 +361,17 @@ def fifos_sum_usd(fifos):
                 sum_usd += price_usd * quantity
     return sum_usd
 
+# stock (and option) split
+def fifos_split(fifos, asset, ratio):
+    for fifo in fifos:
+        # adjust stock for split:
+        if fifo == asset:
+            for f in fifos[fifo]:
+                f[0] = f[0] / ratio
+                f[1] = f[1] / ratio
+                f[2] = f[2] * ratio
+        # XXX: implement option strike adjustment
+
 def print_fifos(fifos):
     print('open positions:')
     for fifo in fifos:
@@ -606,8 +617,10 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             else:
                 oldquantity = splits[x]
                 ratio = quantity / oldquantity
+                if int(ratio) == ratio:
+                    ratio = int(ratio)
                 #print(symbol, quantity, oldquantity, ratio)
-                # XXX: change existing stocks and options for this
+                fifos_split(fifos, symbol, ratio)
         else:
             asset = symbol
             if not isnan(expire):
