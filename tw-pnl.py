@@ -99,7 +99,7 @@ def check_tcode(tcode, tsubcode, description):
             raise
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
-            'Expiration', 'Assignment', 'Exercise'):
+            'Expiration', 'Assignment', 'Exercise', 'Forward Split'):
             raise
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise
