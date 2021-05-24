@@ -199,6 +199,7 @@ Important:
 - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
 - For currency gains tax calculation you can reorder all transactions of one day and use the best
   order to minimize tax payments. This is currently not done with the current source code.
+- If you transfer USD to another bank account, you need to choose between tax-neutral and normal tax transaction.
 - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
   als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
   als "Sell-To-Open" verwendet. Was passiert aber, wenn man eine Option gekauft hat und dann 2 davon

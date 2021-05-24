@@ -421,7 +421,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
 
 def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
-    splits = {}
+    splits = {}               # save data for stock/option splits
     curr_sym = '€'
     if not convert_currency:
         curr_sym = '$'
@@ -466,6 +466,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if account_ref != check_account_ref: # check if this does not change over time
             raise
         (amount, fees) = (float(amount), float(fees))
+        # option/stock splits are tax neutral, so zero out amount/fees for it:
         if tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
             (amount, fees) = (.0, .0)
         conv_usd = get_eurusd(date)
@@ -503,7 +504,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             quantity = 1
         else:
             if tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
-                pass
+                pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
                 raise
             else:
@@ -596,14 +597,17 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     print(header, 'withholding tax: %s,' % symbol, description)
                 newdescription = description
         elif tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+            # XXX: We might check that the two relevant entries have the same data for 'amount'.
             x = symbol + '-' + date
+            # quantity for splits seems to be more like strike price and how it changes.
+            # We use it to calculate the split ration / reverse ratio.
             if str(buysell) == 'Sell':
                 splits[x] = quantity
             else:
                 oldquantity = splits[x]
                 ratio = quantity / oldquantity
                 #print(symbol, quantity, oldquantity, ratio)
-                # XXX: change existing stock and options for this
+                # XXX: change existing stocks and options for this
         else:
             asset = symbol
             if not isnan(expire):
