@@ -371,6 +371,7 @@ def fifos_split(fifos, asset, ratio):
                 f[1] = f[1] / ratio
                 f[2] = f[2] * ratio
         # XXX: implement option strike adjustment
+        # fifo == asset + ' ' + 'P/C' + Strike + ' '
 
 def print_fifos(fifos):
     print('open positions:')

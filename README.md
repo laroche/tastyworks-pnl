@@ -207,6 +207,8 @@ Important:
   verkauft? Bleibt das bei Tastyworks eine Transaktion oder finden hier dann zwei Transaktionen statt?
   Dieser Fall tritt bei mir nicht auf. Der Source Code sollte zumindest diesen Fall detektieren und
   eine Warnung ausgeben.
+- In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
+  als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
