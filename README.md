@@ -2,7 +2,8 @@ Tastyworks PNL
 --------------
 
 This python script is used to generate data for a private German tax income statement
-from Tastyworks csv-file with trade history.
+from Tastyworks csv-file with trade history. Details on German taxes are written up
+at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
 
 How to use
