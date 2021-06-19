@@ -5,6 +5,8 @@ This python script is used to generate data for a private German tax income stat
 from Tastyworks csv-file with trade history. Details on German taxes are written up
 at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
+A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
+
 
 How to use
 ----------
