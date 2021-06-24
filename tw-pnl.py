@@ -578,14 +578,21 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 fee_adjustments += eur_amount
                 total_fees += eur_amount
             elif tsubcode == 'Fee':
-                # XXX In my case: stock borrow fee:
-                asset = 'stock borrow fees for %s' % symbol
-                newdescription = description
-                print(header, 'stock borrow fees: %s,' % symbol, description)
-                fee_adjustments += eur_amount
-                total_fees += eur_amount
-                if amount >= .0:
-                    raise
+                if description == 'INTL WIRE FEE':
+                    local_pnl = ''
+                    asset = 'fee'
+                    newdescription = description
+                    print(header, 'fee:', description)
+                    total_fees += eur_amount
+                else:
+                    # XXX In my case: stock borrow fee:
+                    asset = 'stock borrow fees for %s' % symbol
+                    newdescription = description
+                    print(header, 'stock borrow fees: %s,' % symbol, description)
+                    fee_adjustments += eur_amount
+                    total_fees += eur_amount
+                    if amount >= .0:
+                        raise
             elif tsubcode == 'Withdrawal':
                 if not isnan(symbol):
                     # XXX In my case: dividends paid for short stock:
