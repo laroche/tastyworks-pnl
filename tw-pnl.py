@@ -234,8 +234,8 @@ def is_stock(symbol):
     # Well known ETFs:
     if symbol in ('DIA','DXJ','EEM','EFA','EFA','EWW','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','IWM','IYR','KRE','OIH','QQQ','TQQQ',
-        'RSX','SMH','SPY','UNG','XBI','XHB','XLB',
-        'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT'):
+        'RSX','SMH','SPY','NOBL','UNG','XBI','XHB','XLB',
+        'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT','XLRE'):
         return AssetType.OtherStock # AktienFond
     # Just an example, unfortunately EQQQ cannot be traded with Tastyworks:
     if symbol in ('EQQQ',):
