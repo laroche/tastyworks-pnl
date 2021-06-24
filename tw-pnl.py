@@ -90,16 +90,16 @@ def check_tcode(tcode, tsubcode, description):
         raise
     if tcode == 'Money Movement':
         if tsubcode not in ('Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
-            'Fee', 'Withdrawal', 'Dividend', 'Debit Interest'):
+            'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
             raise
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment':
             raise
     elif tcode == 'Trade':
-        if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close'):
+        if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Buy', 'Sell'):
             raise
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
-            'Expiration', 'Assignment', 'Exercise', 'Forward Split'):
+            'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Special Dividend', 'Cash Settled Exercise'):
             raise
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise
@@ -116,7 +116,9 @@ def check_param(buysell, openclose, callput):
 
 def check_trade(tsubcode, check_amount, amount):
     #print('FEHLER:', check_amount, amount)
-    if tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
+    if tsubcode in ('Buy', 'Sell', 'Cash Settled Exercise', 'Special Dividend'):
+        pass
+    elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
         if not math.isclose(check_amount, amount, abs_tol=0.001):
             raise
     else:
@@ -132,6 +134,7 @@ class AssetType(enum.Enum):
     MischFond = 4
     ImmobilienFond = 5
     OtherStock = 6
+    Future = 7
 
 
 # https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
@@ -230,7 +233,9 @@ def print_nasdaq100():
 
 # Is the symbol a individual stock or anything else
 # like an ETF or fond?
-def is_stock(symbol):
+def is_stock(symbol, tsubcode):
+    #if symbol in ('SPY','IWM','QQQ'):
+    #    return AssetType.AktienFond
     # Well known ETFs:
     if symbol in ('DIA','DXJ','EEM','EFA','EFA','EWW','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','IWM','IYR','KRE','OIH','QQQ','TQQQ',
@@ -245,6 +250,10 @@ def is_stock(symbol):
     # Well known individual stock names:
     if symbol in SP500 or symbol in NASDAQ100:
         return AssetType.IndStock
+    if symbol.startswith('/'):
+        if tsubcode not in ('Buy', 'Sell'):
+            raise
+        return AssetType.Future
     # The conservative way is to through an exception if we are not sure.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
@@ -636,13 +645,17 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             asset = symbol
             if not isnan(expire):
                 expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
-                price *= 100.0
+                # XXX hack for future multiples
+                if asset.startswith('/ES'):
+                    price *= 50.0
+                else:
+                    price *= 100.0
                 if int(strike) == strike: # convert to integer for full numbers
                     strike = int(strike)
                 asset = '%s %s%s %s' % (symbol, callput, strike, expire)
                 asset_type = AssetType.Option
             else:
-                asset_type = is_stock(symbol)
+                asset_type = is_stock(symbol, tsubcode)
             # 'buysell' is not set correctly for 'Expiration'/'Exercise'/'Assignment' entries,
             # so we look into existing positions to check if we are long or short (we cannot
             # be both, so this test should be safe):

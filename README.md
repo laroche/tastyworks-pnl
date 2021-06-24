@@ -121,6 +121,8 @@ FAQ
   a sample transaction line, so that I can adjust the source code.
 - Either github issues or email works for me to enhance/fix this program. Sample data
   is best to resolve issues.
+- One check is to look at the computed value of "account cash balance" from this script and compare it
+  to the official value "Cash Balance" from Tastyworks at <https://manage.tastyworks.com/#/accounts/balances>.
 
 
 Currency gains in German tax law
@@ -144,6 +146,11 @@ Important:
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
 - Does not work with futures.
+   - A first quick implementation is done, further checks are needed on real account data.
+     Let me know if you can provide full account data to check/verify.
+   - Add extra pnl counter for futures.
+- Add extra counter for all transactions to/from the account.
+- Add AssetType into csv/Excel output file.
 - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
 <pre>
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
