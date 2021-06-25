@@ -123,6 +123,9 @@ FAQ
   is best to resolve issues.
 - One check is to look at the computed value of "account cash balance" from this script and compare it
   to the official value "Cash Balance" from Tastyworks at <https://manage.tastyworks.com/#/accounts/balances>.
+- The output-csv file should have the same amount of lines as the input csv. The resulting output
+  is just an enriched form of the input. Please verify all summary output by computing it again from
+  the output-csv file yourself.
 
 
 Currency gains in German tax law
@@ -148,6 +151,9 @@ Important:
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.
+   - As "Mark-to-Market"-payments/transactions are done, we immediately pay taxes for them, this is
+     not stacked up until futures are sold again. What is a correct way to tax these transactions?
+     Adding this up needs to be done to correctly implement "20k€ Terminverlustgeschäfte" for futures.
    - Add extra pnl counter for futures.
 - Add extra counter for all transactions to/from the account.
 - Add AssetType into csv/Excel output file.

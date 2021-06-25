@@ -413,7 +413,7 @@ def show_plt(df):
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, pnl, account_usd, account_usd_notax, total_fees,
+        pnl_stocks_losses, future, pnl, account_usd, account_usd_notax, total_fees,
         term_losses, total, fifos, verbose):
     print()
     print('Total sums paid and received in the year %s:' % cur_year)
@@ -429,10 +429,12 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     if pnl_stocks_gains != .0 or pnl_stocks_losses != .0 or verbose:
         print('pnl stocks gains:        ', f'{pnl_stocks_gains:10.2f}' + curr_sym)
         print('pnl stocks losses:       ', f'{pnl_stocks_losses:10.2f}' + curr_sym)
+    if future != .0 or verbose:
+        print('pnl futures:             ', f'{future:10.2f}' + curr_sym)
     print('pnl other:               ', f'{pnl:10.2f}' + curr_sym)
     print('pnl total:               ', '%10.2f' % (dividends + \
         withdrawal + interest_recv + interest_paid + fee_adjustments + \
-        pnl_stocks_gains + pnl_stocks_losses + pnl) + curr_sym)
+        pnl_stocks_gains + pnl_stocks_losses + future + pnl) + curr_sym)
     print('USD currency gains:      ', f'{account_usd:10.2f}' + curr_sym)
     print('USD curr. gains (no tax):', f'{account_usd_notax:10.2f}' + curr_sym)
     print('losses future contracts: ', f'{-term_losses:10.2f}' + curr_sym)
@@ -451,7 +453,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         curr_sym = '$'
     fifos = {}
     total = .0                # account total
-    (pnl_stocks_gains, pnl_stocks_losses, pnl) = (.0, .0, .0)
+    (pnl_stocks_gains, pnl_stocks_losses, future, pnl) = (.0, .0, .0, .0)
     (account_usd, account_usd_notax) = (.0, .0)
     (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
     (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
@@ -476,9 +478,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if cur_year is not None:
                 print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
                     withdrawal, interest_recv, interest_paid, fee_adjustments,
-                    pnl_stocks_gains, pnl_stocks_losses, pnl, account_usd, account_usd_notax,
+                    pnl_stocks_gains, pnl_stocks_losses, future, pnl, account_usd, account_usd_notax,
                     total_fees, term_losses, total, fifos, verbose)
-                (pnl_stocks_gains, pnl_stocks_losses, pnl) = (.0, .0, .0)
+                (pnl_stocks_gains, pnl_stocks_losses, future, pnl) = (.0, .0, .0, .0)
                 (account_usd, account_usd_notax) = (.0, .0)
                 (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
                 (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
@@ -500,7 +502,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         # look at currency conversion gains:
         tax_free = False
         if tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest', 'Dividend',
-            'Fee', 'Balance Adjustment'):
+            'Fee', 'Balance Adjustment', 'Special Dividend'):
             tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
@@ -627,6 +629,11 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     withholding_tax += eur_amount
                     print(header, 'withholding tax: %s,' % symbol, description)
                 newdescription = description
+            elif tsubcode == 'Mark to Market':
+                asset = 'mark-to-market for %s' % symbol
+                future += eur_amount
+                print(header, description)
+                newdescription = description
         elif tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
             # XXX: We might check that the two relevant entries have the same data for 'amount'.
             x = symbol + '-' + date
@@ -682,6 +689,13 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     pnl_stocks_gains += local_pnl
                 else:
                     pnl_stocks_losses += local_pnl
+            elif asset_type == AssetType.Future:
+                if tsubcode not in ('Buy', 'Sell'):
+                    raise
+                # XXX For futures we just add all payments as-is for taxes. We should add them
+                # up until final closing instead. This should be changed. ???
+                local_pnl = eur_amount
+                future += local_pnl
             else:
                 if cur_year >= '2018':
                     if asset_type == AssetType.AktienFond:
@@ -707,8 +721,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
     print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
         withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, pnl, account_usd, account_usd_notax, total_fees, term_losses,
-        total, fifos, verbose)
+        pnl_stocks_losses, future, pnl, account_usd, account_usd_notax, total_fees,
+        term_losses, total, fifos, verbose)
 
     #print(wk)
     new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains', 'usd_gains_notax',
