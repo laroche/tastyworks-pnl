@@ -1,7 +1,8 @@
 Tastyworks PNL
 --------------
 
-This python script is used to generate data for a private German tax income statement
+This python script is used to generate profit and loss (PNL) data
+(German: Gewinn- und Verlustrechnung) for a private German tax income statement
 from Tastyworks csv-file with trade history. Details on German taxes are written up
 at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
@@ -41,15 +42,14 @@ Per default the script stops on unknown trading symbols (underlyings) and you ha
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
 
-All currency gains are classified as either tax-free or they need to go into the 'Anlage SO' within
-a private German tax statement.
-Currency gains are computed via FIFO as with other assets. They are tax free if hold more than one year
+Currency gains are computed via FIFO as with other assets. They are tax free if hold for more than one year
 or if credit is paid back (negative cash balance). They are also tax free for dividends, credit payments and
 sold options as well as account fees.
+Currency gains need to go into the 'Anlage SO' within a private German tax statement.
 
 The summary output lists all assets at the end of each year. 'account-usd' contains a FIFO list of all
 USD buys and the conversion price for Euro. This entry might be very long and look complicated. You might
-want to ignore this line.
+want to ignore this line and just look over the list of other assets.
 
 The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
 is the cummulative sum, not the real local change. (Bug in the output!)
@@ -94,7 +94,7 @@ Here the output transaction data in detail:
 - __usd_gains_notax__: as above, but not part of German tax law
 - __eur_amount__: 'amount - fees' converted into Euro currency
 - __amount__: transaction amount in USD
-- __fees__: cost of transaction in USD that needs to be subtracted from amount
+- __fees__: cost of transaction in USD that needs to be subtracted from amount (Tastyworks also pays commissions, but they are not listed in the trade history)
 - __eurusd__: official eurusd conversion rate for this transaction date from bundesbank.de
 - __quantity__: number of buys or sells
 - __asset__: what is bought (stock symbol or something like 'SPY P310 20-12-18' for an option
@@ -142,7 +142,7 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
-- If option writing is cash-settled this must go into "Termingeschäftsverluste".
+- If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
 - Currently we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
@@ -185,7 +185,6 @@ Important:
 - Add performance reviews, graphs based on different time periods and underlyings.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
 - Done: Check if dates are truely ascending in the provided csv input files.
-- Check if input has duplicate transactions. Could they happen? (As warning only.)
 - Check if withholding tax is max 15% for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
