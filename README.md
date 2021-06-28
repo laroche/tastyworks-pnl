@@ -88,6 +88,9 @@ Here the output transaction data in detail:
 
 - __datetime__: Date and time (Tastyworks gives minutes for this, no exact seconds)
   of the transaction
+- __type__: type of transaction (German names): Aktie, Aktienfond, Mischfond,
+  Immobilienfond, Sonstiges, Option, Future, Dividende, Quellensteuer, Zinsen,
+  Ein/Auszahlung, Ordergebühr, Brokergebühr
 - __pnl__: pnl for tax payments for this transaction based on FIFO
 - __usd_gains__: currency conversion gains for the account in USD. Based on cash changes
   in USD due to this transaction.
@@ -148,6 +151,7 @@ Important:
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
+  (We now have a "type" field doing this, just filter your data on this.)
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.
@@ -156,7 +160,6 @@ Important:
      Adding this up needs to be done to correctly implement "20k€ Terminverlustgeschäfte" for futures.
    - Add extra pnl counter for futures.
 - Add extra counter for all transactions to/from the account.
-- Add AssetType into csv/Excel output file.
 - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
 <pre>
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00

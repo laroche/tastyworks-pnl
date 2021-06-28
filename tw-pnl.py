@@ -127,7 +127,7 @@ def check_trade(tsubcode, check_amount, amount):
         if not isnan(check_amount) and check_amount != .0:
             raise
 
-class AssetType(enum.Enum):
+class AssetType(enum.IntEnum):
     Option = 1
     IndStock = 2
     AktienFond = 3
@@ -135,7 +135,20 @@ class AssetType(enum.Enum):
     ImmobilienFond = 5
     OtherStock = 6
     Future = 7
+    Transfer = 8
+    Dividend = 9
+    Interest = 10
+    WithholdingTax = 11
+    OrderPayments = 12
+    Fee = 13
 
+def transaction_type(asset_type):
+    t = ['', 'Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
+        'Sonstiges', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
+        'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
+    if int(asset_type) >= 1 and int(asset_type) <= 13:
+        return t[asset_type]
+    return ''
 
 # https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
 SP500 = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABMD', 'ABT', 'ACN', 'ADBE',
@@ -560,9 +573,11 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 asset = 'transfer'
                 newdescription = description
                 print(header, 'transferred:', description)
+                asset_type = AssetType.Transfer
             elif tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest'):
                 if isnan(symbol):
                     asset = 'interest'
+                    asset_type = AssetType.Interest
                     if amount > .0:
                         interest_recv += eur_amount
                     else:
@@ -575,15 +590,18 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 else:
                     if amount > .0:
                         asset = 'dividends for %s' % symbol
+                        asset_type = AssetType.Dividend
                         dividends += eur_amount
                         print(header, 'dividends: %s,' % symbol, description)
                     else:
                         asset = 'withholding tax for %s' % symbol
+                        asset_type = AssetType.WithholdingTax
                         withholding_tax += eur_amount
                         print(header, 'withholding tax: %s,' % symbol, description)
                     newdescription = description
             elif tsubcode == 'Balance Adjustment':
                 asset = 'balance adjustment'
+                asset_type = AssetType.OrderPayments
                 if opt_long:
                     print(header, 'balance adjustment')
                 fee_adjustments += eur_amount
@@ -592,12 +610,14 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 if description == 'INTL WIRE FEE':
                     local_pnl = ''
                     asset = 'fee'
+                    asset_type = AssetType.Fee
                     newdescription = description
                     print(header, 'fee:', description)
                     total_fees += eur_amount
                 else:
                     # XXX In my case: stock borrow fee:
                     asset = 'stock borrow fees for %s' % symbol
+                    asset_type = AssetType.Interest
                     newdescription = description
                     print(header, 'stock borrow fees: %s,' % symbol, description)
                     fee_adjustments += eur_amount
@@ -608,6 +628,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 if not isnan(symbol):
                     # XXX In my case: dividends paid for short stock:
                     asset = 'dividends paid for %s' % symbol
+                    asset_type = AssetType.Dividend
                     newdescription = description
                     print(header, 'dividends paid: %s,' % symbol, description)
                     withdrawal += eur_amount
@@ -617,20 +638,24 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     # account deposit/withdrawal
                     local_pnl = ''
                     asset = 'transfer'
+                    asset_type = AssetType.Transfer
                     newdescription = description
                     print(header, 'transferred:', description)
             elif tsubcode == 'Dividend':
                 if amount > .0:
                     asset = 'dividends for %s' % symbol
+                    asset_type = AssetType.Dividend
                     dividends += eur_amount
                     print(header, 'dividends: %s,' % symbol, description)
                 else:
                     asset = 'withholding tax for %s' % symbol
+                    asset_type = AssetType.WithholdingTax
                     withholding_tax += eur_amount
                     print(header, 'withholding tax: %s,' % symbol, description)
                 newdescription = description
             elif tsubcode == 'Mark to Market':
                 asset = 'mark-to-market for %s' % symbol
+                asset_type = AssetType.Future
                 future += eur_amount
                 print(header, description)
                 newdescription = description
@@ -712,7 +737,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         net_total = total + fifos_sum_usd(fifos)
 
-        new_wk.append([datetime, local_pnl, '%.4f' % usd_gains, '%.4f' % usd_gains_notax,
+        new_wk.append([datetime, transaction_type(asset_type), local_pnl,
+            '%.4f' % usd_gains, '%.4f' % usd_gains_notax,
             '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
             quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
             '%.4f' % term_loss, tax_free])
@@ -725,7 +751,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         term_losses, total, fifos, verbose)
 
     #print(wk)
-    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'pnl', 'usd_gains', 'usd_gains_notax',
+    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
+        'usd_gains', 'usd_gains_notax',
         'eur_amount', 'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
         'description', 'account_total', 'net_total', 'term_loss', 'tax_free'))
     if output_csv is not None:
