@@ -180,6 +180,7 @@ Important:
 - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
   als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
+   - German: Teilfreistellungen gelten auch für Dividenden
 - Add images on how to download csv-file within Tastyworks into docu.
 - Complete the list of non-stocks.
 - Done: For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
