@@ -25,12 +25,11 @@ für das USD-Cashkonto wird erstellt.
 Eine Übersicht über die verschiedenen Summen für Aktien/Dividenden/Optionen
 und den neuen Topf der Termingeschäftsverluste wird ausgegeben.
 
-Details zur Stuererklärung in Deutschland sind unter
+Details zur Steuererklärung in Deutschland sind unter
 <https://laroche.github.io/private-geldanlage/steuern.html> zusammengestellt.
 
 Eine Web-Applikation für dieses Python-Skript wird in Zukunft
-unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.
-]
+unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 
 
 How to use
@@ -175,14 +174,13 @@ Important:
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
-  (We now have a "type" field doing this, just filter your data on this.)
+  (We now have a "type" field doing this, just filter your csv data on this.)
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.
    - As "Mark-to-Market"-payments/transactions are done, we immediately pay taxes for them, this is
      not stacked up until futures are sold again. What is a correct way to tax these transactions?
      Adding this up needs to be done to correctly implement "20k€ Terminverlustgeschäfte" for futures.
-   - Add extra pnl counter for futures.
 - Add extra counter for all transactions to/from the account.
 - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
 <pre>
@@ -212,7 +210,6 @@ Important:
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods and underlyings.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
-- Done: Check if dates are truely ascending in the provided csv input files.
 - Check if withholding tax is max 15% for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
