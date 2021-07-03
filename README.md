@@ -1,12 +1,36 @@
 Tastyworks PNL
 --------------
 
-This python script is used to generate profit and loss (PNL) data
-(German: Gewinn- und Verlustrechnung) for a private German tax income statement
-from Tastyworks csv-file with trade history. Details on German taxes are written up
+Create a PnL-document for a tax income statement in Germany for the US-broker tastyworks.
+Download all transactions from Tastyworks into a csv-file and create with this
+python-script a new enhanced csv-file. This new csv-file adds a currency conversion
+from USD to Euro and computes the realised profits and losses based on the FIFO method.
+Also all currency gains for the USD-cash-account are added.
+A summary for all stock, dividend, option gains as well as the new "Termingeschäftsverluste"
+is output.
+
+Details on German taxes are written up
 at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
+
+
+[In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
+in Deutschland für den US-Broker Tastyworks.
+Lade von Tastyworks alle Transaktionen in eine CSV-Datei herunter und generiere
+mit diesem Python-Skript eine neu aufbereitete CSV-Datei. Diese neue CSV-Datei
+fügt eine Umrechnung von USD in Euro hinzu und berechnet die realisierten
+Gewinne und Verluste nach FIFO-Methode. Auch eine Berechnung aller Währungsgewinne
+für das USD-Cashkonto wird erstellt.
+Eine Übersicht über die verschiedenen Summen für Aktien/Dividenden/Optionen
+und den neuen Topf der Termingeschäftsverluste wird ausgegeben.
+
+Details zur Stuererklärung in Deutschland sind unter
+<https://laroche.github.io/private-geldanlage/steuern.html> zusammengestellt.
+
+Eine Web-Applikation für dieses Python-Skript wird in Zukunft
+unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.
+]
 
 
 How to use
