@@ -107,6 +107,13 @@ The output contains the important original data from the Tastyworks csv file plu
 pnl generated data as well as eurusd conversion data. You probably do not have to
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
+
+The CSV file contains floating point numbers in English(US) notation where a decimal
+point (".") and no decimal comma (",") is used as decimal separator for floating point
+numbers like in "-0.2155".
+Usually Tastyworks provides floating point numbers with 4 decimals after the decimal separator.
+For yearly summaries I only output with the normal 2 decimal digits.
+
 Here the output transaction data in detail:
 
 - __datetime__: Date and time (Tastyworks gives minutes for this, no exact seconds)
