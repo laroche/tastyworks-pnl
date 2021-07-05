@@ -33,6 +33,12 @@ import math
 import datetime as pydatetime
 import pandas
 
+# Ein BMF-Schreiben ist nur für die Finanzämter bindend, Finanzgerichte urteilen nach
+# den Gesetzestexten. Ein BMF-Schreiben setzt als Beispiel nun auch Verluste beim Schreiben
+# von Optionen unter die Verlustbeschränkung von Termingeschäften, dies ist nicht in den
+# Gesetzen verankert.
+bmf_force = False
+
 convert_currency = True
 
 # For an unknown symbol (underlying), assume it is a individual/normal stock.
@@ -316,6 +322,11 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
         if abs(fifo[0][2]) >= abs(quantity):
             if is_option and quantity > 0:
                 pnl -= quantity * price
+                if bmf_force and price > fifo[0][0]:
+                    term_losses += quantity * (price - fifo[0][0])
+                    #print('PLANA', term_losses)
+                    if term_losses < .0:
+                        raise
             else:
                 p = quantity * (price - fifo[0][0])
                 if date is None or \
@@ -344,6 +355,11 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
         # remaining entries into the FIFO).
         if is_option and quantity > 0:
             pnl += fifo[0][2] * price
+            if bmf_force and price > fifo[0][0]:
+                term_losses += fifo[0][2] * (price - fifo[0][0])
+                #print('PLANB', term_losses)
+                if term_losses < .0:
+                    raise
         else:
             p = fifo[0][2] * (price - fifo[0][0])
             if date is None or \
