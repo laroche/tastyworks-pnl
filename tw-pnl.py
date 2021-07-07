@@ -33,10 +33,8 @@ import math
 import datetime as pydatetime
 import pandas
 
-# Ein BMF-Schreiben ist nur für die Finanzämter bindend, Finanzgerichte urteilen nach
-# den Gesetzestexten. Ein BMF-Schreiben setzt als Beispiel nun auch Verluste beim Schreiben
-# von Optionen unter die Verlustbeschränkung von Termingeschäften, dies ist nicht in den
-# Gesetzen verankert.
+# Damit werden auch Verluste beim Schreiben von Optionen berechnet. Dies ist
+# nicht nach aktuellem Steuergesetz der Fall.
 bmf_force = False
 
 convert_currency = True
@@ -806,7 +804,7 @@ def main(argv):
     show = False
     try:
         opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock',
-            'help', 'long', 'output-csv=',
+            'bmf-force', 'help', 'long', 'output-csv=',
             'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
@@ -815,6 +813,9 @@ def main(argv):
         if opt == '--assume-individual-stock':
             global assume_stock
             assume_stock = True
+        elif opt in ('-b', '--bmf-force'):
+            global bmf_force
+            bmf_force = True
         elif opt in ('-h', '--help'):
             usage()
             sys.exit()
