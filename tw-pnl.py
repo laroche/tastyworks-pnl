@@ -354,7 +354,7 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
         if is_option and quantity > 0:
             pnl += fifo[0][2] * price
             if bmf_force and price > fifo[0][0]:
-                term_losses += fifo[0][2] * (price - fifo[0][0])
+                term_losses -= fifo[0][2] * (price - fifo[0][0])
                 #print('PLANB', term_losses)
                 if term_losses < .0:
                     raise
@@ -721,6 +721,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             price = usd2eur(price_usd, date, conv_usd)
             (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
                 asset_type == AssetType.Option, debugfifo=debugfifo)
+            if term_loss < .0:
+                raise
             term_losses += term_loss
             header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
             if verbose:
@@ -809,7 +811,7 @@ def main(argv):
     output_excel = None
     show = False
     try:
-        opts, args = getopt.getopt(argv, 'hluv', ['assume-individual-stock',
+        opts, args = getopt.getopt(argv, 'bhluv', ['assume-individual-stock',
             'bmf-force', 'help', 'long', 'output-csv=',
             'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
