@@ -58,6 +58,9 @@ The option __--usd__ can be used to not translate pnl data into Euro.
 
 The option __--verbose__ adds currency gains for each transaction.
 
+The option __-b__ adds all losses from option writing into __term_loss__. This is needed to compute
+all non-stock losses for the German tax statement.
+
 Per default balance adjustments are only output as total sum, you can use the option __--long__
 to include balance adjustments into the list of transactions.
 
@@ -143,7 +146,8 @@ Here the output transaction data in detail:
   Best looked at to check if this script calculates the same total sum as shown in your
   Tastyworks current total.
 - __term_loss__: how much does this transaction contribute to losses in future
-  contracts ('Verlustverrechnungstopf Termingeschäfte')
+  contracts ('Verlustverrechnungstopf Termingeschäfte'). If you use the option __-b__ then
+  also all losses from option writing are added here.
 - __tax_free__: are further currency changes tax free (German: steuerneutral)
 
 
@@ -206,6 +210,7 @@ Important:
   verkauft? Bleibt das bei Tastyworks eine Transaktion oder finden hier dann zwei Transaktionen statt?
   Dieser Fall tritt bei mir nicht auf. Der Source Code sollte zumindest diesen Fall detektieren und
   eine Warnung ausgeben.
+- Add counters for all stock losses and non-stock losses for German tax report.
 - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
   als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
