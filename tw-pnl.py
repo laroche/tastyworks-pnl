@@ -764,17 +764,17 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         if tax_output:
             if datetime[:4] == tax_output:
-                new_wk.append([datetime[:10], transaction_type(asset_type), '%.2f' % float(local_pnl),
+                new_wk.append([datetime[:10], transaction_type(asset_type),
+                    '%.2f' % float(local_pnl), '%.2f' % term_loss,
                     '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                     quantity, asset,
-                    '%.2f' % term_loss, tax_free,
-                    '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
+                    tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
         else:
-            new_wk.append([datetime, transaction_type(asset_type), local_pnl,
+            new_wk.append([datetime, transaction_type(asset_type),
+                local_pnl, '%.4f' % term_loss,
                 '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
                 quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
-                '%.4f' % term_loss, tax_free,
-                '%.4f' % usd_gains, '%.4f' % usd_gains_notax])
+                tax_free, '%.4f' % usd_gains, '%.4f' % usd_gains_notax])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
@@ -785,14 +785,14 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
     #print(wk)
     if tax_output:
-        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
+        new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl', 'term_loss',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
-            'term_loss', 'tax_free', 'usd_gains', 'usd_gains_notax'))
+            'tax_free', 'usd_gains', 'usd_gains_notax'))
     else:
-        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
+        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl', 'term_loss',
             'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
-            'description', 'account_total', 'net_total', 'term_loss', 'tax_free',
-            'usd_gains', 'usd_gains_notax'))
+            'description', 'account_total', 'net_total',
+            'tax_free', 'usd_gains', 'usd_gains_notax'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
