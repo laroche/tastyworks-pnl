@@ -37,6 +37,9 @@ import pandas
 # nicht nach aktuellem Steuergesetz der Fall.
 bmf_force = False
 
+tax_output = None
+#tax_output = '2020'
+
 convert_currency = True
 
 # For an unknown symbol (underlying), assume it is a individual/normal stock.
@@ -759,11 +762,18 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         net_total = total + fifos_sum_usd(fifos)
 
-        new_wk.append([datetime, transaction_type(asset_type), local_pnl,
-            '%.4f' % usd_gains, '%.4f' % usd_gains_notax,
-            '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
-            quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
-            '%.4f' % term_loss, tax_free])
+        if tax_output:
+            if datetime[:4] == tax_output:
+                new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
+                    '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+                    quantity, asset,
+                    '%.4f' % term_loss, tax_free, '%.4f' % usd_gains, '%.4f' % usd_gains_notax])
+        else:
+            new_wk.append([datetime, transaction_type(asset_type), local_pnl,
+                '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+                quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
+                '%.4f' % term_loss, tax_free,
+                '%.4f' % usd_gains, '%.4f' % usd_gains_notax])
 
     wk.drop('Account Reference', axis=1, inplace=True)
 
@@ -773,10 +783,15 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         term_losses, total, fifos, verbose)
 
     #print(wk)
-    new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
-        'usd_gains', 'usd_gains_notax',
-        'eur_amount', 'amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
-        'description', 'account_total', 'net_total', 'term_loss', 'tax_free'))
+    if tax_output:
+        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
+            'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset',
+            'term_loss', 'tax_free', 'usd_gains', 'usd_gains_notax'))
+    else:
+        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
+            'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
+            'description', 'account_total', 'net_total', 'term_loss', 'tax_free',
+            'usd_gains', 'usd_gains_notax'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
@@ -813,7 +828,7 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv, 'bhluv', ['assume-individual-stock',
             'bmf-force', 'help', 'long', 'output-csv=',
-            'output-excel=', 'show', 'usd', 'verbose', 'debug-fifo'])
+            'output-excel=', 'show', 'tax-output=', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -840,6 +855,9 @@ def main(argv):
             verbose = True
         elif opt == '--show':
             show = True
+        elif opt == '--tax-output':
+            global tax_output
+            tax_output = arg
         elif opt == '--debug-fifo':
             debugfifo = True
     if len(args) == 0:

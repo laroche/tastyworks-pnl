@@ -111,6 +111,10 @@ pnl generated data as well as eurusd conversion data. You probably do not have t
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
 
+If you provide the option __--tax-output=2020__, your output file will be
+optimized for tax output for a special year. Only transactions for that year are output.
+The datetime will only contain the day, but no time information. Fewer other data is output.
+
 The CSV file contains floating point numbers in English(US) notation where a decimal
 point (".") and no decimal comma (",") is used as decimal separator for floating point
 numbers like in "-0.2155".
