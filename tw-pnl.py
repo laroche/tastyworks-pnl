@@ -765,9 +765,10 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if tax_output:
             if datetime[:4] == tax_output:
                 new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
-                    '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+                    '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                     quantity, asset,
-                    '%.4f' % term_loss, tax_free, '%.4f' % usd_gains, '%.4f' % usd_gains_notax])
+                    '%.2f' % term_loss, tax_free,
+                    '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
                 '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
@@ -785,7 +786,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
     if tax_output:
         new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
-            'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset',
+            'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
             'term_loss', 'tax_free', 'usd_gains', 'usd_gains_notax'))
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
