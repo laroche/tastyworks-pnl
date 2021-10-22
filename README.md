@@ -14,6 +14,13 @@ at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
 
+Run the following command for your 2020 tax statement and continue with
+your [libreoffice](https://libreoffice.org/) spreadsheet:
+<pre>
+./tw-pnl.py --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
+soffice tastyworks-tax-2020.csv
+</pre>
+
 
 [In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
 in Deutschland für den US-Broker Tastyworks.
@@ -30,6 +37,13 @@ Details zur Steuererklärung in Deutschland sind unter
 
 Eine Web-Applikation für dieses Python-Skript wird in Zukunft
 unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
+
+Starte folgenden Commandozeilen-Aufruf für eine Steuerausgabe 2020 und
+lade die Daten in Dein [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation:
+<pre>
+./tw-pnl.py --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
+soffice tastyworks-tax-2020.csv
+</pre>
 
 
 How to use
