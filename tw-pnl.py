@@ -764,8 +764,10 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
         if tax_output:
             if datetime[:4] == tax_output:
+                if local_pnl != '':
+                    local_pnl = '%.2f' % float(local_pnl)
                 new_wk.append([datetime[:10], transaction_type(asset_type),
-                    '%.2f' % float(local_pnl), '%.2f' % term_loss,
+                    local_pnl, '%.2f' % term_loss,
                     '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                     quantity, asset,
                     tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
