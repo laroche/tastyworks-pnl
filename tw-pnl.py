@@ -703,7 +703,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if not isnan(expire):
                 expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
                 # XXX hack for future multiples
-                if asset.startswith('/ES'):
+                if asset[:3] in ('/ES', '/ZW'):
                     price *= 50.0
                 else:
                     price *= 100.0
