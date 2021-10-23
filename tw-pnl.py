@@ -106,7 +106,8 @@ def check_tcode(tcode, tsubcode, description):
             raise
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
-            'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Special Dividend', 'Cash Settled Exercise'):
+            'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
+            'Special Dividend', 'Cash Settled Exercise'): # XXX, 'Cash Settled Assignment'):
             raise
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise
@@ -529,7 +530,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             raise
         (amount, fees) = (float(amount), float(fees))
         # option/stock splits are tax neutral, so zero out amount/fees for it:
-        if tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+        if tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
             (amount, fees) = (.0, .0)
         conv_usd = get_eurusd(date)
         total_fees += usd2eur(fees, date, conv_usd)
@@ -565,7 +566,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if isnan(quantity):
             quantity = 1
         else:
-            if tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+            if tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
                 pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
                 raise
@@ -583,7 +584,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         header += ' %s' % f'{amount - fees:10.2f}' + '$'
         #if verbose:
         #    header += ' %s' % f'{conv_usd:8.4f}'
-        if tcode != 'Receive Deliver' or tsubcode != 'Forward Split':
+        if tcode != 'Receive Deliver' or (tsubcode != 'Forward Split' and tsubcode != 'Reverse Split'):
             header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
@@ -682,12 +683,13 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 future += eur_amount
                 print(header, description)
                 newdescription = description
-        elif tcode == 'Receive Deliver' and tsubcode == 'Forward Split':
+        elif tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
             # XXX: We might check that the two relevant entries have the same data for 'amount'.
             x = symbol + '-' + date
             # quantity for splits seems to be more like strike price and how it changes.
             # We use it to calculate the split ration / reverse ratio.
-            if str(buysell) == 'Sell':
+            if (tsubcode == 'Forward Split' and str(buysell) == 'Sell') or \
+               (tsubcode == 'Reverse Split' and str(buysell) == 'Buy'):
                 splits[x] = quantity
             else:
                 oldquantity = splits[x]
@@ -719,6 +721,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 quantity = - quantity
             if tsubcode in ('Exercise', 'Assignment') and quantity < 0:
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
+            if tsubcode == 'Cash Settled Assignment':
+                quantity = 1.0
             check_trade(tsubcode, - (quantity * price), amount)
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
