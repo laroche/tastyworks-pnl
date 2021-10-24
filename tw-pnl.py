@@ -703,8 +703,40 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if not isnan(expire):
                 expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
                 # XXX hack for future multiples
-                if asset[:3] in ('/ES', '/ZW'):
+                # check https://tastyworks.freshdesk.com/support/solutions/articles/43000435192
+                # SP500/Nasdaq/Russel2000 and corn:
+                if asset[:3] in ('/ES', '/ZW', '/ZS', '/ZC'):
                     price *= 50.0
+                elif asset[:3] in ('/NQ',):
+                    price *= 20.0
+                elif asset[:4] in ('/RTY',):
+                    price *= 50.0
+                # silver and gold:
+                elif asset[:3] in ('/GC',):
+                    price *= 100.0
+                elif asset[:4] in ('/MGC',):
+                    price *= 10.0
+                elif asset[:3] in ('/SI',):
+                    price *= 5000.0
+                elif asset[:4] in ('/SIL',):
+                    price *= 1000.0
+                # oil and gas:
+                elif asset[:3] in ('/CL',):
+                    price *= 1000.0
+                elif asset[:3] in ('/QM',):
+                    price *= 500.0
+                elif asset[:3] in ('/NG',):
+                    price *= 10000.0
+                # bitcoin:
+                elif asset[:4] in ('/BTC',):
+                    price *= 5.0
+                elif asset[:4] in ('/MBT',):
+                    price *= .1
+                # interest rates:
+                elif asset[:3] in ('/ZT',):
+                    price *= 2000.0
+                elif asset[:3] in ('/ZF', '/ZN', '/ZB', '/UB'):
+                    price *= 1000.0
                 else:
                     price *= 100.0
                 if int(strike) == strike: # convert to integer for full numbers
