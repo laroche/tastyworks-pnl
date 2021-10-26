@@ -345,8 +345,8 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
                     #print('Termingeschäft-Verlust von %.2f:' % p)
                     term_losses += p
             if debugfifo:
-                print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
-                    % (asset, quantity, fifo[0][0], price, pnl))
+                print('DEBUG FIFO: %s: del %7d * %8.4f (new: %8.4f) = %8.2f pnl %8.2f notax' \
+                    % (asset, quantity, fifo[0][0], price, pnl, pnl_notax))
             fifo[0][2] += quantity
             if fifo[0][2] == 0:
                 fifo.popleft()
@@ -378,8 +378,8 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
                 #print('Termingeschäft-Verlust von %.2f:' % -p)
                 term_losses -= p
         if debugfifo:
-            print('DEBUG FIFO: %s: del %7d * %8.2f (new: %8.2f) = %8.2f pnl' \
-                % (asset, -fifo[0][2], fifo[0][0], price, pnl))
+            print('DEBUG FIFO: %s: del %7d * %8.4f (new: %8.4f) = %8.2f pnl, %8.2f notax' \
+                % (asset, -fifo[0][2], fifo[0][0], price, pnl, pnl_notax))
         quantity += fifo[0][2]
         fifo.popleft()
     # Just add this to the FIFO queue:
@@ -388,8 +388,8 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
     if is_option and quantity < 0:
         pnl -= quantity * price
     if debugfifo:
-        print('DEBUG FIFO: %s: add %7d * %8.2f = %8.2f pnl' \
-            % (asset, quantity, price, pnl))
+        print('DEBUG FIFO: %s: add %7d * %8.2f = %8.2f pnl %8.2f notax' \
+            % (asset, quantity, price, pnl, pnl_notax))
     return (pnl, pnl_notax, term_losses)
 
 # Check if the first entry in the FIFO
