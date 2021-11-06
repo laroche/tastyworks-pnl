@@ -243,6 +243,9 @@ Important:
 - Check if withholding tax is max 15% for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
+   - The EUR amount is internally stored with 4 digits, so if pnl computations are
+     done, we can have a slightly different results. Maybe the EUR amount should already
+     be stored rounded to 2 digits for all further computations.
 - Is the time output using the correct timezone?
 - Does Tastyworks use BRK.B or BRK/B in transaction history?
   Adjust the list of individual stocks accordingly.
