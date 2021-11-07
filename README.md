@@ -204,6 +204,9 @@ Important:
   Can transactions also be grouped per year on different sheets?
 - Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
   (We now have a "type" field doing this, just filter your csv data on this.)
+- Instead of type "Optionen", we should differeniate between "Stillhaltergeschäfte"/"Glattstellungen"
+  and also Long-Options with "Gewinne"/"Verluste". Currently having all in one big basket for options
+  is not good for the tax report.
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.
