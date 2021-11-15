@@ -148,7 +148,8 @@ Here the output transaction data in detail:
 - __usd_gains_notax__: as above, but not part of German tax law
 - __eur_amount__: 'amount - fees' converted into Euro currency
 - __amount__: transaction amount in USD
-- __fees__: cost of transaction in USD that needs to be subtracted from amount (Tastyworks also pays commissions, but they are not listed in the trade history)
+- __fees__: cost of transaction in USD that needs to be subtracted from amount (Tastyworks fees and
+  all exchange, clearing and regulatory fees)
 - __eurusd__: official eurusd conversion rate for this transaction date from bundesbank.de
 - __quantity__: number of buys or sells
 - __asset__: what is bought (stock symbol or something like 'SPY P310 20-12-18' for an option
