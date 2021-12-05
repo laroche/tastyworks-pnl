@@ -660,12 +660,25 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     if amount >= .0:
                         raise
                 else:
-                    # account deposit/withdrawal
-                    local_pnl = ''
-                    asset = 'transfer'
-                    asset_type = AssetType.Transfer
-                    newdescription = description
-                    print(header, 'transferred:', description)
+                    if description[:5] == 'FROM ':
+                        asset = 'interest'
+                        asset_type = AssetType.Interest
+                        if amount > .0:
+                            interest_recv += eur_amount
+                        else:
+                            interest_paid += eur_amount
+                        if description != 'INTEREST ON CREDIT BALANCE':
+                            newdescription = description
+                            print(header, 'interest:', description)
+                        else:
+                            print(header, 'interest')
+                    else:
+                        # account deposit/withdrawal
+                        local_pnl = ''
+                        asset = 'transfer'
+                        asset_type = AssetType.Transfer
+                        newdescription = description
+                        print(header, 'transferred:', description)
             elif tsubcode == 'Dividend':
                 if amount > .0:
                     asset = 'dividends for %s' % symbol
@@ -803,8 +816,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if datetime[:4] == tax_output:
                 if local_pnl != '':
                     local_pnl = '%.2f' % float(local_pnl)
-                if asset_type != AssetType.Transfer:
-                    new_wk.append([datetime[:10], transaction_type(asset_type),
+                #if asset_type != AssetType.Transfer:
+                new_wk.append([datetime[:10], transaction_type(asset_type),
                         local_pnl, '%.2f' % term_loss,
                         '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                         quantity, asset,
