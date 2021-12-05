@@ -17,7 +17,7 @@ A web-based application will be built up at <https://knorke2.homedns.org/depot-p
 Run the following command for your 2020 tax statement and continue with
 your [libreoffice](https://libreoffice.org/) spreadsheet:
 <pre>
-./tw-pnl.py --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
 soffice tastyworks-tax-2020.csv
 </pre>
 
@@ -41,7 +41,7 @@ unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 Starte folgenden Commandozeilen-Aufruf für eine Steuerausgabe 2020 und
 lade die Daten in Dein [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation:
 <pre>
-./tw-pnl.py --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
 soffice tastyworks-tax-2020.csv
 </pre>
 
@@ -104,10 +104,14 @@ If you work on Linux with Ubuntu/Debian, you need to make sure
 sudo apt-get install python3-pandas
 </code>
 
-Or use pip for a local install:
+Or use pip or pip3 for a local install:
 
 <code>
 pip install pandas
+</code>
+
+<code>
+pip3 install pandas
 </code>
 
 
