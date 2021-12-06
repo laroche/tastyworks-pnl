@@ -60,9 +60,9 @@ history over all years. (You can at most download data for one year, so for seve
 you have to download into several files and combine them into one file with a text editor.)
 The csv file has the following first line:
 
-<code>
+<p><code>
 Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference
-</code>
+</code></p>
 
 If you delete the __eurusd.csv__ file, a current version is downloaded directly
 from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
@@ -100,9 +100,9 @@ The option __--show__ gives some summary graphs.
 If you work on Linux with Ubuntu/Debian, you need to make sure
 <https://pandas.pydata.org/> is installed:
 
-<code>
+<p><code>
 sudo apt-get install python3-pandas
-</code>
+</code></p>
 
 Or use pip or pip3 for a local install:
 
