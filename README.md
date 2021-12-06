@@ -150,7 +150,7 @@ Here the output transaction data in detail:
   contracts ('Verlustverrechnungstopf Termingeschäfte'). If you use the option __-b__ then
   also all losses from option writing are added here.
 - __eur_amount__: 'amount - fees' converted into Euro currency
-- __amount__: transaction amount in USD
+- __usd_amount__: transaction amount in USD
 - __fees__: cost of transaction in USD that needs to be subtracted from amount (Tastyworks fees and
   all exchange, clearing and regulatory fees)
 - __eurusd__: official eurusd conversion rate for this transaction date from bundesbank.de
@@ -205,9 +205,7 @@ Important:
 - Currently we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
-  Can transactions also be grouped per year on different sheets?
-- Optionally break up report into: dividends, withholding-tax, interest, fees, stocks, other.
-  (We now have a "type" field doing this, just filter your csv data on this.)
+  Can transactions also be grouped per year on different sheets/tabs?
 - Instead of type "Optionen", we should differeniate between "Stillhaltergeschäfte"/"Glattstellungen"
   and also Long-Options with "Gewinne"/"Verluste". Currently having all in one big basket for options
   is not good for the tax report.
@@ -251,8 +249,9 @@ Important:
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
    - The EUR amount is internally stored with 4 digits, so if pnl computations are
-     done, we can have a slightly different results. Maybe the EUR amount should already
-     be stored rounded to 2 digits for all further computations.
+     done, we can have slightly different results. Maybe the EUR amount should already
+     be stored rounded to 2 digits for all further computations. As tax data should be
+     computed from the spreadsheet file, this is not really an issue.
 - Is the time output using the correct timezone?
 - Does Tastyworks use BRK.B or BRK/B in transaction history?
   Adjust the list of individual stocks accordingly.
