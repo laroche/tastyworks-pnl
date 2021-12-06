@@ -38,8 +38,8 @@ Details zur Steuererklärung in Deutschland sind unter
 Eine Web-Applikation für dieses Python-Skript wird in Zukunft
 unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 
-Starte folgenden Commandozeilen-Aufruf für eine Steuerausgabe 2020 und
-lade die Daten in Dein [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation:
+Starte folgenden Kommandozeilen-Aufruf für eine Steuerausgabe 2020 und
+lade die Daten in Deine [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation:
 <pre>
 python3 tw-pnl.py --assume-individual-stock --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
 soffice tastyworks-tax-2020.csv
@@ -106,13 +106,12 @@ sudo apt-get install python3-pandas
 
 Or use pip or pip3 for a local install:
 
-<code>
+<p><code>
 pip install pandas
-</code>
-
-<code>
+</code></p>
+<p><code>
 pip3 install pandas
-</code>
+</code></p>
 
 
 CSV and Excel Output
@@ -147,9 +146,9 @@ Here the output transaction data in detail:
   Immobilienfond, Sonstiges, Option, Future, Dividende, Quellensteuer, Zinsen,
   Ein/Auszahlung, Ordergebühr, Brokergebühr
 - __pnl__: pnl for tax payments for this transaction based on FIFO
-- __usd_gains__: currency conversion gains for the account in USD. Based on cash changes
-  in USD due to this transaction.
-- __usd_gains_notax__: as above, but not part of German tax law
+- __term_loss__: how much does this transaction contribute to losses in future
+  contracts ('Verlustverrechnungstopf Termingeschäfte'). If you use the option __-b__ then
+  also all losses from option writing are added here.
 - __eur_amount__: 'amount - fees' converted into Euro currency
 - __amount__: transaction amount in USD
 - __fees__: cost of transaction in USD that needs to be subtracted from amount (Tastyworks fees and
@@ -168,10 +167,10 @@ Here the output transaction data in detail:
   This does not use current market data, but keeps asset prices at purchase cost.
   Best looked at to check if this script calculates the same total sum as shown in your
   Tastyworks current total.
-- __term_loss__: how much does this transaction contribute to losses in future
-  contracts ('Verlustverrechnungstopf Termingeschäfte'). If you use the option __-b__ then
-  also all losses from option writing are added here.
 - __tax_free__: are further currency changes tax free (German: steuerneutral)
+- __usd_gains__: currency conversion gains for the account in USD. Based on cash changes
+  in USD due to this transaction.
+- __usd_gains_notax__: as above, but not part of German tax law
 
 
 FAQ
