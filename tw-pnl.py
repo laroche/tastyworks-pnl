@@ -585,9 +585,9 @@ def get_summary(new_wk):
         new_wk.append(['Stillhalter Verluste:', '', '', '', f'{soption_losses:.2f}', 'Euro', '', '', '', '', '', ''])
         new_wk.append(['Stillhalter Gesamt:', '', '', '', f'{soption_gains + soption_losses:.2f}', 'Euro', '', '', '', '', '', ''])
     if option_gains != .0 or option_losses != .0:
-        new_wk.append(['Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
     if futures_gains != .0 or futures_losses != .0:
         new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', '', ''])
         new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', '', ''])
