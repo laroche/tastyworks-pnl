@@ -6,8 +6,7 @@ Download all transactions from Tastyworks into a csv-file and create with this
 python-script a new enhanced csv-file. This new csv-file adds a currency conversion
 from USD to Euro and computes the realised profits and losses based on the FIFO method.
 Also all currency gains for the USD-cash-account are added.
-A summary for all stock, dividend, option gains as well as the new "Termingeschäftsverluste"
-is output.
+A summary for all stock, fonds, dividend, option and future gains/losses is output.
 
 Details on German taxes are written up
 at <https://laroche.github.io/private-geldanlage/steuern.html>.
@@ -29,8 +28,8 @@ mit diesem Python-Skript eine neu aufbereitete CSV-Datei. Diese neue CSV-Datei
 fügt eine Umrechnung von USD in Euro hinzu und berechnet die realisierten
 Gewinne und Verluste nach FIFO-Methode. Auch eine Berechnung aller Währungsgewinne
 für das USD-Cashkonto wird erstellt.
-Eine Übersicht über die verschiedenen Summen für Aktien/Dividenden/Optionen
-und den neuen Topf der Termingeschäftsverluste wird ausgegeben.
+Eine Übersicht über die verschiedenen Gewinne/Verluste für Aktien/Fonds/Dividenden/Optionen
+und Futures wird ausgegeben.
 
 Details zur Steuererklärung in Deutschland sind unter
 <https://laroche.github.io/private-geldanlage/steuern.html> zusammengestellt.
@@ -118,7 +117,7 @@ CSV and Excel Output
 --------------------
 
 The script can also output all data again as CSV file or as Excel file.
-(CSV should be most robust, I don't have much experience with excel. I'd recommend CSV
+(CSV should be most robust, I don't have much experience with Excel. I'd recommend CSV
 and just reading it into a new Excel sheet yourself. Both data types contain the same output data.)
 
 The options for this are __--output-csv=file.csv__ and __--output-excel=file.xlsx__.
@@ -203,13 +202,9 @@ Important:
   message for this case for manual adjustments in this rather rare case.
 - If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
 - REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
-- Currently we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
   Can transactions also be grouped per year on different sheets/tabs?
-- Instead of type "Optionen", we should differeniate between "Stillhaltergeschäfte"/"Glattstellungen"
-  and also Long-Options with "Gewinne"/"Verluste". Currently having all in one big basket for options
-  is not good for the tax report.
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.
@@ -236,7 +231,6 @@ Important:
   verkauft? Bleibt das bei Tastyworks eine Transaktion oder finden hier dann zwei Transaktionen statt?
   Dieser Fall tritt bei mir nicht auf. Der Source Code sollte zumindest diesen Fall detektieren und
   eine Warnung ausgeben.
-- Add counters for all stock losses and non-stock losses for German tax report.
 - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
   als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
@@ -248,7 +242,7 @@ Important:
 - Specify non-realised gains to know how much tax needs to be paid for current net total.
 - Add performance reviews, graphs based on different time periods and underlyings.
 - Add description of the asset: SPY: SPDR S&P 500 ETF Trust
-- Check if withholding tax is max 15% for US stocks as per DBA.
+- Check if withholding tax is max 15% for dividends for US stocks as per DBA.
   Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
 - Are we rounding output correctly?
    - The EUR amount is internally stored with 4 digits, so if pnl computations are
@@ -267,9 +261,9 @@ Important:
 - Useful statistics:
    - How much premium can you keep for option trades. Tastyworks says this should be
      about 25 % of the sold premium. I am mostly selling only premium and can keep
-     about 80 % of it.
-   - How much do you pay for your option trades to the broker/exchange as feeds compared
-     to your overall profit? This seems to be less than 1.5 % for me.
+     about 80 % of it in 2021.
+   - How much fees do you pay for your option trades to the broker/exchange compared
+     to your overall profit? This seems to be less than 1.5 % for me in 2021.
 
 Nice:
 
