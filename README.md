@@ -264,6 +264,12 @@ Important:
 - Generate documentation that can be passed on to the German tax authorities on how
   the tax is computed and also document on how to fill out the official tax documents.
    - Check this for docx reporting: <https://github.com/airens/interactive_brokers_tax>
+- Useful statistics:
+   - How much premium can you keep for option trades. Tastyworks says this should be
+     about 25 % of the sold premium. I am mostly selling only premium and can keep
+     about 80 % of it.
+   - How much do you pay for your option trades to the broker/exchange as feeds compared
+     to your overall profit? This seems to be less than 1.5 % for me.
 
 Nice:
 
