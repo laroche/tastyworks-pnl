@@ -507,8 +507,8 @@ def get_summary(new_wk):
     usd_notax = .0
     for i in new_wk:
         type = i[1]
-        usd += float(i[10])
-        usd_notax += float(i[11])
+        usd += float(i[9])
+        usd_notax += float(i[10])
         if type in ('Ein/Auszahlung', 'Brokergebühr'):
             continue
         pnl = float(i[2])
@@ -559,54 +559,54 @@ def get_summary(new_wk):
         else:
             print(i)
             raise
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     if fonds_gains != .0 or fonds_losses != .0:
-        new_wk.append(['Investmentfonds:', '', '', '', f'{fonds_gains + fonds_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Investmentfonds:', '', '', '', f'{fonds_gains + fonds_losses:.2f}', 'Euro', '', '', '', '', ''])
     if stock_gains != .0 or stock_losses != .0:
-        new_wk.append(['Aktien Gewinne:', '', '', '', f'{stock_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Aktien Verluste:', '', '', '', f'{stock_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Aktien Gesamt:', '', '', '', f'{stock_gains + stock_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Aktien Gewinne:', '', '', '', f'{stock_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Aktien Verluste:', '', '', '', f'{stock_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Aktien Gesamt:', '', '', '', f'{stock_gains + stock_losses:.2f}', 'Euro', '', '', '', '', ''])
     if dividend_gains != .0 or dividend_losses != .0:
-        new_wk.append(['Dividenden:', '', '', '', f'{dividend_gains:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Dividenden:', '', '', '', f'{dividend_gains:.2f}', 'Euro', '', '', '', '', ''])
     if dividend_losses != .0:
-        new_wk.append(['bezahlte Dividenden:', '', '', '', f'{dividend_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Dividenden Gesamt:', '', '', '', f'{dividend_gains + dividend_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['bezahlte Dividenden:', '', '', '', f'{dividend_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Dividenden Gesamt:', '', '', '', f'{dividend_gains + dividend_losses:.2f}', 'Euro', '', '', '', '', ''])
     if withholdingtax != .0:
-        new_wk.append(['Quellensteuer:', '', '', '', f'{withholdingtax:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Quellensteuer:', '', '', '', f'{withholdingtax:.2f}', 'Euro', '', '', '', '', ''])
     if other_gains != .0 or other_losses != .0:
-        new_wk.append(['Sonstige Gewinne:', '', '', '', f'{other_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Sonstige Verluste:', '', '', '', f'{other_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Sonstige Gesamt:', '', '', '', f'{other_gains + other_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Sonstige Gewinne:', '', '', '', f'{other_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Sonstige Verluste:', '', '', '', f'{other_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Sonstige Gesamt:', '', '', '', f'{other_gains + other_losses:.2f}', 'Euro', '', '', '', '', ''])
     if soption_gains != .0 or soption_losses != .0:
-        new_wk.append(['Stillhalter Gewinne:', '', '', '', f'{soption_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Stillhalter Verluste:', '', '', '', f'{soption_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Stillhalter Gesamt:', '', '', '', f'{soption_gains + soption_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Gewinne:', '', '', '', f'{soption_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Verluste:', '', '', '', f'{soption_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Gesamt:', '', '', '', f'{soption_gains + soption_losses:.2f}', 'Euro', '', '', '', '', ''])
     if option_gains != .0 or option_losses != .0:
-        new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', ''])
     if futures_gains != .0 or futures_losses != .0:
-        new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Future Gesamt:', '', '', '', f'{futures_gains + futures_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Future Gesamt:', '', '', '', f'{futures_gains + futures_losses:.2f}', 'Euro', '', '', '', '', ''])
     if interest_gains != .0 or interest_losses != .0:
-        new_wk.append(['Zinseinnahmen:', '', '', '', f'{interest_gains:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Zinsausgaben:', '', '', '', f'{interest_losses:.2f}', 'Euro', '', '', '', '', '', ''])
-        new_wk.append(['Zinsen Gesamt:', '', '', '', f'{interest_gains + interest_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Zinseinnahmen:', '', '', '', f'{interest_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Zinsausgaben:', '', '', '', f'{interest_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Zinsen Gesamt:', '', '', '', f'{interest_gains + interest_losses:.2f}', 'Euro', '', '', '', '', ''])
     if fee_adjustments != .0:
-        new_wk.append(['Ordergebühren:', '', '', '', f'{fee_adjustments:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Ordergebühren:', '', '', '', f'{fee_adjustments:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
     total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
         + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
     total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses
-    new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', '', ''])
-    new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['Währungsgewinne USD:', '', '', '', f'{usd:.2f}', 'Euro', '', '', '', '', '', ''])
-    new_wk.append(['Währungsgewinne USD (steuerfrei):', '', '', '', f'{usd_notax:.2f}', 'Euro', '', '', '', '', '', ''])
+    new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', ''])
+    new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['Währungsgewinne USD:', '', '', '', f'{usd:.2f}', 'Euro', '', '', '', '', ''])
+    new_wk.append(['Währungsgewinne USD (steuerfrei):', '', '', '', f'{usd_notax:.2f}', 'Euro', '', '', '', '', ''])
 
 def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
@@ -948,8 +948,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     local_pnl = '%.2f' % float(local_pnl)
                 #if asset_type != AssetType.Transfer:
                 new_wk.append([datetime[:10], transaction_type(asset_type),
-                        local_pnl, '%.2f' % term_loss,
-                        '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
+                        local_pnl, '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                         quantity, asset,
                         tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
         else:
@@ -970,7 +969,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     if tax_output:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         get_summary(new_wk)
-        new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl', 'term_loss',
+        new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
     else:
