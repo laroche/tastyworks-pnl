@@ -539,11 +539,20 @@ def get_summary(new_wk):
                 option_losses += pnl
             else:
                 option_gains += pnl
+            if i[8] != False: # tax_free
+                raise
         elif type == 'Stillhalter-Option':
             if pnl < .0:
                 soption_losses += pnl
             else:
                 soption_gains += pnl
+            # Kontrolle:  Praemien sind alle steuerfrei, Glattstellungen nicht:
+            if i[8] == False: # tax_free
+                if pnl > .0:
+                    raise
+            else:
+                if pnl < .0:
+                    raise
         elif type == 'Dividende':
             if pnl < .0:
                 dividend_losses += pnl
@@ -598,7 +607,7 @@ def get_summary(new_wk):
         new_wk.append(['Zinsen Gesamt:', '', '', '', f'{interest_gains + interest_losses:.2f}', 'Euro', '', '', '', '', ''])
     if fee_adjustments != .0:
         new_wk.append(['Ordergebühren:', '', '', '', f'{fee_adjustments:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
         + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
     total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses
