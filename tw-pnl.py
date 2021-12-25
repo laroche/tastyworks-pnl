@@ -136,25 +136,26 @@ def check_trade(tsubcode, check_amount, amount):
             raise
 
 class AssetType(enum.IntEnum):
-    Option = 1
-    IndStock = 2
-    AktienFond = 3
-    MischFond = 4
-    ImmobilienFond = 5
-    OtherStock = 6
-    Future = 7
-    Transfer = 8
-    Dividend = 9
-    Interest = 10
-    WithholdingTax = 11
-    OrderPayments = 12
-    Fee = 13
+    LongOption = 1
+    ShortOption = 2
+    IndStock = 3
+    AktienFond = 4
+    MischFond = 5
+    ImmobilienFond = 6
+    OtherStock = 7
+    Future = 8
+    Transfer = 9
+    Dividend = 10
+    Interest = 11
+    WithholdingTax = 12
+    OrderPayments = 13
+    Fee = 14
 
 def transaction_type(asset_type):
-    t = ['', 'Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
+    t = ['', 'Long-Option', 'Stillhalter-Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
         'Sonstiges', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
         'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
-    if int(asset_type) >= 1 and int(asset_type) <= 13:
+    if int(asset_type) >= 1 and int(asset_type) <= 14:
         return t[asset_type]
     return ''
 
@@ -500,6 +501,8 @@ def get_summary(new_wk):
     other_losses = .0
     option_gains = .0
     option_losses = .0
+    soption_gains = .0
+    soption_losses = .0
     usd = .0
     usd_notax = .0
     for i in new_wk:
@@ -531,11 +534,16 @@ def get_summary(new_wk):
                 other_losses += pnl
             else:
                 other_gains += pnl
-        elif type == 'Option':
+        elif type == 'Long-Option':
             if pnl < .0:
                 option_losses += pnl
             else:
                 option_gains += pnl
+        elif type == 'Stillhalter-Option':
+            if pnl < .0:
+                soption_losses += pnl
+            else:
+                soption_gains += pnl
         elif type == 'Dividende':
             if pnl < .0:
                 dividend_losses += pnl
@@ -572,6 +580,10 @@ def get_summary(new_wk):
         new_wk.append(['Sonstige Gewinne:', '', '', '', f'{other_gains:.2f}', 'Euro', '', '', '', '', '', ''])
         new_wk.append(['Sonstige Verluste:', '', '', '', f'{other_losses:.2f}', 'Euro', '', '', '', '', '', ''])
         new_wk.append(['Sonstige Gesamt:', '', '', '', f'{other_gains + other_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+    if soption_gains != .0 or soption_losses != .0:
+        new_wk.append(['Stillhalter Gewinne:', '', '', '', f'{soption_gains:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Verluste:', '', '', '', f'{soption_losses:.2f}', 'Euro', '', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Gesamt:', '', '', '', f'{soption_gains + soption_losses:.2f}', 'Euro', '', '', '', '', '', ''])
     if option_gains != .0 or option_losses != .0:
         new_wk.append(['Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', '', ''])
         new_wk.append(['Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', '', ''])
@@ -587,8 +599,8 @@ def get_summary(new_wk):
     if fee_adjustments != .0:
         new_wk.append(['Ordergebühren:', '', '', '', f'{fee_adjustments:.2f}', 'Euro', '', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', '', ''])
-    total_other = dividend_gains + dividend_losses + other_gains + other_losses + option_gains + option_losses \
-        + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
+    total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
+        + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
     total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses
     new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', '', ''])
     new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', '', ''])
@@ -869,7 +881,11 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 if int(strike) == strike: # convert to integer for full numbers
                     strike = int(strike)
                 asset = '%s %s%s %s' % (symbol, callput, strike, expire)
-                asset_type = AssetType.Option
+                asset_type = AssetType.LongOption
+                if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or \
+                    (str(buysell) == 'Buy' and str(openclose) == 'Close') or
+                    (tsubcode in ('Expiration', 'Exercise', 'Assignment') and not fifos_islong(fifos, asset))):
+                    asset_type = AssetType.ShortOption
             else:
                 asset_type = is_stock(symbol, tsubcode)
             # 'buysell' is not set correctly for 'Expiration'/'Exercise'/'Assignment' entries,
@@ -886,7 +902,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
             (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
-                asset_type == AssetType.Option, debugfifo=debugfifo)
+                (asset_type == AssetType.LongOption) or (asset_type == AssetType.ShortOption),
+                debugfifo=debugfifo)
             if term_loss < .0:
                 raise
             term_losses += term_loss
