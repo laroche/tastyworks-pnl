@@ -202,6 +202,7 @@ Important:
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
 - If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
+- REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
 - Currently we only make one pass over the data. Better allow several data passes/computations.
 - Print header with explanation of transaction output.
 - Can Excel output also include yearly summary data computed from Excel?
