@@ -838,6 +838,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
 
     #print(wk)
     if tax_output:
+        new_wk = sorted(new_wk, key=lambda x: x[1])
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl', 'term_loss',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
