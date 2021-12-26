@@ -509,18 +509,22 @@ def get_summary(new_wk):
         type = i[1]
         usd += float(i[9])
         usd_notax += float(i[10])
-        if type in ('Ein/Auszahlung', 'Brokergebühr'):
-            continue
-        (pnl, tax_free) = (float(i[2]), i[8])
+        pnl = .0
+        if i[2] != '':
+            pnl = float(i[2])
+        tax_free = i[8]
         # steuerfreie Zahlungen:
-        if type in ('Dividende', 'Zinsen', 'Ordergebühr', 'Quellensteuer'):
+        if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
             if tax_free == False:
                 raise
         # keine steuerfreien Zahlungen:
-        if type in ('Sonstiges', 'Long-Option', 'Future', 'Aktienfond', 'Mischfond', 'Immobilienfond', 'Aktie'):
+        if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
+            'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
             if tax_free == True:
                 raise
-        if type == 'Ordergebühr':
+        if type in ('Ein/Auszahlung', 'Brokergebühr'):
+            pass
+        elif type == 'Ordergebühr':
             fee_adjustments += pnl
         elif type == 'Aktie':
             if pnl < .0:
