@@ -258,6 +258,8 @@ Important:
 - Generate documentation that can be passed on to the German tax authorities on how
   the tax is computed and also document on how to fill out the official tax documents.
    - Check this for docx reporting: <https://github.com/airens/interactive_brokers_tax>
+- More German words in the output csv file for the German Finanzamt.
+- Output a list of assets at the beginning and at the end of a tax year.
 - Useful statistics:
    - How much premium can you keep for option trades. Tastyworks says this should be
      about 25 % of the sold premium. I am mostly selling only premium and can keep
