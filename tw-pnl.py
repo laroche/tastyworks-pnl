@@ -484,7 +484,7 @@ def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
     print_fifos(fifos)
     print()
 
-def get_summary(new_wk):
+def get_summary(new_wk, year):
     stock_gains = .0
     stock_losses = .0
     fonds_gains = .0
@@ -578,6 +578,14 @@ def get_summary(new_wk):
         else:
             print(i)
             raise
+
+    # header:
+    new_wk.insert(0, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', ''])
+    new_wk.insert(1, ['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.insert(1, ['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.insert(1, ['', '', '', '', '', '', '', '', '', '', ''])
+
+    # summary at the end:
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
@@ -987,7 +995,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     #print(wk)
     if tax_output:
         new_wk = sorted(new_wk, key=lambda x: x[1])
-        get_summary(new_wk)
+        get_summary(new_wk, tax_output)
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
