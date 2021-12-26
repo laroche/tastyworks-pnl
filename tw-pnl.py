@@ -511,7 +511,15 @@ def get_summary(new_wk):
         usd_notax += float(i[10])
         if type in ('Ein/Auszahlung', 'Brokergebühr'):
             continue
-        pnl = float(i[2])
+        (pnl, tax_free) = (float(i[2]), i[8])
+        # steuerfreie Zahlungen:
+        if type in ('Dividende', 'Zinsen', 'Ordergebühr', 'Quellensteuer'):
+            if tax_free == False:
+                raise
+        # keine steuerfreien Zahlungen:
+        if type in ('Sonstiges', 'Long-Option', 'Future', 'Aktienfond', 'Mischfond', 'Immobilienfond', 'Aktie'):
+            if tax_free == True:
+                raise
         if type == 'Ordergebühr':
             fee_adjustments += pnl
         elif type == 'Aktie':
@@ -539,15 +547,13 @@ def get_summary(new_wk):
                 option_losses += pnl
             else:
                 option_gains += pnl
-            if i[8] != False: # tax_free
-                raise
         elif type == 'Stillhalter-Option':
             if pnl < .0:
                 soption_losses += pnl
             else:
                 soption_gains += pnl
             # Kontrolle:  Praemien sind alle steuerfrei, Glattstellungen nicht:
-            if i[8] == False: # tax_free
+            if tax_free == False:
                 if pnl > .0:
                     raise
             else:
