@@ -143,19 +143,20 @@ class AssetType(enum.IntEnum):
     MischFond = 5
     ImmobilienFond = 6
     OtherStock = 7
-    Future = 8
-    Transfer = 9
-    Dividend = 10
-    Interest = 11
-    WithholdingTax = 12
-    OrderPayments = 13
-    Fee = 14
+    Crypto = 8
+    Future = 9
+    Transfer = 10
+    Dividend = 11
+    Interest = 12
+    WithholdingTax = 13
+    OrderPayments = 14
+    Fee = 15
 
 def transaction_type(asset_type):
     t = ['', 'Long-Option', 'Stillhalter-Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
-        'Sonstiges', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
+        'Sonstiges', 'Krypto', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
         'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
-    if int(asset_type) >= 1 and int(asset_type) <= 14:
+    if int(asset_type) >= 1 and int(asset_type) <= 15:
         return t[asset_type]
     return ''
 
@@ -503,6 +504,8 @@ def get_summary(new_wk, year):
     option_losses = .0
     soption_gains = .0
     soption_losses = .0
+    crypto_gains = .0
+    crypto_losses = .0
     usd = .0
     usd_notax = .0
     for i in new_wk:
@@ -563,6 +566,11 @@ def get_summary(new_wk, year):
             else:
                 if pnl < .0:
                     raise
+        elif type == 'Krypto':
+            if pnl < .0:
+                crypto_losses += pnl
+            else:
+                crypto_gains += pnl
         elif type == 'Dividende':
             if pnl < .0:
                 dividend_losses += pnl
@@ -615,6 +623,10 @@ def get_summary(new_wk, year):
         new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', ''])
+    if crypto_gains != .0 or crypto_losses != .0:
+        new_wk.append(['Krypto Gewinne:', '', '', '', f'{crypto_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Krypto Verluste:', '', '', '', f'{crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Krypto Gesamt:', '', '', '', f'{crypto_gains + crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
     if futures_gains != .0 or futures_losses != .0:
         new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', ''])
@@ -628,7 +640,7 @@ def get_summary(new_wk, year):
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
         + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
-    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses
+    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses + crypto_losses + crypto_gains
     new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
@@ -973,7 +985,6 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if datetime[:4] == tax_output:
                 if local_pnl != '':
                     local_pnl = '%.2f' % float(local_pnl)
-                #if asset_type != AssetType.Transfer:
                 new_wk.append([datetime[:10], transaction_type(asset_type),
                         local_pnl, '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                         quantity, asset,
