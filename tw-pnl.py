@@ -122,13 +122,17 @@ def check_param(buysell, openclose, callput):
     if str(callput) not in ('nan', 'C', 'P'):
         raise
 
-def check_trade(tsubcode, check_amount, amount):
+def check_trade(tsubcode, check_amount, amount, asset_type):
     #print('FEHLER:', check_amount, amount)
     if tsubcode in ('Buy', 'Sell', 'Cash Settled Exercise', 'Special Dividend'):
         pass
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
-        if not math.isclose(check_amount, amount, abs_tol=0.001):
-            raise
+        if asset_type == AssetType.Crypto:
+            if not math.isclose(check_amount, amount, abs_tol=0.01):
+                raise
+        else:
+            if not math.isclose(check_amount, amount, abs_tol=0.001):
+                raise
     else:
         if not isnan(amount) and amount != .0:
             raise
@@ -258,6 +262,9 @@ def print_nasdaq100():
 # Is the symbol a individual stock or anything else
 # like an ETF or fond?
 def is_stock(symbol, tsubcode):
+    # Crypto assets like BTC/USD or ETH/USD:
+    if symbol[-4:] == '/USD':
+        return AssetType.Crypto
     #if symbol in ('SPY','IWM','QQQ'):
     #    return AssetType.AktienFond
     # Well known ETFs:
@@ -734,7 +741,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
                 pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
-                raise
+                # Hardcode AssetType.Crypto here again:
+                if symbol[-4:] != '/USD':
+                    raise
             else:
                 quantity = int(quantity)
 
@@ -937,7 +946,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
             if tsubcode == 'Cash Settled Assignment':
                 quantity = 1.0
-            check_trade(tsubcode, - (quantity * price), amount)
+            check_trade(tsubcode, - (quantity * price), amount, asset_type)
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
             (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
