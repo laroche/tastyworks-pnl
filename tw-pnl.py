@@ -122,13 +122,17 @@ def check_param(buysell, openclose, callput):
     if str(callput) not in ('nan', 'C', 'P'):
         raise
 
-def check_trade(tsubcode, check_amount, amount):
+def check_trade(tsubcode, check_amount, amount, asset_type):
     #print('FEHLER:', check_amount, amount)
     if tsubcode in ('Buy', 'Sell', 'Cash Settled Exercise', 'Special Dividend'):
         pass
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
-        if not math.isclose(check_amount, amount, abs_tol=0.001):
-            raise
+        if asset_type == AssetType.Crypto:
+            if not math.isclose(check_amount, amount, abs_tol=0.01):
+                raise
+        else:
+            if not math.isclose(check_amount, amount, abs_tol=0.001):
+                raise
     else:
         if not isnan(amount) and amount != .0:
             raise
@@ -143,19 +147,20 @@ class AssetType(enum.IntEnum):
     MischFond = 5
     ImmobilienFond = 6
     OtherStock = 7
-    Future = 8
-    Transfer = 9
-    Dividend = 10
-    Interest = 11
-    WithholdingTax = 12
-    OrderPayments = 13
-    Fee = 14
+    Crypto = 8
+    Future = 9
+    Transfer = 10
+    Dividend = 11
+    Interest = 12
+    WithholdingTax = 13
+    OrderPayments = 14
+    Fee = 15
 
 def transaction_type(asset_type):
     t = ['', 'Long-Option', 'Stillhalter-Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
-        'Sonstiges', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
+        'Sonstiges', 'Krypto', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
         'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
-    if int(asset_type) >= 1 and int(asset_type) <= 14:
+    if int(asset_type) >= 1 and int(asset_type) <= 15:
         return t[asset_type]
     return ''
 
@@ -176,54 +181,54 @@ SP500 = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABMD', 'ABT', 'ACN', 'ADBE',
     'DG', 'DGX', 'DHI', 'DHR', 'DIS', 'DISCA', 'DISCK', 'DISH', 'DLR', 'DLTR',
     'DOV', 'DOW', 'DPZ', 'DRE', 'DRI', 'DTE', 'DUK', 'DVA', 'DVN', 'DXC',
     'DXCM', 'EA', 'EBAY', 'ECL', 'ED', 'EFX', 'EIX', 'EL', 'EMN', 'EMR',
-    'ENPH', 'EOG', 'EQIX', 'EQR', 'ES', 'ESS', 'ETN', 'ETR', 'ETSY', 'EVRG',
-    'EW', 'EXC', 'EXPD', 'EXPE', 'EXR', 'F', 'FANG', 'FAST', 'FB', 'FBHS',
-    'FCX', 'FDX', 'FE', 'FFIV', 'FIS', 'FISV', 'FITB', 'FLT', 'FMC', 'FOX',
-    'FOXA', 'FRC', 'FRT', 'FTNT', 'FTV', 'GD', 'GE', 'GILD', 'GIS', 'GL',
-    'GLW', 'GM', 'GNRC', 'GOOG', 'GOOGL', 'GPC', 'GPN', 'GPS', 'GRMN', 'GS',
-    'GWW', 'HAL', 'HAS', 'HBAN', 'HBI', 'HCA', 'HD', 'HES', 'HIG', 'HII',
-    'HLT', 'HOLX', 'HON', 'HPE', 'HPQ', 'HRL', 'HSIC', 'HST', 'HSY', 'HUM',
-    'HWM', 'IBM', 'ICE', 'IDXX', 'IEX', 'IFF', 'ILMN', 'INCY', 'INFO', 'INTC',
-    'INTU', 'IP', 'IPG', 'IPGP', 'IQV', 'IR', 'IRM', 'ISRG', 'IT', 'ITW',
-    'IVZ', 'J', 'JBHT', 'JCI', 'JKHY', 'JNJ', 'JNPR', 'JPM', 'K', 'KEY',
-    'KEYS', 'KHC', 'KIM', 'KLAC', 'KMB', 'KMI', 'KMX', 'KO', 'KR', 'KSU', 'L',
-    'LDOS', 'LEG', 'LEN', 'LH', 'LHX', 'LIN', 'LKQ', 'LLY', 'LMT', 'LNC',
-    'LNT', 'LOW', 'LRCX', 'LUMN', 'LUV', 'LVS', 'LW', 'LYB', 'LYV', 'MA',
-    'MAA', 'MAR', 'MAS', 'MCD', 'MCHP', 'MCK', 'MCO', 'MDLZ', 'MDT', 'MET',
-    'MGM', 'MHK', 'MKC', 'MKTX', 'MLM', 'MMC', 'MMM', 'MNST', 'MO', 'MOS',
-    'MPC', 'MPWR', 'MRK', 'MRNA', 'MRO', 'MS', 'MSCI', 'MSFT', 'MSI', 'MTB',
-    'MTCH', 'MTD', 'MU', 'NCLH', 'NDAQ', 'NEE', 'NEM', 'NFLX', 'NI', 'NKE',
-    'NLOK', 'NLSN', 'NOC', 'NOW', 'NRG', 'NSC', 'NTAP', 'NTRS', 'NUE', 'NVDA',
-    'NVR', 'NWL', 'NWS', 'NWSA', 'NXPI', 'O', 'ODFL', 'OGN', 'OKE', 'OMC',
-    'ORCL', 'ORLY', 'OTIS', 'OXY', 'PAYC', 'PAYX', 'PBCT', 'PCAR', 'PEAK',
-    'PEG', 'PENN', 'PEP', 'PFE', 'PFG', 'PG', 'PGR', 'PH', 'PHM', 'PKG', 'PKI',
-    'PLD', 'PM', 'PNC', 'PNR', 'PNW', 'POOL', 'PPG', 'PPL', 'PRU', 'PSA',
-    'PSX', 'PTC', 'PVH', 'PWR', 'PXD', 'PYPL', 'QCOM', 'QRVO', 'RCL', 'RE',
-    'REG', 'REGN', 'RF', 'RHI', 'RJF', 'RL', 'RMD', 'ROK', 'ROL', 'ROP',
-    'ROST', 'RSG', 'RTX', 'SBAC', 'SBUX', 'SCHW', 'SEE', 'SHW', 'SIVB', 'SJM',
-    'SLB', 'SNA', 'SNPS', 'SO', 'SPG', 'SPGI', 'SRE', 'STE', 'STT', 'STX',
-    'STZ', 'SWK', 'SWKS', 'SYF', 'SYK', 'SYY', 'T', 'TAP', 'TDG', 'TDY',
-    'TECH', 'TEL', 'TER', 'TFC', 'TFX', 'TGT', 'TJX', 'TMO', 'TMUS', 'TPR',
-    'TRMB', 'TROW', 'TRV', 'TSCO', 'TSLA', 'TSN', 'TT', 'TTWO', 'TWTR', 'TXN',
-    'TXT', 'TYL', 'UA', 'UAA', 'UAL', 'UDR', 'UHS', 'ULTA', 'UNH', 'UNP',
-    'UPS', 'URI', 'USB', 'V', 'VFC', 'VIAC', 'VLO', 'VMC', 'VNO', 'VRSK',
-    'VRSN', 'VRTX', 'VTR', 'VTRS', 'VZ', 'WAB', 'WAT', 'WBA', 'WDC', 'WEC',
-    'WELL', 'WFC', 'WHR', 'WLTW', 'WM', 'WMB', 'WMT', 'WRB', 'WRK', 'WST',
-    'WU', 'WY', 'WYNN', 'XEL', 'XLNX', 'XOM', 'XRAY', 'XYL', 'YUM', 'ZBH',
-    'ZBRA', 'ZION', 'ZTS')
+    'ENPH', 'EOG', 'EPAM', 'EQIX', 'EQR', 'ES', 'ESS', 'ETN', 'ETR', 'ETSY',
+    'EVRG', 'EW', 'EXC', 'EXPD', 'EXPE', 'EXR', 'F', 'FANG', 'FAST', 'FB',
+    'FBHS', 'FCX', 'FDS', 'FDX', 'FE', 'FFIV', 'FIS', 'FISV', 'FITB', 'FLT',
+    'FMC', 'FOX', 'FOXA', 'FRC', 'FRT', 'FTNT', 'FTV', 'GD', 'GE', 'GILD',
+    'GIS', 'GL', 'GLW', 'GM', 'GNRC', 'GOOG', 'GOOGL', 'GPC', 'GPN', 'GPS',
+    'GRMN', 'GS', 'GWW', 'HAL', 'HAS', 'HBAN', 'HCA', 'HD', 'HES', 'HIG',
+    'HII', 'HLT', 'HOLX', 'HON', 'HPE', 'HPQ', 'HRL', 'HSIC', 'HST', 'HSY',
+    'HUM', 'HWM', 'IBM', 'ICE', 'IDXX', 'IEX', 'IFF', 'ILMN', 'INCY', 'INFO',
+    'INTC', 'INTU', 'IP', 'IPG', 'IPGP', 'IQV', 'IR', 'IRM', 'ISRG', 'IT',
+    'ITW', 'IVZ', 'J', 'JBHT', 'JCI', 'JKHY', 'JNJ', 'JNPR', 'JPM', 'K', 'KEY',
+    'KEYS', 'KHC', 'KIM', 'KLAC', 'KMB', 'KMI', 'KMX', 'KO', 'KR', 'L', 'LDOS',
+    'LEN', 'LH', 'LHX', 'LIN', 'LKQ', 'LLY', 'LMT', 'LNC', 'LNT', 'LOW',
+    'LRCX', 'LUMN', 'LUV', 'LVS', 'LW', 'LYB', 'LYV', 'MA', 'MAA', 'MAR',
+    'MAS', 'MCD', 'MCHP', 'MCK', 'MCO', 'MDLZ', 'MDT', 'MET', 'MGM', 'MHK',
+    'MKC', 'MKTX', 'MLM', 'MMC', 'MMM', 'MNST', 'MO', 'MOS', 'MPC', 'MPWR',
+    'MRK', 'MRNA', 'MRO', 'MS', 'MSCI', 'MSFT', 'MSI', 'MTB', 'MTCH', 'MTD',
+    'MU', 'NCLH', 'NDAQ', 'NEE', 'NEM', 'NFLX', 'NI', 'NKE', 'NLOK', 'NLSN',
+    'NOC', 'NOW', 'NRG', 'NSC', 'NTAP', 'NTRS', 'NUE', 'NVDA', 'NVR', 'NWL',
+    'NWS', 'NWSA', 'NXPI', 'O', 'ODFL', 'OGN', 'OKE', 'OMC', 'ORCL', 'ORLY',
+    'OTIS', 'OXY', 'PAYC', 'PAYX', 'PBCT', 'PCAR', 'PEAK', 'PEG', 'PENN',
+    'PEP', 'PFE', 'PFG', 'PG', 'PGR', 'PH', 'PHM', 'PKG', 'PKI', 'PLD', 'PM',
+    'PNC', 'PNR', 'PNW', 'POOL', 'PPG', 'PPL', 'PRU', 'PSA', 'PSX', 'PTC',
+    'PVH', 'PWR', 'PXD', 'PYPL', 'QCOM', 'QRVO', 'RCL', 'RE', 'REG', 'REGN',
+    'RF', 'RHI', 'RJF', 'RL', 'RMD', 'ROK', 'ROL', 'ROP', 'ROST', 'RSG', 'RTX',
+    'SBAC', 'SBNY', 'SBUX', 'SCHW', 'SEDG', 'SEE', 'SHW', 'SIVB', 'SJM', 'SLB',
+    'SNA', 'SNPS', 'SO', 'SPG', 'SPGI', 'SRE', 'STE', 'STT', 'STX', 'STZ',
+    'SWK', 'SWKS', 'SYF', 'SYK', 'SYY', 'T', 'TAP', 'TDG', 'TDY', 'TECH',
+    'TEL', 'TER', 'TFC', 'TFX', 'TGT', 'TJX', 'TMO', 'TMUS', 'TPR', 'TRMB',
+    'TROW', 'TRV', 'TSCO', 'TSLA', 'TSN', 'TT', 'TTWO', 'TWTR', 'TXN', 'TXT',
+    'TYL', 'UA', 'UAA', 'UAL', 'UDR', 'UHS', 'ULTA', 'UNH', 'UNP', 'UPS',
+    'URI', 'USB', 'V', 'VFC', 'VIAC', 'VLO', 'VMC', 'VNO', 'VRSK', 'VRSN',
+    'VRTX', 'VTR', 'VTRS', 'VZ', 'WAB', 'WAT', 'WBA', 'WDC', 'WEC', 'WELL',
+    'WFC', 'WHR', 'WLTW', 'WM', 'WMB', 'WMT', 'WRB', 'WRK', 'WST', 'WY',
+    'WYNN', 'XEL', 'XLNX', 'XOM', 'XRAY', 'XYL', 'YUM', 'ZBH', 'ZBRA', 'ZION',
+    'ZTS')
 
 # https://en.wikipedia.org/wiki/NASDAQ-100
-NASDAQ100 = ('ATVI', 'ADBE', 'AMD', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AEP', 'AMGN',
-    'ADI', 'ANSS', 'AAPL', 'AMAT', 'ASML', 'TEAM', 'ADSK', 'ADP', 'BIDU',
-    'BIIB', 'BKNG', 'AVGO', 'CDNS', 'CDW', 'CERN', 'CHTR', 'CHKP', 'CTAS',
-    'CSCO', 'CTSH', 'CMCSA', 'CPRT', 'COST', 'CRWD', 'CSX', 'DXCM', 'DOCU',
-    'DLTR', 'EBAY', 'EA', 'EXC', 'FB', 'FAST', 'FISV', 'FOXA', 'FOX', 'GILD',
-    'HON', 'IDXX', 'ILMN', 'INCY', 'INTC', 'INTU', 'ISRG', 'JD', 'KDP', 'KLAC',
-    'KHC', 'LRCX', 'LULU', 'MAR', 'MRVL', 'MTCH', 'MELI', 'MCHP', 'MU', 'MSFT',
-    'MRNA', 'MDLZ', 'MNST', 'NTES', 'NFLX', 'NVDA', 'NXPI', 'ORLY', 'OKTA',
-    'PCAR', 'PAYX', 'PYPL', 'PTON', 'PEP', 'PDD', 'QCOM', 'REGN', 'ROST',
-    'SGEN', 'SIRI', 'SWKS', 'SPLK', 'SBUX', 'SNPS', 'TMUS', 'TSLA', 'TXN',
-    'TCOM', 'VRSN', 'VRSK', 'VRTX', 'WBA', 'WDAY', 'XEL', 'XLNX', 'ZM')
+NASDAQ100 = ('ATVI', 'ADBE', 'AMD', 'ABNB', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AEP',
+    'AMGN', 'ADI', 'ANSS', 'AAPL', 'AMAT', 'ASML', 'TEAM', 'ADSK', 'ADP',
+    'BIDU', 'BIIB', 'BKNG', 'AVGO', 'CDNS', 'CHTR', 'CTAS', 'CSCO', 'CTSH',
+    'CMCSA', 'CPRT', 'COST', 'CRWD', 'CSX', 'DDOG', 'DXCM', 'DOCU', 'DLTR',
+    'EBAY', 'EA', 'EXC', 'FAST', 'FISV', 'FTNT', 'GILD', 'HON', 'IDXX', 'ILMN',
+    'INTC', 'INTU', 'ISRG', 'JD', 'KDP', 'KLAC', 'KHC', 'LRCX', 'LCID', 'LULU',
+    'MAR', 'MRVL', 'MTCH', 'MELI', 'FB', 'MCHP', 'MU', 'MSFT', 'MRNA', 'MDLZ',
+    'MNST', 'NTES', 'NFLX', 'NVDA', 'NXPI', 'ORLY', 'OKTA', 'PCAR', 'PANW',
+    'PAYX', 'PYPL', 'PTON', 'PEP', 'PDD', 'QCOM', 'REGN', 'ROST', 'SGEN',
+    'SIRI', 'SWKS', 'SPLK', 'SBUX', 'SNPS', 'TMUS', 'TSLA', 'TXN', 'VRSN',
+    'VRSK', 'VRTX', 'WBA', 'WDAY', 'XEL', 'XLNX', 'ZM', 'ZS')
 
 def read_sp500():
     table = pandas.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
@@ -257,6 +262,9 @@ def print_nasdaq100():
 # Is the symbol a individual stock or anything else
 # like an ETF or fond?
 def is_stock(symbol, tsubcode):
+    # Crypto assets like BTC/USD or ETH/USD:
+    if symbol[-4:] == '/USD':
+        return AssetType.Crypto
     #if symbol in ('SPY','IWM','QQQ'):
     #    return AssetType.AktienFond
     # Well known ETFs:
@@ -503,6 +511,8 @@ def get_summary(new_wk, year):
     option_losses = .0
     soption_gains = .0
     soption_losses = .0
+    crypto_gains = .0
+    crypto_losses = .0
     usd = .0
     usd_notax = .0
     for i in new_wk:
@@ -563,6 +573,11 @@ def get_summary(new_wk, year):
             else:
                 if pnl < .0:
                     raise
+        elif type == 'Krypto':
+            if pnl < .0:
+                crypto_losses += pnl
+            else:
+                crypto_gains += pnl
         elif type == 'Dividende':
             if pnl < .0:
                 dividend_losses += pnl
@@ -615,6 +630,10 @@ def get_summary(new_wk, year):
         new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', ''])
+    if crypto_gains != .0 or crypto_losses != .0:
+        new_wk.append(['Krypto Gewinne:', '', '', '', f'{crypto_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Krypto Verluste:', '', '', '', f'{crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Krypto Gesamt:', '', '', '', f'{crypto_gains + crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
     if futures_gains != .0 or futures_losses != .0:
         new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', ''])
@@ -628,7 +647,7 @@ def get_summary(new_wk, year):
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
         + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
-    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses
+    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses + crypto_losses + crypto_gains
     new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
@@ -722,7 +741,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
                 pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
-                raise
+                # Hardcode AssetType.Crypto here again:
+                if symbol[-4:] != '/USD':
+                    raise
             else:
                 quantity = int(quantity)
 
@@ -925,7 +946,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
             if tsubcode == 'Cash Settled Assignment':
                 quantity = 1.0
-            check_trade(tsubcode, - (quantity * price), amount)
+            check_trade(tsubcode, - (quantity * price), amount, asset_type)
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
             (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
@@ -973,7 +994,6 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             if datetime[:4] == tax_output:
                 if local_pnl != '':
                     local_pnl = '%.2f' % float(local_pnl)
-                #if asset_type != AssetType.Transfer:
                 new_wk.append([datetime[:10], transaction_type(asset_type),
                         local_pnl, '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
                         quantity, asset,

@@ -51,8 +51,10 @@ How to use
 Download your trade history as csv file from
 <https://trade.tastyworks.com/index.html#/transactionHistoryPage>.
 (Choose "Activity" and then "History" and then setup the filter for a
-custom period of time and download it as csv file. Do not download this file
-from the separate Tastyworks application, but use the website and your browser.)
+custom period of time and download it as csv file. Beware that Tastyworks
+limits the download to 250 lines.
+Do not download this file from the separate Tastyworks application,
+but use the website and your browser.)
 
 Newest entries in the csv file should be on the top and it should contain the complete
 history over all years. (You can at most download data for one year, so for several years
@@ -211,6 +213,9 @@ Important:
    - As "Mark-to-Market"-payments/transactions are done, we immediately pay taxes for them, this is
      not stacked up until futures are sold again. What is a correct way to tax these transactions?
      Adding this up needs to be done to correctly implement "20k€ Terminverlustgeschäfte" for futures.
+- Cryptos:
+   - I am not trading cryptos, so there is only minimal support for them.
+   - Cryptos have their own group. pnl is calculated as with normal stocks. No 1-year-taxfree or any other stuff is done.
 - Add extra counter for all transactions to/from the account.
 - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
 <pre>
