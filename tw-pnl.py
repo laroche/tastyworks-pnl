@@ -449,6 +449,11 @@ def show_plt(df):
     df2['datetime2'] = pandas.to_datetime(df2['datetime'])
     monthly_totals = df2.resample(rule='M', on='datetime2').sum() # .mean() rule='Q' quarterly
     monthly_totals.plot(kind='bar', y=['pnl',])
+    df3 = df.copy()
+    df3.datetime = pandas.to_datetime(df2.datetime)
+    df3.set_index('datetime', inplace=True)
+    quarterly_totals = df3.resample('QS').sum()
+    quarterly_totals.plot(kind='bar', y=['pnl',])
     #monthly_list = pandas.date_range(start='2018-04-01', end='2021-07-31', freq='M')
     #print(monthly_list)
     df.plot(y=['net_total'])
