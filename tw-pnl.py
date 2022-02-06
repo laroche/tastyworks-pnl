@@ -440,6 +440,8 @@ def check_total(fifos, total):
         print(total)
         raise
 
+# How to change date-format output with pandas:
+# https://stackoverflow.com/questions/30133280/pandas-bar-plot-changes-date-format
 def show_plt(df):
     import matplotlib.pyplot as plt
     for i in ('account_total', 'net_total', 'pnl', 'usd_gains', 'term_loss'):
@@ -447,16 +449,33 @@ def show_plt(df):
     #df.plot(x='datetime', y=['account_total', 'pnl', 'term_loss'])
     df2 = df.copy()
     df2['datetime2'] = pandas.to_datetime(df2['datetime'])
-    monthly_totals = df2.resample(rule='M', on='datetime2').sum() # .mean() rule='Q' quarterly
-    monthly_totals.plot(kind='bar', y=['pnl',])
+    monthly_totals = df2.resample(rule='MS', on='datetime2').sum()
+    date_monthly = [x.strftime("%Y-%m") for x in monthly_totals.index]
+    ax = monthly_totals.plot(kind='bar', y=['pnl',], title='Monthly PnL Summary', xlabel='Date', ylabel='PnL')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_monthly)
+    ax = monthly_totals.plot(kind='bar', y=['usd_gains',], title='Monthly USD Gains', xlabel='Date', ylabel='USD Gains')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_monthly)
+    ax = monthly_totals.plot(kind='bar', y=['term_loss',], title='Monthly Term Loss', xlabel='Date', ylabel='Term Loss')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_monthly)
     df3 = df.copy()
     df3.datetime = pandas.to_datetime(df2.datetime)
     df3.set_index('datetime', inplace=True)
     quarterly_totals = df3.resample('QS').sum()
-    quarterly_totals.plot(kind='bar', y=['pnl',])
-    #monthly_list = pandas.date_range(start='2018-04-01', end='2021-07-31', freq='M')
-    #print(monthly_list)
+    date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
+    ax = quarterly_totals.plot(kind='bar', y=['pnl',], title='Quarterly PnL Summary', xlabel='Date', ylabel='PnL')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_quarterly)
+    ax = quarterly_totals.plot(kind='bar', y=['usd_gains',], title='Quarterly USD Gains', xlabel='Date', ylabel='USD Gains')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_quarterly)
+    ax = quarterly_totals.plot(kind='bar', y=['term_loss',], title='Quarterly Term Loss', xlabel='Date', ylabel='Term Loss')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_quarterly)
     df.plot(y=['net_total'])
+    #plt.yscale('log')
     df.plot(y=['account_total'])
     df.plot(kind='bar', y=['pnl', 'usd_gains', 'term_loss'])
     df.plot(kind='bar', y=['usd_gains'])
