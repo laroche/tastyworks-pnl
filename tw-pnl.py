@@ -611,9 +611,9 @@ def get_summary(new_wk, year):
             withholdingtax += pnl
         elif type == 'Future':
             if pnl < .0:
-                future_losses += pnl
+                futures_losses += pnl
             else:
-                future_gains += pnl
+                futures_gains += pnl
         else:
             print(i)
             raise
