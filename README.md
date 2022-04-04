@@ -13,11 +13,11 @@ at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
 
-Run the following command for your 2020 tax statement and continue with
+Run the following command for your 2021 tax statement and continue with
 your [libreoffice](https://libreoffice.org/) spreadsheet:
 <pre>
-python3 tw-pnl.py --assume-individual-stock --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
-soffice tastyworks-tax-2020.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
+soffice tastyworks-tax-2021.csv
 </pre>
 
 
@@ -37,16 +37,19 @@ Details zur Steuererklärung in Deutschland sind unter
 Eine Web-Applikation für dieses Python-Skript wird in Zukunft
 unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 
-Starte folgenden Kommandozeilen-Aufruf für eine Steuerausgabe 2020 und
+Starte folgenden Kommandozeilen-Aufruf für eine Steuerausgabe 2021 und
 lade die Daten in Deine [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation:
 <pre>
-python3 tw-pnl.py --assume-individual-stock --tax-output=2020 --output-csv=tastyworks-tax-2020.csv transaction_history.csv
-soffice tastyworks-tax-2020.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
+soffice tastyworks-tax-2021.csv
 </pre>
 
 
 How to use
 ----------
+
+Clone or download this repository onto your local computer. If you don't have git installed,
+you can download the current zip file from <https://github.com/laroche/tastyworks-pnl/archive/refs/heads/main.zip>.
 
 Download your trade history as csv file from
 <https://trade.tastyworks.com/index.html#/transactionHistoryPage>.
@@ -129,7 +132,7 @@ pnl generated data as well as eurusd conversion data. You probably do not have t
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
 
-If you provide the option __--tax-output=2020__, your output file will be
+If you provide the option __--tax-output=2021__, your output file will be
 optimized for tax output for a special year. Only transactions for that year are output.
 The datetime will only contain the day, but no time information. Fewer other data is output.
 
@@ -181,8 +184,13 @@ FAQ
   a sample transaction line, so that I can adjust the source code.
 - Either github issues or email works for me to enhance/fix this program. Sample data
   is best to resolve issues.
+- If you read in the csv-file from Tastyworks into Excel, the floating point price values
+  can get converted from US style to German notation. This breaks this skript, so please
+  stay with original data from Tastyworks or use a normal editor instead of Excel to change data.
 - One check is to look at the computed value of "account cash balance" from this script and compare it
   to the official value "Cash Balance" from Tastyworks at <https://manage.tastyworks.com/#/accounts/balances>.
+  After 550 transactions the final cash balance value is on the cent identical to the
+  computed value.
 - The output-csv file should have the same amount of lines as the input csv. The resulting output
   is just an enriched form of the input. Please verify all summary output by computing it again from
   the output-csv file yourself.
