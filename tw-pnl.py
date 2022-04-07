@@ -920,9 +920,11 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     price *= 50.0
                 elif asset[:3] in ('/NQ',):
                     price *= 20.0
+                elif asset[:3] in ('/MNQ',):
+                    price *= 2.0
                 elif asset[:4] in ('/RTY',):
                     price *= 50.0
-                elif asset[:4] in ('/MES',):
+                elif asset[:4] in ('/MES', '/M2K'):
                     price *= 5.0
                 # silver and gold:
                 elif asset[:3] in ('/GC',):
@@ -936,6 +938,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 # oil and gas:
                 elif asset[:3] in ('/CL',):
                     price *= 1000.0
+                elif asset[:4] in ('/MCL',):
+                    price *= 100.0
                 elif asset[:3] in ('/QM',):
                     price *= 500.0
                 elif asset[:3] in ('/NG',):
