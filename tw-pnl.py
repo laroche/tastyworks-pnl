@@ -922,6 +922,8 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     price *= 20.0
                 elif asset[:4] in ('/RTY',):
                     price *= 50.0
+                elif asset[:4] in ('/MES',):
+                    price *= 5.0
                 # silver and gold:
                 elif asset[:3] in ('/GC',):
                     price *= 100.0
