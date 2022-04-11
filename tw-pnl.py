@@ -99,7 +99,8 @@ def check_tcode(tcode, tsubcode, description):
         if tsubcode not in ('Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
             'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
             raise
-        if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment':
+        if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment' \
+            and not description.startswith('Fee Correction'):
             raise
     elif tcode == 'Trade':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Buy', 'Sell'):
@@ -107,7 +108,7 @@ def check_tcode(tcode, tsubcode, description):
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
-            'Special Dividend', 'Cash Settled Exercise'): # XXX, 'Cash Settled Assignment'):
+            'Special Dividend', 'Cash Settled Exercise', 'Futures Settlement'): # XXX, 'Cash Settled Assignment'):
             raise
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise
@@ -123,8 +124,9 @@ def check_param(buysell, openclose, callput):
         raise
 
 def check_trade(tsubcode, check_amount, amount, asset_type):
-    #print('FEHLER:', check_amount, amount)
-    if tsubcode in ('Buy', 'Sell', 'Cash Settled Exercise', 'Special Dividend'):
+    #print('FEHLER:', check_amount, amount, tsubcode)
+    if tsubcode in ('Buy', 'Sell', 'Cash Settled Exercise',
+        'Special Dividend', 'Futures Settlement'):
         pass
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
         if asset_type == AssetType.Crypto:
@@ -282,7 +284,7 @@ def is_stock(symbol, tsubcode):
     if symbol in SP500 or symbol in NASDAQ100:
         return AssetType.IndStock
     if symbol.startswith('/'):
-        if tsubcode not in ('Buy', 'Sell'):
+        if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
             raise
         return AssetType.Future
     # The conservative way is to through an exception if we are not sure.
@@ -998,7 +1000,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 else:
                     pnl_stocks_losses += local_pnl
             elif asset_type == AssetType.Future:
-                if tsubcode not in ('Buy', 'Sell'):
+                if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
                     raise
                 # XXX For futures we just add all payments as-is for taxes. We should add them
                 # up until final closing instead. This should be changed. ???
