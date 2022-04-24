@@ -956,6 +956,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     price *= 2000.0
                 elif asset[:3] in ('/ZF', '/ZN', '/ZB', '/UB'):
                     price *= 1000.0
+                # currencies:
+                elif asset[:3] in ('/6E',):
+                    price *= 125000.0
                 else:
                     price *= 100.0
                 if int(strike) == strike: # convert to integer for full numbers
