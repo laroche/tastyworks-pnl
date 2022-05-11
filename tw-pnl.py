@@ -736,9 +736,12 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         eur_amount = usd2eur(amount - fees, date)
         # look at currency conversion gains:
         tax_free = False
-        if tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest', 'Dividend',
+        if tsubcode in ('Credit Interest', 'Debit Interest', 'Dividend',
             'Fee', 'Balance Adjustment', 'Special Dividend'):
             tax_free = True
+        if tsubcode == 'Deposit':
+            if description != 'ACH DEPOSIT':
+                tax_free = True
         if tsubcode == 'Withdrawal' and not isnan(symbol):
             tax_free = True
         # Stillhalterpraemien gelten als Zufluss und nicht als Anschaffung
@@ -792,7 +795,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             term_loss = .0
             if tsubcode != 'Transfer' and fees != .0:
                 raise
-            if tsubcode == 'Transfer':
+            if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT'):
                 local_pnl = ''
                 asset = 'transfer'
                 newdescription = description

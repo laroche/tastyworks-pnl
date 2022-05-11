@@ -180,8 +180,6 @@ Here the output transaction data in detail:
 FAQ
 ---
 
-- Maybe ACH transfers are not yet implemented. I don't use them, maybe email me
-  a sample transaction line, so that I can adjust the source code.
 - Either github issues or email works for me to enhance/fix this program. Sample data
   is best to resolve issues.
 - If you read in the csv-file from Tastyworks into Excel, the floating point price values
