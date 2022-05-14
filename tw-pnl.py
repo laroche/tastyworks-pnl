@@ -21,7 +21,7 @@
 # sudo apt-get install python3-pandas
 #
 #
-# pylint: disable=C0103,C0111,C0114,C0116,C0326,C0330
+# pylint: disable=C0103,C0111,C0114,C0116,C0301,E0704
 #
 
 import enum
@@ -551,12 +551,12 @@ def get_summary(new_wk, year):
         tax_free = i[8]
         # steuerfreie Zahlungen:
         if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
-            if tax_free == False:
+            if tax_free is False:
                 raise
         # keine steuerfreien Zahlungen:
         if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
             'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
-            if tax_free == True:
+            if tax_free is True:
                 raise
         if type in ('Ein/Auszahlung', 'Brokergebühr'):
             pass
@@ -593,7 +593,7 @@ def get_summary(new_wk, year):
             else:
                 soption_gains += pnl
             # Kontrolle:  Praemien sind alle steuerfrei, Glattstellungen nicht:
-            if tax_free == False:
+            if tax_free is False:
                 if pnl > .0:
                     raise
             else:
@@ -728,7 +728,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             raise
         (amount, fees) = (float(amount), float(fees))
         # option/stock splits are tax neutral, so zero out amount/fees for it:
-        if tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
+        if tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
             (amount, fees) = (.0, .0)
         conv_usd = get_eurusd(date)
         total_fees += usd2eur(fees, date, conv_usd)
@@ -767,7 +767,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if isnan(quantity):
             quantity = 1
         else:
-            if tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
+            if tcode == 'Receive Deliver' and tsubcode in ('Forward Split' or tsubcode == 'Reverse Split'):
                 pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
                 # Hardcode AssetType.Crypto here again:
@@ -787,7 +787,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         header += ' %s' % f'{amount - fees:10.2f}' + '$'
         #if verbose:
         #    header += ' %s' % f'{conv_usd:8.4f}'
-        if tcode != 'Receive Deliver' or (tsubcode != 'Forward Split' and tsubcode != 'Reverse Split'):
+        if tcode != 'Receive Deliver' or tsubcode not in ('Forward Split', 'Reverse Split'):
             header += ' %5d' % quantity
 
         if tcode == 'Money Movement':
@@ -899,7 +899,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 future += eur_amount
                 print(header, description)
                 newdescription = description
-        elif tcode == 'Receive Deliver' and (tsubcode == 'Forward Split' or tsubcode == 'Reverse Split'):
+        elif tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
             # XXX: We might check that the two relevant entries have the same data for 'amount'.
             x = symbol + '-' + date
             # quantity for splits seems to be more like strike price and how it changes.
@@ -988,7 +988,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
             (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
-                (asset_type == AssetType.LongOption) or (asset_type == AssetType.ShortOption),
+                asset_type in (AssetType.LongOption, AssetType.ShortOption),
                 debugfifo=debugfifo)
             if term_loss < .0:
                 raise
