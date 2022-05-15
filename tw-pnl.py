@@ -452,9 +452,9 @@ def show_plt(df):
     df2.datetime = pandas.to_datetime(df2.datetime)
     df2.set_index('datetime', inplace=True)
 
-    net_total_min = df2.net_total.min() * 0.9
     monthly_totals = df2.resample('MS').sum()
     monthly_last = df2.resample('MS').last() # .ohlc() .mean()
+    monthly_min = monthly_last.net_total.min() * 0.9
     date_monthly = [x.strftime("%Y-%m") for x in monthly_totals.index]
     ax = monthly_totals.plot(kind='bar', y='pnl', title='Monthly PnL Summary', xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
@@ -468,10 +468,11 @@ def show_plt(df):
     ax = monthly_last.plot(kind='bar', y='net_total', title='Monthly Net Total', xlabel='Date', ylabel='net_total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
-    plt.ylim(bottom=net_total_min)
+    plt.ylim(bottom=monthly_min)
 
     quarterly_totals = df2.resample('QS').sum()
     quarterly_last = df2.resample('QS').last() # .ohlc() .mean()
+    quarterly_min = quarterly_last.net_total.min() * 0.9
     date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
     ax = quarterly_totals.plot(kind='bar', y='pnl', title='Quarterly PnL Summary', xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
@@ -485,7 +486,7 @@ def show_plt(df):
     ax = quarterly_last.plot(kind='bar', y='net_total', title='Quarterly Net Total', xlabel='Date', ylabel='net_total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
-    plt.ylim(bottom=net_total_min)
+    plt.ylim(bottom=quarterly_min)
 
     #plt.yscale('log')
     #df.plot(y=['cash_total'])
