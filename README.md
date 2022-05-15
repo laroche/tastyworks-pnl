@@ -163,10 +163,10 @@ Here the output transaction data in detail:
 - __symbol__: base asset (underlying) that is traded. This is included to be able to
   generate summary overviews for e.g. all transactions in SPY with stocks and options combined.
 - __description__: additional informational text for the transaction
-- __account_total__: account cash balance in USD after this transaction. This is the previous account total plus
+- __cash_total__: account cash balance in USD after this transaction. This is the previous account total plus
   'amount - fees' from this transaction. (Cash amount at Tastyworks.)
   This is purely informational and not needed for tax data.
-- __net_total__: Sum in USD of account_total (cash) plus all assets (stocks, options)
+- __net_total__: Sum in USD of cash_total plus all assets (stocks, options)
   in your account.
   This does not use current market data, but keeps asset prices at purchase cost.
   Best looked at to check if this script calculates the same total sum as shown in your

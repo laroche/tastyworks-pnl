@@ -445,9 +445,10 @@ def check_total(fifos, total):
 # https://stackoverflow.com/questions/30133280/pandas-bar-plot-changes-date-format
 def show_plt(df):
     import matplotlib.pyplot as plt
-    for i in ('account_total', 'net_total', 'pnl', 'usd_gains', 'term_loss'):
+    for i in ('cash_total', 'net_total', 'pnl', 'usd_gains', 'term_loss'):
         df[i] = pandas.to_numeric(df[i]) # df[i].astype(float)
-    #df.plot(x='datetime', y=['account_total', 'pnl', 'term_loss'])
+    #df.plot(x='datetime', y=['cash_total', 'pnl', 'term_loss'])
+
     df2 = df.copy()
     df2['datetime2'] = pandas.to_datetime(df2['datetime'])
     monthly_totals = df2.resample(rule='MS', on='datetime2').sum()
@@ -461,8 +462,17 @@ def show_plt(df):
     ax = monthly_totals.plot(kind='bar', y=['term_loss',], title='Monthly Term Loss', xlabel='Date', ylabel='Term Loss')
     plt.subplots_adjust(bottom=0.3)
     ax.set_xticklabels(date_monthly)
+
+    df4 = df.copy()
+    df4['datetime2'] = pandas.to_datetime(df4['datetime'])
+    monthly_totals = df4.resample(rule='MS', on='datetime2').last() # .ohlc() .mean()
+    date_monthly = [x.strftime("%Y-%m") for x in monthly_totals.index]
+    ax = monthly_totals.plot(kind='bar', y=['net_total',], title='Monthly Net Total', xlabel='Date', ylabel='net_total')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_monthly)
+
     df3 = df.copy()
-    df3.datetime = pandas.to_datetime(df2.datetime)
+    df3.datetime = pandas.to_datetime(df3.datetime)
     df3.set_index('datetime', inplace=True)
     quarterly_totals = df3.resample('QS').sum()
     date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
@@ -475,12 +485,22 @@ def show_plt(df):
     ax = quarterly_totals.plot(kind='bar', y=['term_loss',], title='Quarterly Term Loss', xlabel='Date', ylabel='Term Loss')
     plt.subplots_adjust(bottom=0.3)
     ax.set_xticklabels(date_quarterly)
-    df.plot(y=['net_total'])
+
+    df5 = df.copy()
+    df5.datetime = pandas.to_datetime(df5.datetime)
+    df5.set_index('datetime', inplace=True)
+    quarterly_totals = df5.resample('QS').last() # .ohlc() .mean()
+    date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
+    ax = quarterly_totals.plot(kind='bar', y=['net_total',], title='Quarterly Net Total', xlabel='Date', ylabel='net_total')
+    plt.subplots_adjust(bottom=0.3)
+    ax.set_xticklabels(date_quarterly)
+
     #plt.yscale('log')
-    df.plot(y=['account_total'])
-    df.plot(kind='bar', y=['pnl', 'usd_gains', 'term_loss'])
-    df.plot(kind='bar', y=['usd_gains'])
-    df.plot(kind='bar', y=['term_loss'])
+    df.plot(y=['cash_total'])
+    df.plot(y=['net_total'])
+    #df.plot(kind='bar', y=['pnl', 'usd_gains', 'term_loss'])
+    #df.plot(kind='bar', y=['usd_gains'])
+    #df.plot(kind='bar', y=['term_loss'])
     plt.show()
 
 def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
@@ -1059,7 +1079,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl', 'term_loss',
             'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
-            'description', 'account_total', 'net_total',
+            'description', 'cash_total', 'net_total',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
     if output_csv is not None:
         with open(output_csv, 'w') as f:
