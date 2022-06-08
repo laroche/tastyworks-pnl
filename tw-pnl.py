@@ -289,7 +289,7 @@ def is_stock(symbol, tsubcode):
     # The conservative way is to through an exception if we are not sure.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
-        print('Use the option --assume-individual-stock to assume ' +
+        print('Use the option --assume-individual-stock to assume ' + \
             'individual stock for all unknown symbols.')
         raise
     # Just assume this is a normal stock if not in the above list
@@ -979,7 +979,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 asset = '%s %s%s %s' % (symbol, callput, strike, expire)
                 asset_type = AssetType.LongOption
                 if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or \
-                    (str(buysell) == 'Buy' and str(openclose) == 'Close') or
+                    (str(buysell) == 'Buy' and str(openclose) == 'Close') or \
                     (tsubcode in ('Expiration', 'Exercise', 'Assignment') and not fifos_islong(fifos, asset))):
                     asset_type = AssetType.ShortOption
             else:
