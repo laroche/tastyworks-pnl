@@ -108,7 +108,8 @@ def check_tcode(tcode, tsubcode, description):
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
-            'Special Dividend', 'Cash Settled Exercise', 'Futures Settlement', 'Transfer'): # XXX, 'Cash Settled Assignment'):
+            'Special Dividend', 'Cash Settled Assignment', 'Cash Settled Exercise',
+            'Futures Settlement', 'Transfer'):
             raise
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise
@@ -125,7 +126,7 @@ def check_param(buysell, openclose, callput):
 
 def check_trade(tsubcode, check_amount, amount, asset_type):
     #print('FEHLER:', check_amount, amount, tsubcode)
-    if tsubcode in ('Buy', 'Sell', 'Cash Settled Exercise',
+    if tsubcode in ('Buy', 'Sell', 'Cash Settled Assignment', 'Cash Settled Exercise',
         'Special Dividend', 'Futures Settlement'):
         pass
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
@@ -924,6 +925,11 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     ratio = int(ratio)
                 #print(symbol, quantity, oldquantity, ratio)
                 fifos_split(fifos, symbol, ratio)
+        elif tcode == 'Receive Deliver' and tsubcode in ('Exercise', 'Assignment') and symbol == 'SPX':
+            # SPX Options already have a "Cash Settled Exercise/Assignment" tsubcode that handels all
+            # trade relevant data. So we just delete this Exercise/Assignment line altogether.
+            # XXX Add a check there is no relevant transaction data included here.
+            pass
         else:
             asset = symbol
             if not isnan(expire):
@@ -980,7 +986,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                 asset_type = AssetType.LongOption
                 if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or \
                     (str(buysell) == 'Buy' and str(openclose) == 'Close') or \
-                    (tsubcode in ('Expiration', 'Exercise', 'Assignment') and not fifos_islong(fifos, asset))):
+                    (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and not fifos_islong(fifos, asset))):
                     asset_type = AssetType.ShortOption
             else:
                 asset_type = is_stock(symbol, tsubcode)
@@ -988,12 +994,12 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             # so we look into existing positions to check if we are long or short (we cannot
             # be both, so this test should be safe):
             if str(buysell) == 'Sell' or \
-                (tsubcode in ('Expiration', 'Exercise', 'Assignment') and fifos_islong(fifos, asset)):
+                (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and fifos_islong(fifos, asset)):
                 quantity = - quantity
-            if tsubcode in ('Exercise', 'Assignment') and quantity < 0:
+            if tsubcode in ('Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and quantity < 0:
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
-            if tsubcode == 'Cash Settled Assignment':
-                quantity = 1.0
+            #if tsubcode in ('Cash Settled Assignment', 'Cash Settled Exercise'):
+            #    quantity = 1.0
             check_trade(tsubcode, - (quantity * price), amount, asset_type)
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
