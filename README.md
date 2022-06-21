@@ -208,6 +208,10 @@ Important:
 - If a long option is assigned, the option buy price should be added to
   the stock price. This is currently not done, but we print a warning
   message for this case for manual adjustments in this rather rare case.
+- If you sell one option and then buy two of the same options, this transaction should be split for
+  a short option trade and a long option trade for German taxes. This is currently not done, but maybe
+  the checks for the yearly tax report will not work in this case. A real check and split of the
+  transactions needs to be added.
 - If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
 - REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
 - Print header with explanation of transaction output.
@@ -238,10 +242,7 @@ Important:
 - If you transfer USD to another bank account, you need to choose between tax-neutral and normal tax transaction.
 - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
   als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
-  als "Sell-To-Open" verwendet. Was passiert aber, wenn man eine Option gekauft hat und dann 2 davon
-  verkauft? Bleibt das bei Tastyworks eine Transaktion oder finden hier dann zwei Transaktionen statt?
-  Dieser Fall tritt bei mir nicht auf. Der Source Code sollte zumindest diesen Fall detektieren und
-  eine Warnung ausgeben.
+  als "Sell-To-Open" verwendet.
 - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
   als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
 - Complete support for Investmentsteuergesetz (InvStG) 2018.
