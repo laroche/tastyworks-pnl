@@ -226,7 +226,13 @@ Important:
 - Cryptos:
    - I am not trading cryptos, so there is only minimal support for them.
    - Cryptos have their own group. pnl is calculated as with normal stocks. No 1-year-taxfree or any other stuff is done.
-- Add extra counter for all transactions to/from the account.
+- Statistics:
+   - Add extra counter for all transactions to/from the account.
+   - Options
+      - all premium sold, how much could be kept?
+      - average days in trade
+      - number of winning trades
+   - Statistics for stock/options combined for the same symbol
 - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
 <pre>
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
