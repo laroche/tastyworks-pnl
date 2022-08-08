@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2020-2021 Florian La Roche <Florian.LaRoche@gmail.com>
+# Copyright (C) 2020-2022 Florian La Roche <Florian.LaRoche@gmail.com>
 # https://github.com/laroche/tastyworks-pnl
 #
 # Generate data for a German tax income statement from Tastyworks trade history.
@@ -33,12 +33,8 @@ import math
 import datetime as pydatetime
 import pandas
 
-# Damit werden auch Verluste beim Schreiben von Optionen berechnet. Dies ist
-# nicht nach aktuellem Steuergesetz der Fall.
-bmf_force = False
-
 tax_output = None
-#tax_output = '2020'
+#tax_output = '2021'
 
 convert_currency = True
 
@@ -310,14 +306,13 @@ def prev_year(date):
 # 'fifos' is a dictionary with 'asset' names. It contains a FIFO
 # 'deque()' with a list of 'price' (as float), 'price_usd' (as float),
 # 'quantity' (as integer), 'date' of purchase and 'tax_free'.
-def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
-    tax_free=False, debug=False, debugfifo=False, debugcurr=False):
+def fifo_add(fifos, quantity, price, price_usd, asset, date=None, tax_free=False, debug=False):
     prevyear = prev_year(date)
-    (pnl, pnl_notax, term_losses) = (.0, .0, .0)
+    (pnl, pnl_notax) = (.0, .0)
     if quantity == 0:
-        return (pnl, pnl_notax, term_losses)
+        return (pnl, pnl_notax)
     if debug:
-        print_fifos(fifos)
+        #print_fifos(fifos)
         print('fifo_add', quantity, price, asset)
     # Find the right FIFO queue for our asset:
     if fifos.get(asset) is None:
@@ -334,74 +329,34 @@ def fifo_add(fifos, quantity, price, price_usd, asset, is_option, date=None,
         # Check if the FIFO queue has enough entries for
         # us to finish:
         if abs(fifo[0][2]) >= abs(quantity):
-            if is_option and quantity > 0:
-                pnl -= quantity * price
-                if bmf_force and price > fifo[0][0]:
-                    term_losses += quantity * (price - fifo[0][0])
-                    #print('PLANA', term_losses)
-                    if term_losses < .0:
-                        raise
+            p = quantity * (price - fifo[0][0])
+            if date is None or \
+                (fifo[0][3] > prevyear and quantity < 0 and \
+                not fifo[0][4] and not tax_free):
+                pnl -= p
             else:
-                p = quantity * (price - fifo[0][0])
-                if date is None or \
-                    (fifo[0][3] > prevyear and quantity < 0 and \
-                    not fifo[0][4] and not tax_free):
-                    pnl -= p
-                else:
-                    pnl_notax -= p
-                    if date is not None and debugcurr:
-                        print(fifo[0][3], '%.2f' % (-p / 10000.0),
-                            'over one year ago or paying back loan or tax free')
-                if is_option and quantity < 0 and p > .0:
-                    #print('Termingeschäft-Verlust von %.2f:' % p)
-                    term_losses += p
-            if debugfifo:
-                print('DEBUG FIFO: %s: del %7d * %8.4f (new: %8.4f) = %8.2f pnl %8.2f notax' \
-                    % (asset, quantity, fifo[0][0], price, pnl, pnl_notax))
+                pnl_notax -= p
             fifo[0][2] += quantity
             if fifo[0][2] == 0:
                 fifo.popleft()
                 if len(fifo) == 0:
                     del fifos[asset]
-            return (pnl, pnl_notax, term_losses)
+            return (pnl, pnl_notax)
         # Remove the oldest FIFO entry and continue
         # the loop for further entries (or add the
         # remaining entries into the FIFO).
-        if is_option and quantity > 0:
-            pnl += fifo[0][2] * price
-            if bmf_force and price > fifo[0][0]:
-                term_losses -= fifo[0][2] * (price - fifo[0][0])
-                #print('PLANB', term_losses)
-                if term_losses < .0:
-                    raise
+        p = fifo[0][2] * (price - fifo[0][0])
+        if date is None or \
+            (fifo[0][3] > prevyear and quantity < 0 and \
+            not fifo[0][4] and not tax_free):
+            pnl += p
         else:
-            p = fifo[0][2] * (price - fifo[0][0])
-            if date is None or \
-                (fifo[0][3] > prevyear and quantity < 0 and \
-                not fifo[0][4] and not tax_free):
-                pnl += p
-            else:
-                pnl_notax += p
-                if date is not None and debugcurr:
-                    print(fifo[0][3], '%.2f' % (p / 10000.0),
-                        'over one year ago or paying back loan or tax free')
-            if is_option and quantity < 0 and p < .0:
-                #print('Termingeschäft-Verlust von %.2f:' % -p)
-                term_losses -= p
-        if debugfifo:
-            print('DEBUG FIFO: %s: del %7d * %8.4f (new: %8.4f) = %8.2f pnl, %8.2f notax' \
-                % (asset, -fifo[0][2], fifo[0][0], price, pnl, pnl_notax))
+            pnl_notax += p
         quantity += fifo[0][2]
         fifo.popleft()
     # Just add this to the FIFO queue:
     fifo.append([price, price_usd, quantity, date, tax_free])
-    # selling an option is taxed directly as income
-    if is_option and quantity < 0:
-        pnl -= quantity * price
-    if debugfifo:
-        print('DEBUG FIFO: %s: add %7d * %8.2f = %8.2f pnl %8.2f notax' \
-            % (asset, quantity, price, pnl, pnl_notax))
-    return (pnl, pnl_notax, term_losses)
+    return (pnl, pnl_notax)
 
 # Check if the first entry in the FIFO
 # is 'long' the underlying or 'short'.
@@ -428,10 +383,10 @@ def fifos_split(fifos, asset, ratio):
         # XXX: implement option strike adjustment
         # fifo == asset + ' ' + 'P/C' + Strike + ' '
 
-def print_fifos(fifos):
-    print('open positions:')
-    for fifo in fifos:
-        print(fifo, fifos[fifo])
+#def print_fifos(fifos):
+#    print('open positions:')
+#    for fifo in fifos:
+#        print(fifo, fifos[fifo])
 
 # account-usd should always be the same as total together with
 # EURUSD conversion data. So just a sanity check:
@@ -448,7 +403,7 @@ def show_plt(df):
     import matplotlib.pyplot as plt
 
     df2 = df.copy()
-    for i in ('cash_total', 'net_total', 'pnl', 'usd_gains', 'term_loss'):
+    for i in ('cash_total', 'net_total', 'pnl', 'usd_gains'):
         df2[i] = pandas.to_numeric(df2[i]) # df2[i].astype(float)
     df2.datetime = pandas.to_datetime(df2.datetime)
     df2.set_index('datetime', inplace=True)
@@ -461,9 +416,6 @@ def show_plt(df):
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
     ax = monthly_totals.plot(kind='bar', y='usd_gains', title='Monthly USD Gains', xlabel='Date', ylabel='USD Gains')
-    plt.subplots_adjust(bottom=0.2)
-    ax.set_xticklabels(date_monthly)
-    ax = monthly_totals.plot(kind='bar', y='term_loss', title='Monthly Term Loss', xlabel='Date', ylabel='Term Loss')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
     ax = monthly_last.plot(kind='bar', y='net_total', title='Monthly Net Total', xlabel='Date', ylabel='net_total')
@@ -481,55 +433,27 @@ def show_plt(df):
     ax = quarterly_totals.plot(kind='bar', y='usd_gains', title='Quarterly USD Gains', xlabel='Date', ylabel='USD Gains')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
-    ax = quarterly_totals.plot(kind='bar', y='term_loss', title='Quarterly Term Loss', xlabel='Date', ylabel='Term Loss')
-    plt.subplots_adjust(bottom=0.2)
-    ax.set_xticklabels(date_quarterly)
     ax = quarterly_last.plot(kind='bar', y='net_total', title='Quarterly Net Total', xlabel='Date', ylabel='net_total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
     plt.ylim(bottom=quarterly_min)
 
     #plt.yscale('log')
-    #df.plot(y=['cash_total'])
-    #df.plot(y=['net_total'])
 
     plt.show()
 
-def print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
-        withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, future, pnl, account_usd, account_usd_notax, total_fees,
-        term_losses, total, fifos, verbose):
-    print()
-    print('Total sums paid and received in the year %s:' % cur_year)
-    if dividends != .0 or withholding_tax != .0 or verbose:
-        print('dividends received:      ', f'{dividends:10.2f}' + curr_sym)
-        print('withholding tax paid:    ', f'{withholding_tax:10.2f}' + curr_sym)
-    if withdrawal != .0:
-        print('dividends paid:          ', f'{withdrawal:10.2f}' + curr_sym)
-    print('interest received:       ', f'{interest_recv:10.2f}' + curr_sym)
-    if interest_paid != .0:
-        print('interest paid:           ', f'{interest_paid:10.2f}' + curr_sym)
-    print('fee adjustments:         ', f'{fee_adjustments:10.2f}' + curr_sym)
-    if pnl_stocks_gains != .0 or pnl_stocks_losses != .0 or verbose:
-        print('pnl stocks gains:        ', f'{pnl_stocks_gains:10.2f}' + curr_sym)
-        print('pnl stocks losses:       ', f'{pnl_stocks_losses:10.2f}' + curr_sym)
-    if future != .0 or verbose:
-        print('pnl futures:             ', f'{future:10.2f}' + curr_sym)
-    print('pnl other:               ', f'{pnl:10.2f}' + curr_sym)
-    print('pnl total:               ', '%10.2f' % (dividends + \
-        withdrawal + interest_recv + interest_paid + fee_adjustments + \
-        pnl_stocks_gains + pnl_stocks_losses + future + pnl) + curr_sym)
-    print('USD currency gains:      ', f'{account_usd:10.2f}' + curr_sym)
-    print('USD curr. gains (no tax):', f'{account_usd_notax:10.2f}' + curr_sym)
-    print('losses future contracts: ', f'{-term_losses:10.2f}' + curr_sym)
-    print()
-    print('New end sums and open positions:')
-    print('total fees paid:         ', f'{total_fees:10.2f}' + curr_sym)
-    print('account cash balance:    ', f'{total:10.2f}' + '$')
-    print_fifos(fifos)
-    print()
+#def print_yearly_summary(cur_year, cash_total, fifos):
+#    print('Total sums paid and received in the year %s:' % cur_year)
+#    print()
+#    print('New end sums and open positions:')
+#    print('account cash balance:    ', f'{cash_total:10.2f}' + '$')
+#    print_fifos(fifos)
+#    print()
 
 def get_summary(new_wk, year):
+    einzahlungen = .0
+    auszahlungen = .0
+    fees = .0
     stock_gains = .0
     stock_losses = .0
     fonds_gains = .0
@@ -546,6 +470,8 @@ def get_summary(new_wk, year):
     other_losses = .0
     option_gains = .0
     option_losses = .0
+    soption_fifo_gains = .0
+    soption_fifo_losses = .0
     soption_gains = .0
     soption_losses = .0
     crypto_gains = .0
@@ -569,8 +495,13 @@ def get_summary(new_wk, year):
             'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
             if tax_free is True:
                 raise
-        if type in ('Ein/Auszahlung', 'Brokergebühr'):
-            pass
+        if type == 'Ein/Auszahlung':
+            if pnl < .0:
+                auszahlungen += pnl
+            else:
+                einzahlungen += pnl
+        elif type == 'Brokergebühr':
+            fees += pnl
         elif type == 'Ordergebühr':
             fee_adjustments += pnl
         elif type == 'Aktie':
@@ -599,6 +530,11 @@ def get_summary(new_wk, year):
             else:
                 option_gains += pnl
         elif type == 'Stillhalter-Option':
+            if pnl < .0:
+                soption_fifo_losses += pnl
+            else:
+                soption_fifo_gains += pnl
+            pnl = float(i[3])
             if pnl < .0:
                 soption_losses += pnl
             else:
@@ -642,12 +578,26 @@ def get_summary(new_wk, year):
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    if einzahlungen != .0:
+        new_wk.append(['Einzahlungen:', '', '', '', f'{einzahlungen:.2f}', 'Euro', '', '', '', '', ''])
+    if auszahlungen != .0:
+        new_wk.append(['Auszahlungen:', '', '', '', f'{auszahlungen:.2f}', 'Euro', '', '', '', '', ''])
+    if fees != .0:
+        new_wk.append(['Gebühren:', '', '', '', f'{fees:.2f}', 'Euro', '', '', '', '', ''])
     if fonds_gains != .0 or fonds_losses != .0:
         new_wk.append(['Investmentfonds:', '', '', '', f'{fonds_gains + fonds_losses:.2f}', 'Euro', '', '', '', '', ''])
+    if crypto_gains != .0 or crypto_losses != .0:
+        new_wk.append(['Krypto Gewinne:', '', '', '', f'{crypto_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Krypto Verluste:', '', '', '', f'{crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Krypto Gesamt:', '', '', '', f'{crypto_gains + crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     if stock_gains != .0 or stock_losses != .0:
         new_wk.append(['Aktien Gewinne:', '', '', '', f'{stock_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Aktien Verluste:', '', '', '', f'{stock_losses:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Aktien Gesamt:', '', '', '', f'{stock_gains + stock_losses:.2f}', 'Euro', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
+    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     if dividend_gains != .0 or dividend_losses != .0:
         new_wk.append(['Dividenden:', '', '', '', f'{dividend_gains:.2f}', 'Euro', '', '', '', '', ''])
     if dividend_losses != .0:
@@ -663,14 +613,14 @@ def get_summary(new_wk, year):
         new_wk.append(['Stillhalter Gewinne:', '', '', '', f'{soption_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Stillhalter Verluste:', '', '', '', f'{soption_losses:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Stillhalter Gesamt:', '', '', '', f'{soption_gains + soption_losses:.2f}', 'Euro', '', '', '', '', ''])
+    if soption_fifo_gains != .0 or soption_fifo_losses != .0:
+        new_wk.append(['Stillhalter Gewinne (FIFO):', '', '', '', f'{soption_fifo_gains:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Verluste (FIFO):', '', '', '', f'{soption_fifo_losses:.2f}', 'Euro', '', '', '', '', ''])
+        new_wk.append(['Stillhalter Gesamt (FIFO):', '', '', '', f'{soption_fifo_gains + soption_fifo_losses:.2f}', 'Euro', '', '', '', '', ''])
     if option_gains != .0 or option_losses != .0:
         new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if crypto_gains != .0 or crypto_losses != .0:
-        new_wk.append(['Krypto Gewinne:', '', '', '', f'{crypto_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Krypto Verluste:', '', '', '', f'{crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Krypto Gesamt:', '', '', '', f'{crypto_gains + crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
     if futures_gains != .0 or futures_losses != .0:
         new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', ''])
         new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', ''])
@@ -684,26 +634,23 @@ def get_summary(new_wk, year):
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
         + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
-    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses + crypto_losses + crypto_gains
+    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses + crypto_gains + crypto_losses
     new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
     new_wk.append(['Währungsgewinne USD:', '', '', '', f'{usd:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['Währungsgewinne USD (steuerfrei):', '', '', '', f'{usd_notax:.2f}', 'Euro', '', '', '', '', ''])
 
-def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
+def check(wk, output_csv, output_excel, show):
     #print(wk)
     splits = {}               # save data for stock/option splits
     curr_sym = '€'
     if not convert_currency:
         curr_sym = '$'
     fifos = {}
-    total = .0                # account total
-    (pnl_stocks_gains, pnl_stocks_losses, future, pnl) = (.0, .0, .0, .0)
-    (account_usd, account_usd_notax) = (.0, .0)
-    (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
-    (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
+    cash_total = .0           # account cash total
     cur_year = None
+    (min_year, max_year) = (0, 0)
     prev_datetime = None
     check_account_ref = None
     new_wk = []
@@ -720,17 +667,15 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             raise
         prev_datetime = datetime
         date = datetime[:10] # year-month-day but no time
-        if cur_year != datetime[:4]:
-            if cur_year is not None:
-                print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
-                    withdrawal, interest_recv, interest_paid, fee_adjustments,
-                    pnl_stocks_gains, pnl_stocks_losses, future, pnl, account_usd, account_usd_notax,
-                    total_fees, term_losses, total, fifos, verbose)
-                (pnl_stocks_gains, pnl_stocks_losses, future, pnl) = (.0, .0, .0, .0)
-                (account_usd, account_usd_notax) = (.0, .0)
-                (dividends, withholding_tax, interest_recv, interest_paid) = (.0, .0, .0, .0)
-                (withdrawal, fee_adjustments, total_fees, term_losses) = (.0, .0, .0, .0)
-            cur_year = datetime[:4]
+        #if cur_year != datetime[:4]:
+        #    if cur_year is not None:
+        #        print_yearly_summary(cur_year, cash_total, fifos)
+        #    cur_year = datetime[:4]
+        cur_year = datetime[:4]
+        if int(cur_year) > max_year:
+            max_year = int(cur_year)
+        if int(cur_year) < min_year or min_year == 0:
+            min_year = int(cur_year)
         check_tcode(tcode, tsubcode, description)
         check_param(buysell, openclose, callput)
         if check_account_ref is None:
@@ -742,8 +687,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
             (amount, fees) = (.0, .0)
         conv_usd = get_eurusd(date)
-        total_fees += usd2eur(fees, date, conv_usd)
-        total += amount - fees
+        cash_total += amount - fees
         eur_amount = usd2eur(amount - fees, date)
         # look at currency conversion gains:
         tax_free = False
@@ -766,11 +710,9 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             not isnan(expire) and str(buysell) == 'Sell' and str(openclose) == 'Open':
             tax_free = True
         # USD as a big integer number:
-        (usd_gains, usd_gains_notax, _) = fifo_add(fifos, int((amount - fees) * 10000),
-            1 / conv_usd, 1, 'account-usd', False, date, tax_free, debugfifo=debugfifo)
+        (usd_gains, usd_gains_notax) = fifo_add(fifos, int((amount - fees) * 10000),
+            1 / conv_usd, 1, 'account-usd', date, tax_free)
         (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
-        account_usd += usd_gains
-        account_usd_notax += usd_gains_notax
 
         asset = ''
         newdescription = ''
@@ -792,74 +734,43 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
         if price < .0:
             raise
 
-        header = '%s %s' % (datetime, f'{eur_amount:10.2f}' + curr_sym)
-        if verbose:
-            header += ' %s' % f'{usd_gains:10.2f}' + '€'
-        header += ' %s' % f'{amount - fees:10.2f}' + '$'
-        #if verbose:
-        #    header += ' %s' % f'{conv_usd:8.4f}'
-        if tcode != 'Receive Deliver' or tsubcode not in ('Forward Split', 'Reverse Split'):
-            header += ' %5d' % quantity
-
         if tcode == 'Money Movement':
             local_pnl = '%.4f' % eur_amount
-            term_loss = .0
             if tsubcode != 'Transfer' and fees != .0:
                 raise
             if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT'):
                 local_pnl = ''
                 asset = 'transfer'
                 newdescription = description
-                print(header, 'transferred:', description)
                 asset_type = AssetType.Transfer
             elif tsubcode in ('Deposit', 'Credit Interest', 'Debit Interest'):
                 if isnan(symbol):
                     asset = 'interest'
                     asset_type = AssetType.Interest
-                    if amount > .0:
-                        interest_recv += eur_amount
-                    else:
-                        interest_paid += eur_amount
                     if description != 'INTEREST ON CREDIT BALANCE':
                         newdescription = description
-                        print(header, 'interest:', description)
-                    else:
-                        print(header, 'interest')
                 else:
                     if amount > .0:
                         asset = 'dividends for %s' % symbol
                         asset_type = AssetType.Dividend
-                        dividends += eur_amount
-                        print(header, 'dividends: %s,' % symbol, description)
                     else:
                         asset = 'withholding tax for %s' % symbol
                         asset_type = AssetType.WithholdingTax
-                        withholding_tax += eur_amount
-                        print(header, 'withholding tax: %s,' % symbol, description)
                     newdescription = description
             elif tsubcode == 'Balance Adjustment':
                 asset = 'balance adjustment'
                 asset_type = AssetType.OrderPayments
-                if opt_long:
-                    print(header, 'balance adjustment')
-                fee_adjustments += eur_amount
-                total_fees += eur_amount
             elif tsubcode == 'Fee':
                 if description == 'INTL WIRE FEE':
                     local_pnl = ''
                     asset = 'fee'
                     asset_type = AssetType.Fee
                     newdescription = description
-                    print(header, 'fee:', description)
-                    total_fees += eur_amount
                 else:
                     # XXX In my case: stock borrow fee:
                     asset = 'stock borrow fees for %s' % symbol
                     asset_type = AssetType.Interest
                     newdescription = description
-                    print(header, 'stock borrow fees: %s,' % symbol, description)
-                    fee_adjustments += eur_amount
-                    total_fees += eur_amount
                     if amount >= .0:
                         raise
             elif tsubcode == 'Withdrawal':
@@ -868,47 +779,31 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                     asset = 'dividends paid for %s' % symbol
                     asset_type = AssetType.Dividend
                     newdescription = description
-                    print(header, 'dividends paid: %s,' % symbol, description)
-                    withdrawal += eur_amount
                     if amount >= .0:
                         raise
                 else:
                     if description[:5] == 'FROM ':
                         asset = 'interest'
                         asset_type = AssetType.Interest
-                        if amount > .0:
-                            interest_recv += eur_amount
-                        else:
-                            interest_paid += eur_amount
                         if description != 'INTEREST ON CREDIT BALANCE':
                             newdescription = description
-                            print(header, 'interest:', description)
-                        else:
-                            print(header, 'interest')
                     else:
                         # account deposit/withdrawal
                         local_pnl = ''
                         asset = 'transfer'
                         asset_type = AssetType.Transfer
                         newdescription = description
-                        print(header, 'transferred:', description)
             elif tsubcode == 'Dividend':
                 if amount > .0:
                     asset = 'dividends for %s' % symbol
                     asset_type = AssetType.Dividend
-                    dividends += eur_amount
-                    print(header, 'dividends: %s,' % symbol, description)
                 else:
                     asset = 'withholding tax for %s' % symbol
                     asset_type = AssetType.WithholdingTax
-                    withholding_tax += eur_amount
-                    print(header, 'withholding tax: %s,' % symbol, description)
                 newdescription = description
             elif tsubcode == 'Mark to Market':
                 asset = 'mark-to-market for %s' % symbol
                 asset_type = AssetType.Future
-                future += eur_amount
-                print(header, description)
                 newdescription = description
         elif tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
             # XXX: We might check that the two relevant entries have the same data for 'amount'.
@@ -995,6 +890,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             # be both, so this test should be safe):
             if str(buysell) == 'Sell' or \
                 (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and fifos_islong(fifos, asset)):
+                #print('Switching quantity from long to short:')
                 quantity = - quantity
             if tsubcode in ('Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and quantity < 0:
                 print('Assignment/Exercise for a long option, please move pnl on next line to stock:')
@@ -1003,31 +899,15 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             check_trade(tsubcode, - (quantity * price), amount, asset_type)
             price_usd = abs((amount - fees) / quantity)
             price = usd2eur(price_usd, date, conv_usd)
-            (local_pnl, _, term_loss) = fifo_add(fifos, quantity, price, price_usd, asset,
-                asset_type in (AssetType.LongOption, AssetType.ShortOption),
-                debugfifo=debugfifo)
-            if term_loss < .0:
-                raise
-            term_losses += term_loss
-            header = '%s %s' % (datetime, f'{local_pnl:10.2f}' + curr_sym)
-            if verbose:
-                header += ' %s' % f'{usd_gains:10.2f}' + '€'
-            header += ' %s' % f'{amount-fees:10.2f}' + '$'
-            #if verbose:
-            #    header += ' %s' % f'{conv_usd:8.4f}'
-            print(header, '%5d' % quantity, asset)
+            (local_pnl, _) = fifo_add(fifos, quantity, price, price_usd, asset)
             if asset_type == AssetType.IndStock:
-                if local_pnl > .0:
-                    pnl_stocks_gains += local_pnl
-                else:
-                    pnl_stocks_losses += local_pnl
+                pass
             elif asset_type == AssetType.Future:
                 if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
                     raise
                 # XXX For futures we just add all payments as-is for taxes. We should add them
                 # up until final closing instead. This should be changed. ???
                 local_pnl = eur_amount
-                future += local_pnl
             else:
                 if cur_year >= '2018':
                     if asset_type == AssetType.AktienFond:
@@ -1036,37 +916,29 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
                         local_pnl *= 0.85
                     elif asset_type == AssetType.ImmobilienFond:
                         local_pnl *= 0.20
-                pnl += local_pnl
             description = ''
             local_pnl = '%.4f' % local_pnl
 
-        #check_total(fifos, total)
+        #check_total(fifos, cash_total)
 
-        net_total = total + fifos_sum_usd(fifos)
+        net_total = cash_total + fifos_sum_usd(fifos)
 
+        if local_pnl != '':
+            local_pnl = '%.2f' % float(local_pnl)
         if tax_output:
             if datetime[:4] == tax_output:
-                if local_pnl != '':
-                    local_pnl = '%.2f' % float(local_pnl)
-                new_wk.append([datetime[:10], transaction_type(asset_type),
-                        local_pnl, '%.2f' % eur_amount, '%.2f' % (amount - fees), '%.4f' % conv_usd,
+                new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
+                        '%.2f' % eur_amount, '%.4f' % (amount - fees), '%.4f' % conv_usd,
                         quantity, asset,
                         tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
         else:
-            new_wk.append([datetime, transaction_type(asset_type),
-                local_pnl, '%.4f' % term_loss,
-                '%.4f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
-                quantity, asset, symbol, newdescription, '%.2f' % total, '%.2f' % net_total,
-                tax_free, '%.4f' % usd_gains, '%.4f' % usd_gains_notax])
+            new_wk.append([datetime, transaction_type(asset_type), local_pnl,
+                '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+                quantity, asset, symbol, newdescription, '%.2f' % cash_total, '%.2f' % net_total,
+                tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
 
     wk.drop('Account Reference', axis=1, inplace=True)
-
-    print_yearly_summary(cur_year, curr_sym, dividends, withholding_tax,
-        withdrawal, interest_recv, interest_paid, fee_adjustments, pnl_stocks_gains,
-        pnl_stocks_losses, future, pnl, account_usd, account_usd_notax, total_fees,
-        term_losses, total, fifos, verbose)
-
-    #print(wk)
+    #print_yearly_summary(cur_year, cash_total, fifos)
     if tax_output:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         get_summary(new_wk, tax_output)
@@ -1074,7 +946,7 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
     else:
-        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl', 'term_loss',
+        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
             'description', 'cash_total', 'net_total',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
@@ -1084,8 +956,6 @@ def check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo):
     if output_excel is not None:
         with pandas.ExcelWriter(output_excel) as f:
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
-    #print(new_wk)
-
     if show:
         show_plt(new_wk)
 
@@ -1108,9 +978,7 @@ def main(argv):
     #print_sp500()
     #print_nasdaq100()
     #sys.exit(0)
-    opt_long = False
     verbose = False
-    debugfifo = False
     output_csv = None
     output_excel = None
     show = False
@@ -1125,14 +993,9 @@ def main(argv):
         if opt == '--assume-individual-stock':
             global assume_stock
             assume_stock = True
-        elif opt in ('-b', '--bmf-force'):
-            global bmf_force
-            bmf_force = True
         elif opt in ('-h', '--help'):
             usage()
             sys.exit()
-        elif opt in ('-l', '--long'):
-            opt_long = True
         elif opt == '--output-csv':
             output_csv = arg
         elif opt == '--output-excel':
@@ -1141,14 +1004,12 @@ def main(argv):
             global convert_currency
             convert_currency = False
         elif opt in ('-v', '--verbose'):
-            verbose = True
+            verbose = True # XXX currently unused
         elif opt == '--show':
             show = True
         elif opt == '--tax-output':
             global tax_output
             tax_output = arg
-        elif opt == '--debug-fifo':
-            debugfifo = True
     if len(args) == 0:
         usage()
         sys.exit()
@@ -1157,7 +1018,7 @@ def main(argv):
     for csv_file in args:
         check_csv(csv_file)
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, opt_long, verbose, show, debugfifo)
+        check(wk, output_csv, output_excel, show)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
