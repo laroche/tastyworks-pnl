@@ -644,9 +644,6 @@ def get_summary(new_wk, year):
 def check(wk, output_csv, output_excel, show):
     #print(wk)
     splits = {}               # save data for stock/option splits
-    curr_sym = '€'
-    if not convert_currency:
-        curr_sym = '$'
     fifos = {}
     cash_total = .0           # account cash total
     cur_year = None
