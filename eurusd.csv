@@ -2,7 +2,7 @@
 "",Euro foreign exchange reference rate of the ECB / EUR 1 = USD ... / United States,
 unit,USD,
 unit multiplier,one,
-last update,2022-06-13 15:58:11,
+last update,2022-08-08 15:58:05,
 2010-01-01,.,No value available
 2010-01-02,.,No value available
 2010-01-03,.,No value available
@@ -4550,5 +4550,61 @@ last update,2022-06-13 15:58:11,
 2022-06-11,.,No value available
 2022-06-12,.,No value available
 2022-06-13,1.0455,
+2022-06-14,1.0452,
+2022-06-15,1.0431,
+2022-06-16,1.0400,
+2022-06-17,1.0486,
+2022-06-18,.,No value available
+2022-06-19,.,No value available
+2022-06-20,1.0517,
+2022-06-21,1.0550,
+2022-06-22,1.0521,
+2022-06-23,1.0493,
+2022-06-24,1.0524,
+2022-06-25,.,No value available
+2022-06-26,.,No value available
+2022-06-27,1.0572,
+2022-06-28,1.0561,
+2022-06-29,1.0517,
+2022-06-30,1.0387,
+2022-07-01,1.0425,
+2022-07-02,.,No value available
+2022-07-03,.,No value available
+2022-07-04,1.0455,
+2022-07-05,1.0290,
+2022-07-06,1.0177,
+2022-07-07,1.0180,
+2022-07-08,1.0163,
+2022-07-09,.,No value available
+2022-07-10,.,No value available
+2022-07-11,1.0098,
+2022-07-12,1.0042,
+2022-07-13,1.0067,
+2022-07-14,1.0005,
+2022-07-15,1.0059,
+2022-07-16,.,No value available
+2022-07-17,.,No value available
+2022-07-18,1.0131,
+2022-07-19,1.0245,
+2022-07-20,1.0199,
+2022-07-21,1.0199,
+2022-07-22,1.0190,
+2022-07-23,.,No value available
+2022-07-24,.,No value available
+2022-07-25,1.0236,
+2022-07-26,1.0124,
+2022-07-27,1.0152,
+2022-07-28,1.0122,
+2022-07-29,1.0198,
+2022-07-30,.,No value available
+2022-07-31,.,No value available
+2022-08-01,1.0233,
+2022-08-02,1.0224,
+2022-08-03,1.0194,
+2022-08-04,1.0181,
+2022-08-05,1.0233,
+2022-08-06,.,No value available
+2022-08-07,.,No value available
+2022-08-08,1.0199,
 "","General: The ECB publishes daily euro foreign exchange reference rates, which are calculated on the basis of the concertation between central banks at 14.15.",
 "",Source: European Central Bank (ECB).,
