@@ -33,9 +33,6 @@ import math
 import datetime as pydatetime
 import pandas
 
-tax_output = None
-#tax_output = '2021'
-
 convert_currency = True
 
 # For an unknown symbol (underlying), assume it is a individual/normal stock.
@@ -367,7 +364,8 @@ def fifos_sum_usd(fifos):
     sum_usd = .0
     for fifo in fifos:
         if fifo != 'account-usd':
-            for (price, price_usd, quantity, date, tax_free) in fifos[fifo]:
+            #for (price, price_usd, quantity, date, tax_free) in fifos[fifo]:
+            for (_, price_usd, quantity, _, _) in fifos[fifo]:
                 sum_usd += price_usd * quantity
     return sum_usd
 
@@ -450,6 +448,124 @@ def show_plt(df):
 #    print_fifos(fifos)
 #    print()
 
+# XXX Why does this function take so much CPU time?
+def get_summary2(new_wk, tax_output, min_year, max_year):
+    years = list(range(min_year, max_year + 1))
+    cols = ['description'] + years
+    data = []
+    for r in ('Einzahlungen', 'Auszahlungen', 'Brokergebühren', 'Ordergebühren',
+        'Investmentfondsgewinne', 'Investmentfondsverluste',
+        'Krypto-Gewinne', 'Krypto-Verluste',
+        'Aktiengewinne', 'Aktienverluste',
+        'Sonstige Gewinne', 'Sonstige Verluste',
+        'Stillhalter-Gewinne', 'Stillhalter-Verluste',
+        'Stillhalter-Gewinne (FIFO)', 'Stillhalter-Verluste (FIFO)',
+        'Long-Optionen-Gewinne', 'Long-Optionen-Verluste',
+        'Future-Gewinne', 'Future-Verluste',
+        'Dividenden', 'bezahlte Dividenden', 'Quellensteuer',
+        'Zinseinnahmen', 'Zinsausgaben',
+        'Währungsgewinne USD', 'Währungsgewinne USD (steuerfrei)'):
+        data.append([r] + [.0] * len(years))
+    stats = pandas.DataFrame(data, columns=cols)
+    for i in new_wk.index:
+        if tax_output:
+            (date, type, pnl, eur_amount, usd_amount, eurusd, quantity, asset,
+                tax_free, usd_gains, usd_gains_notax) = new_wk.iloc[i]
+        else:
+            (date, type, pnl, eur_amount, usd_amount, fees, eurusd, quantity, asset, symbol,
+                tax_free, usd_gains, usd_gains_notax, description, cash_total, net_total) = new_wk.iloc[i]
+        year = int(date[:4])
+        # steuerfreie Zahlungen:
+        if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
+            if bool(tax_free) is False:
+                raise
+        # keine steuerfreien Zahlungen:
+        if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
+            'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
+            if bool(tax_free) is True:
+                raise
+        # Währungsgewinne:
+        stats.loc[stats.description=='Währungsgewinne USD', year] += float(usd_gains)
+        stats.loc[stats.description=='Währungsgewinne USD (steuerfrei)', year] += float(usd_gains_notax)
+        # PNL aufbereiten:
+        if pnl == '':
+            pnl = .0
+        else:
+            pnl = float(pnl)
+        # Die verschiedenen Zahlungen:
+        if type == 'Ein/Auszahlung':
+            if pnl < .0:
+                stats.loc[stats.description=='Auszahlungen', year] += pnl
+            else:
+                stats.loc[stats.description=='Einzahlungen', year] += pnl
+        elif type == 'Brokergebühr':
+            stats.loc[stats.description=='Brokergebühren', year] += pnl
+        elif type == 'Ordergebühr':
+            stats.loc[stats.description=='Ordergebühren', year] += pnl
+        elif type in ('Aktienfond', 'Mischfond', 'Immobilienfond'):
+            if pnl < .0:
+                stats.loc[stats.description=='Investmentfondsverluste', year] += pnl
+            else:
+                stats.loc[stats.description=='Investmentfondsgewinne', year] += pnl
+        elif type == 'Krypto':
+            if pnl < .0:
+                stats.loc[stats.description=='Krypto-Verluste', year] += pnl
+            else:
+                stats.loc[stats.description=='Krypto-Gewinne', year] += pnl
+        elif type == 'Aktie':
+            if pnl < .0:
+                stats.loc[stats.description=='Aktienverluste', year] += pnl
+            else:
+                stats.loc[stats.description=='Aktiengewinne', year] += pnl
+        elif type == 'Sonstiges':
+            if pnl < .0:
+                stats.loc[stats.description=='Sonstige Verluste', year] += pnl
+            else:
+                stats.loc[stats.description=='Sonstige Gewinne', year] += pnl
+        elif type == 'Long-Option':
+            if pnl < .0:
+                stats.loc[stats.description=='Long-Optionen-Verluste', year] += pnl
+            else:
+                stats.loc[stats.description=='Long-Optionen-Gewinne', year] += pnl
+        elif type == 'Stillhalter-Option':
+            if pnl < .0:
+                stats.loc[stats.description=='Stillhalter-Verluste (FIFO)', year] += pnl
+            else:
+                stats.loc[stats.description=='Stillhalter-Gewinne (FIFO)', year] += pnl
+            eur_amount = float(eur_amount)
+            if eur_amount < .0:
+                stats.loc[stats.description=='Stillhalter-Verluste', year] += eur_amount
+            else:
+                stats.loc[stats.description=='Stillhalter-Gewinne', year] += eur_amount
+            # Kontrolle:  Praemien sind alle steuerfrei, Glattstellungen nicht:
+            if bool(tax_free) is False:
+                if eur_amount > .0:
+                    raise
+            else:
+                if eur_amount < .0:
+                    raise
+        elif type == 'Dividende':
+            if pnl < .0:
+                stats.loc[stats.description=='bezahlte Dividenden', year] += pnl
+            else:
+                stats.loc[stats.description=='Dividenden', year] += pnl
+        elif type == 'Quellensteuer':
+            stats.loc[stats.description=='Quellensteuer', year] += pnl
+        elif type == 'Zinsen':
+            if pnl < .0:
+                stats.loc[stats.description=='Zinsausgaben', year] += pnl
+            else:
+                stats.loc[stats.description=='Zinseinnahmen', year] += pnl
+        elif type == 'Future':
+            if pnl < .0:
+                stats.loc[stats.description=='Future-Verluste', year] += pnl
+            else:
+                stats.loc[stats.description=='Future-Gewinne', year] += pnl
+        else:
+            print(type, i)
+            raise
+    return stats
+
 def get_summary(new_wk, year):
     einzahlungen = .0
     auszahlungen = .0
@@ -504,16 +620,16 @@ def get_summary(new_wk, year):
             fees += pnl
         elif type == 'Ordergebühr':
             fee_adjustments += pnl
-        elif type == 'Aktie':
-            if pnl < .0:
-                stock_losses += pnl
-            else:
-                stock_gains += pnl
         elif type in ('Aktienfond', 'Mischfond', 'Immobilienfond'):
             if pnl < .0:
                 fonds_losses += pnl
             else:
                 fonds_gains += pnl
+        elif type == 'Aktie':
+            if pnl < .0:
+                stock_losses += pnl
+            else:
+                stock_gains += pnl
         elif type == 'Zinsen':
             if pnl < .0:
                 interest_losses += pnl
@@ -641,8 +757,7 @@ def get_summary(new_wk, year):
     new_wk.append(['Währungsgewinne USD:', '', '', '', f'{usd:.2f}', 'Euro', '', '', '', '', ''])
     new_wk.append(['Währungsgewinne USD (steuerfrei):', '', '', '', f'{usd_notax:.2f}', 'Euro', '', '', '', '', ''])
 
-def check(wk, output_csv, output_excel, show):
-    #print(wk)
+def check(wk, output_csv, output_excel, tax_output, output_summary, show):
     splits = {}               # save data for stock/option splits
     fifos = {}
     cash_total = .0           # account cash total
@@ -931,12 +1046,18 @@ def check(wk, output_csv, output_excel, show):
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
                 '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
-                quantity, asset, symbol, newdescription, '%.2f' % cash_total, '%.2f' % net_total,
-                tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
+                quantity, asset, symbol,
+                tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax,
+                newdescription, '%.2f' % cash_total, '%.2f' % net_total])
 
-    wk.drop('Account Reference', axis=1, inplace=True)
+    #wk.drop('Account Reference', axis=1, inplace=True)
     #print_yearly_summary(cur_year, cash_total, fifos)
+    # XXX datetime -> date, time
+    # XXX --year=2021 zum Limitieren von Jahr
+    # XXX --verbose für einen langen Report, inklusive DIT, Prozent Gewinner, Durchschnitt Gewinn, Anzahl Gewinntrades
+    # XXX output: summary for one year and summary for all years
     if tax_output:
+        # XXX: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         get_summary(new_wk, tax_output)
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
@@ -945,8 +1066,11 @@ def check(wk, output_csv, output_excel, show):
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
-            'description', 'cash_total', 'net_total',
-            'tax_free', 'usd_gains', 'usd_gains_notax'))
+            'tax_free', 'usd_gains', 'usd_gains_notax',
+            'description', 'cash_total', 'net_total'))
+    if output_summary is not None:
+        stats = get_summary2(new_wk, tax_output, min_year, max_year)
+        print(stats)
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
@@ -978,11 +1102,14 @@ def main(argv):
     verbose = False
     output_csv = None
     output_excel = None
+    tax_output = None
+    #tax_output = '2021'
+    output_summary = None
     show = False
     try:
         opts, args = getopt.getopt(argv, 'bhluv', ['assume-individual-stock',
-            'bmf-force', 'help', 'long', 'output-csv=',
-            'output-excel=', 'show', 'tax-output=', 'usd', 'verbose', 'debug-fifo'])
+            'help', 'output-csv=', 'output-excel=', 'summary=',
+            'show', 'tax-output=', 'usd', 'verbose', 'debug-fifo'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -997,6 +1124,8 @@ def main(argv):
             output_csv = arg
         elif opt == '--output-excel':
             output_excel = arg
+        elif opt == '--summary':
+            output_summary = arg
         elif opt in ('-u', '--usd'):
             global convert_currency
             convert_currency = False
@@ -1005,7 +1134,6 @@ def main(argv):
         elif opt == '--show':
             show = True
         elif opt == '--tax-output':
-            global tax_output
             tax_output = arg
     if len(args) == 0:
         usage()
@@ -1014,8 +1142,8 @@ def main(argv):
     args.reverse()
     for csv_file in args:
         check_csv(csv_file)
-        wk = pandas.read_csv(csv_file, parse_dates=['Date/Time']) # 'Expiration Date'])
-        check(wk, output_csv, output_excel, show)
+        wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
+        check(wk, output_csv, output_excel, tax_output, output_summary, show)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
