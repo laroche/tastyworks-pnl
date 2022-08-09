@@ -494,10 +494,10 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
             pnl = float(pnl)
         # Die verschiedenen Zahlungen:
         if type == 'Ein/Auszahlung':
-            if pnl < .0:
-                stats.loc[stats.description=='Auszahlungen', year] += pnl
+            if float(eur_amount) < .0:
+                stats.loc[stats.description=='Auszahlungen', year] += float(eur_amount)
             else:
-                stats.loc[stats.description=='Einzahlungen', year] += pnl
+                stats.loc[stats.description=='Einzahlungen', year] += float(eur_amount)
         elif type == 'Brokergebühr':
             stats.loc[stats.description=='Brokergebühren', year] += pnl
         elif type == 'Ordergebühr':
@@ -613,9 +613,9 @@ def get_summary(new_wk, year):
                 raise
         if type == 'Ein/Auszahlung':
             if pnl < .0:
-                auszahlungen += pnl
+                auszahlungen += float(i[3])
             else:
-                einzahlungen += pnl
+                einzahlungen += float(i[3])
         elif type == 'Brokergebühr':
             fees += pnl
         elif type == 'Ordergebühr':
