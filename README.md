@@ -20,6 +20,10 @@ python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tasty
 soffice tastyworks-tax-2021.csv
 </pre>
 
+The following command outputs a summary page for all years and generates a list of all transactions:
+<pre>
+python3 tw-pnl.py --assume-individual-stock --summary=summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
+</pre>
 
 [In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
 in Deutschland für den US-Broker Tastyworks.
@@ -42,6 +46,11 @@ lade die Daten in Deine [libreoffice](https://de.libreoffice.org/) Tabellenkalku
 <pre>
 python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
 soffice tastyworks-tax-2021.csv
+</pre>
+
+Folgender Befehl gibt eine Übersichtsseite für alle Jahre und eine Liste mit Transaktionen:
+<pre>
+python3 tw-pnl.py --assume-individual-stock --summary=summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
 </pre>
 
 
@@ -76,12 +85,6 @@ The option __--usd__ can be used to not translate pnl data into Euro.
 
 The option __--verbose__ adds currency gains for each transaction.
 
-The option __-b__ adds all losses from option writing into __term_loss__. This is needed to compute
-all non-stock losses for the German tax statement.
-
-Per default balance adjustments are only output as total sum, you can use the option __--long__
-to include balance adjustments into the list of transactions.
-
 Per default the script stops on unknown trading symbols (underlyings) and you have
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
@@ -95,8 +98,7 @@ The summary output lists all assets at the end of each year. 'account-usd' conta
 USD buys and the conversion price for Euro. This entry might be very long and look complicated. You might
 want to ignore this line and just look over the list of other assets.
 
-The option __--debug-fifo__ gives details on the FIFO workings. Be aware that pnl data
-is the cummulative sum, not the real local change. (Bug in the output!)
+The option __--summary=summary.csv__ gives some summary of gains and losses for all years.
 
 The option __--show__ gives some summary graphs.
 
