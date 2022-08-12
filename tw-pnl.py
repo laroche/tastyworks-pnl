@@ -465,7 +465,8 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
         'Zinseinnahmen', 'Zinsausgaben', 'Zinsen Gesamt',
         'Z19 Ausländische Kapitalerträge',
         'Z21 Termingeschäftsgewinne+Stillhalter',
-        'Z24 Termingeschäftsverluste')
+        'Z24 Termingeschäftsverluste',
+        'KAP+KAP-INV')
     data = []
     for _ in index:
         data.append([.0] * len(years))
@@ -622,6 +623,9 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
             stats.loc['Z24 Termingeschäftsverluste', year] = z24
         else:
             stats.loc['Z19 Ausländische Kapitalerträge', year] += z24
+        stats.loc['KAP+KAP-INV', year] = \
+            stats.loc['Z19 Ausländische Kapitalerträge', year] + \
+            stats.loc['Anlage KAP-INV', year]
     # sum of data over all years (not useful in some cases):
     for i in stats.index:
         total = .0
