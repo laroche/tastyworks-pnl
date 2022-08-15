@@ -411,13 +411,16 @@ def show_plt(df):
     monthly_last = df2.resample('MS').last() # .ohlc() .mean()
     monthly_min = monthly_last.net_total.min() * 0.9
     date_monthly = [x.strftime("%Y-%m") for x in monthly_totals.index]
-    ax = monthly_totals.plot(kind='bar', y='pnl', title='Monthly PnL Summary', xlabel='Date', ylabel='PnL')
+    ax = monthly_totals.plot(kind='bar', y='pnl', title='Monthly PnL Summary')
+    ax.set(xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
-    ax = monthly_totals.plot(kind='bar', y='usd_gains', title='Monthly USD Gains', xlabel='Date', ylabel='USD Gains')
+    ax = monthly_totals.plot(kind='bar', y='usd_gains', title='Monthly USD Gains')
+    ax.set(xlabel='Date', ylabel='USD Gains')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
-    ax = monthly_last.plot(kind='bar', y='net_total', title='Monthly Net Total', xlabel='Date', ylabel='net_total')
+    ax = monthly_last.plot(kind='bar', y='net_total', title='Monthly Net Total')
+    ax.set(xlabel='Date', ylabel='net_total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
     plt.ylim(bottom=monthly_min)
@@ -426,13 +429,16 @@ def show_plt(df):
     quarterly_last = df2.resample('QS').last() # .ohlc() .mean()
     quarterly_min = quarterly_last.net_total.min() * 0.9
     date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
-    ax = quarterly_totals.plot(kind='bar', y='pnl', title='Quarterly PnL Summary', xlabel='Date', ylabel='PnL')
+    ax = quarterly_totals.plot(kind='bar', y='pnl', title='Quarterly PnL Summary')
+    ax.set(xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
-    ax = quarterly_totals.plot(kind='bar', y='usd_gains', title='Quarterly USD Gains', xlabel='Date', ylabel='USD Gains')
+    ax = quarterly_totals.plot(kind='bar', y='usd_gains', title='Quarterly USD Gains')
+    ax.set(xlabel='Date', ylabel='USD Gains')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
-    ax = quarterly_last.plot(kind='bar', y='net_total', title='Quarterly Net Total', xlabel='Date', ylabel='net_total')
+    ax = quarterly_last.plot(kind='bar', y='net_total', title='Quarterly Net Total')
+    ax.set(xlabel='Date', ylabel='net_total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
     plt.ylim(bottom=quarterly_min)
@@ -445,7 +451,7 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
     # generate new (empty) pandas dataframe:
     years = list(range(min_year, max_year + 1)) + ['total']
     index = ('Einzahlungen', 'Auszahlungen', 'Brokergebühren',
-        'Alle Gebühren in USD',
+        'Alle Gebühren in USD', 'Alle Gebühren',
         'Währungsgewinne USD', 'Währungsgewinne USD (steuerfrei)',
         'Währungsgewinne USD Gesamt',
         'Krypto-Gewinne', 'Krypto-Verluste',
@@ -493,8 +499,9 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
         # Währungsgewinne:
         stats.loc['Währungsgewinne USD', year] += float(usd_gains)
         stats.loc['Währungsgewinne USD (steuerfrei)', year] += float(usd_gains_notax)
-        # XXX Should we output all fees also in Euro?
+        # sum of all fees paid:
         stats.loc['Alle Gebühren in USD', year] += float(fees)
+        stats.loc['Alle Gebühren', year] += usd2eur(float(fees), date[:10])
         # PNL aufbereiten:
         if pnl == '':
             pnl = .0
@@ -574,6 +581,10 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
             raise
     # add sums of data:
     for year in years:
+        ag = stats.loc['Alle Gebühren in USD', year]
+        stats.loc['Alle Gebühren in USD', year] = float(f'{ag:.2f}')
+        ag = stats.loc['Alle Gebühren', year]
+        stats.loc['Alle Gebühren', year] = float(f'{ag:.2f}')
         stats.loc['Währungsgewinne USD Gesamt', year] = \
             stats.loc['Währungsgewinne USD', year] + stats.loc['Währungsgewinne USD (steuerfrei)', year]
         stats.loc['Aktien Gesamt', year] = \
@@ -1135,7 +1146,7 @@ def check(wk, output_csv, output_excel, tax_output, output_summary, show):
             'description', 'cash_total', 'net_total'))
     if output_summary is not None:
         stats = get_summary2(new_wk, tax_output, min_year, max_year)
-        print(stats) # XXX Why are floats printed with 3 decimals?
+        print(stats)
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
