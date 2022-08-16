@@ -85,6 +85,31 @@ def usd2eur(x, date, conv=None):
         return x / conv
     return x
 
+class AssetType(enum.IntEnum):
+    LongOption = 1
+    ShortOption = 2
+    IndStock = 3
+    AktienFond = 4
+    MischFond = 5
+    ImmobilienFond = 6
+    OtherStock = 7
+    Crypto = 8
+    Future = 9
+    Transfer = 10
+    Dividend = 11
+    Interest = 12
+    WithholdingTax = 13
+    OrderPayments = 14
+    Fee = 15
+
+def transaction_type(asset_type):
+    t = ['', 'Long-Option', 'Stillhalter-Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
+        'Sonstiges', 'Krypto', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
+        'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
+    if int(asset_type) >= 1 and int(asset_type) <= 15:
+        return t[asset_type]
+    return ''
+
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ('Money Movement', 'Trade', 'Receive Deliver'):
         raise
@@ -134,31 +159,6 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
             raise
         if not isnan(check_amount) and check_amount != .0:
             raise
-
-class AssetType(enum.IntEnum):
-    LongOption = 1
-    ShortOption = 2
-    IndStock = 3
-    AktienFond = 4
-    MischFond = 5
-    ImmobilienFond = 6
-    OtherStock = 7
-    Crypto = 8
-    Future = 9
-    Transfer = 10
-    Dividend = 11
-    Interest = 12
-    WithholdingTax = 13
-    OrderPayments = 14
-    Fee = 15
-
-def transaction_type(asset_type):
-    t = ['', 'Long-Option', 'Stillhalter-Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
-        'Sonstiges', 'Krypto', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
-        'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
-    if int(asset_type) >= 1 and int(asset_type) <= 15:
-        return t[asset_type]
-    return ''
 
 # https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
 SP500 = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABMD', 'ABT', 'ACN', 'ADBE',
