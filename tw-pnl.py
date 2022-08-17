@@ -20,6 +20,10 @@
 #
 # sudo apt-get install python3-pandas
 #
+# for grphical output (--show) you need at least:
+#
+# sudo apt-get install python3-matplotlib
+#
 #
 # pylint: disable=C0103,C0111,C0114,C0116,C0301,E0704
 #
@@ -211,6 +215,8 @@ SP500 = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABMD', 'ABT', 'ACN', 'ADBE',
     'WAB', 'WAT', 'WBA', 'WBD', 'WDC', 'WEC', 'WELL', 'WFC', 'WHR', 'WM',
     'WMB', 'WMT', 'WRB', 'WRK', 'WST', 'WTW', 'WY', 'WYNN', 'XEL', 'XOM',
     'XRAY', 'XYL', 'YUM', 'ZBH', 'ZBRA', 'ZION', 'ZTS')
+# old stock symbols who got merged, renamed, removed:
+SP500old = ('FB',)
 
 # https://en.wikipedia.org/wiki/NASDAQ-100
 NASDAQ100 = ('ATVI', 'ADBE', 'ADP', 'ABNB', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AMD',
@@ -274,7 +280,7 @@ def is_stock(symbol, tsubcode):
     if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO'):
         return AssetType.OtherStock
     # Well known individual stock names:
-    if symbol in SP500 or symbol in NASDAQ100:
+    if symbol in SP500 or symbol in SP500old or symbol in NASDAQ100:
         return AssetType.IndStock
     if symbol.startswith('/'):
         if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
@@ -447,9 +453,18 @@ def show_plt(df):
 
     plt.show()
 
-def get_summary2(new_wk, tax_output, min_year, max_year):
+def df_append_row(df, row):
+    #df = df.append(pandas.Series(row), ignore_index=True)
+    df.loc[len(df)] = row
+    #df = df.sort_index().reset_index(drop=True)
+    return df
+
+def get_summary(new_wk, tax_output, min_year, max_year):
     # generate new (empty) pandas dataframe:
-    years = list(range(min_year, max_year + 1)) + ['total']
+    if tax_output:
+        min_year = max_year = int(tax_output)
+    years = list(range(min_year, max_year + 1))
+    years_total = years + ['total']
     index = ('Einzahlungen', 'Auszahlungen', 'Brokergebühren',
         'Alle Gebühren in USD', 'Alle Gebühren',
         'Währungsgewinne USD', 'Währungsgewinne USD (steuerfrei)',
@@ -475,9 +490,9 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
         'KAP+KAP-INV')
     data = []
     for _ in index:
-        data.append([.0] * len(years))
-    stats = pandas.DataFrame(data, columns=years, index=index)
-    # fill in all data:
+        data.append([.0] * len(years_total))
+    stats = pandas.DataFrame(data, columns=years_total, index=index)
+    # check all transactions and record summary data per year:
     for i in new_wk.index:
         fees = .0
         if tax_output:
@@ -605,7 +620,7 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
             stats.loc['Währungsgewinne USD', year] + \
             stats.loc['Krypto-Gewinne', year] + stats.loc['Krypto-Verluste', year]
         anlage_so = stats.loc['Anlage SO', year]
-        if year != 'total' and year > min_year:
+        if year > min_year:
             anlage_so += stats.loc['Anlage SO Verlustvortrag', year - 1]
         anlage_so_verlust = .0
         if anlage_so < .0:
@@ -629,7 +644,7 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
             stats.loc['Dividenden', year] + \
             stats.loc['Zinsen Gesamt', year] + \
             stats.loc['zusätzliche Ordergebühren', year]
-        if year != 'total' and year >= 2021:
+        if year >= 2021:
             stats.loc['Z21 Termingeschäftsgewinne+Stillhalter', year] = z21
             stats.loc['Z24 Termingeschäftsverluste', year] = z24
         else:
@@ -646,198 +661,22 @@ def get_summary2(new_wk, tax_output, min_year, max_year):
     # XXX Compute unrealized sums of short options.
     return stats
 
-def get_summary(new_wk, year):
-    einzahlungen = .0
-    auszahlungen = .0
-    fees = .0
-    stock_gains = .0
-    stock_losses = .0
-    fonds_gains = .0
-    fonds_losses = .0
-    dividend_gains = .0
-    dividend_losses = .0
-    withholdingtax = .0
-    interest_gains = .0
-    interest_losses = .0
-    fee_adjustments = .0
-    futures_gains = .0
-    futures_losses = .0
-    other_gains = .0
-    other_losses = .0
-    option_gains = .0
-    option_losses = .0
-    soption_fifo_gains = .0
-    soption_fifo_losses = .0
-    soption_gains = .0
-    soption_losses = .0
-    crypto_gains = .0
-    crypto_losses = .0
-    usd = .0
-    usd_notax = .0
-    for i in new_wk:
-        type = i[1]
-        usd += float(i[9])
-        usd_notax += float(i[10])
-        pnl = .0
-        if i[2] != '':
-            pnl = float(i[2])
-        tax_free = i[8]
-        # steuerfreie Zahlungen:
-        if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
-            if tax_free is False:
-                raise
-        # keine steuerfreien Zahlungen:
-        if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
-            'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
-            if tax_free is True:
-                raise
-        if type == 'Ein/Auszahlung':
-            if pnl < .0:
-                auszahlungen += float(i[3])
-            else:
-                einzahlungen += float(i[3])
-        elif type == 'Brokergebühr':
-            fees += pnl
-        elif type == 'Ordergebühr':
-            fee_adjustments += pnl
-        elif type in ('Aktienfond', 'Mischfond', 'Immobilienfond'):
-            if pnl < .0:
-                fonds_losses += pnl
-            else:
-                fonds_gains += pnl
-        elif type == 'Aktie':
-            if pnl < .0:
-                stock_losses += pnl
-            else:
-                stock_gains += pnl
-        elif type == 'Zinsen':
-            if pnl < .0:
-                interest_losses += pnl
-            else:
-                interest_gains += pnl
-        elif type == 'Sonstiges':
-            if pnl < .0:
-                other_losses += pnl
-            else:
-                other_gains += pnl
-        elif type == 'Long-Option':
-            if pnl < .0:
-                option_losses += pnl
-            else:
-                option_gains += pnl
-        elif type == 'Stillhalter-Option':
-            if pnl < .0:
-                soption_fifo_losses += pnl
-            else:
-                soption_fifo_gains += pnl
-            pnl = float(i[3])
-            if pnl < .0:
-                soption_losses += pnl
-            else:
-                soption_gains += pnl
-            # Kontrolle:  Praemien sind alle steuerfrei, Glattstellungen nicht:
-            if tax_free is False:
-                if pnl > .0:
-                    raise
-            else:
-                if pnl < .0:
-                    raise
-        elif type == 'Krypto':
-            if pnl < .0:
-                crypto_losses += pnl
-            else:
-                crypto_gains += pnl
-        elif type == 'Dividende':
-            if pnl < .0:
-                dividend_losses += pnl
-            else:
-                dividend_gains += pnl
-        elif type == 'Quellensteuer':
-            withholdingtax += pnl
-        elif type == 'Future':
-            if pnl < .0:
-                futures_losses += pnl
-            else:
-                futures_gains += pnl
-        else:
-            print(i)
-            raise
+def append_yearly_stats(df, tax_output, stats, min_year, max_year):
+    end = [''] * 5
+    years = list(range(min_year, max_year + 1))
+    if tax_output:
+        end = []
+        years = [int(tax_output)]
+    for year in years:
+        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
+        for i in stats.index:
+            df = df_append_row(df, [i, '', '', '', '', '', '%.2f' % stats.loc[i, year], '', '', '', ''] + end)
+    return df
 
-    # header:
-    new_wk.insert(0, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', ''])
-    new_wk.insert(1, ['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.insert(1, ['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.insert(1, ['', '', '', '', '', '', '', '', '', '', ''])
-
-    # summary at the end:
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    if einzahlungen != .0:
-        new_wk.append(['Einzahlungen:', '', '', '', f'{einzahlungen:.2f}', 'Euro', '', '', '', '', ''])
-    if auszahlungen != .0:
-        new_wk.append(['Auszahlungen:', '', '', '', f'{auszahlungen:.2f}', 'Euro', '', '', '', '', ''])
-    if fees != .0:
-        new_wk.append(['Gebühren:', '', '', '', f'{fees:.2f}', 'Euro', '', '', '', '', ''])
-    if fonds_gains != .0 or fonds_losses != .0:
-        new_wk.append(['Investmentfonds:', '', '', '', f'{fonds_gains + fonds_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if crypto_gains != .0 or crypto_losses != .0:
-        new_wk.append(['Krypto Gewinne:', '', '', '', f'{crypto_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Krypto Verluste:', '', '', '', f'{crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Krypto Gesamt:', '', '', '', f'{crypto_gains + crypto_losses:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    if stock_gains != .0 or stock_losses != .0:
-        new_wk.append(['Aktien Gewinne:', '', '', '', f'{stock_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Aktien Verluste:', '', '', '', f'{stock_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Aktien Gesamt:', '', '', '', f'{stock_gains + stock_losses:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    if dividend_gains != .0 or dividend_losses != .0:
-        new_wk.append(['Dividenden:', '', '', '', f'{dividend_gains:.2f}', 'Euro', '', '', '', '', ''])
-    if dividend_losses != .0:
-        new_wk.append(['bezahlte Dividenden:', '', '', '', f'{dividend_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Dividenden Gesamt:', '', '', '', f'{dividend_gains + dividend_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if withholdingtax != .0:
-        new_wk.append(['Quellensteuer:', '', '', '', f'{withholdingtax:.2f}', 'Euro', '', '', '', '', ''])
-    if other_gains != .0 or other_losses != .0:
-        new_wk.append(['Sonstige Gewinne:', '', '', '', f'{other_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Sonstige Verluste:', '', '', '', f'{other_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Sonstige Gesamt:', '', '', '', f'{other_gains + other_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if soption_gains != .0 or soption_losses != .0:
-        new_wk.append(['Stillhalter Gewinne:', '', '', '', f'{soption_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Stillhalter Verluste:', '', '', '', f'{soption_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Stillhalter Gesamt:', '', '', '', f'{soption_gains + soption_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if soption_fifo_gains != .0 or soption_fifo_losses != .0:
-        new_wk.append(['Stillhalter Gewinne (FIFO):', '', '', '', f'{soption_fifo_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Stillhalter Verluste (FIFO):', '', '', '', f'{soption_fifo_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Stillhalter Gesamt (FIFO):', '', '', '', f'{soption_fifo_gains + soption_fifo_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if option_gains != .0 or option_losses != .0:
-        new_wk.append(['Long-Optionen Gewinne:', '', '', '', f'{option_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Long-Optionen Verluste:', '', '', '', f'{option_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Long-Optionen Gesamt:', '', '', '', f'{option_gains + option_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if futures_gains != .0 or futures_losses != .0:
-        new_wk.append(['Future Gewinne:', '', '', '', f'{futures_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Future Verluste:', '', '', '', f'{futures_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Future Gesamt:', '', '', '', f'{futures_gains + futures_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if interest_gains != .0 or interest_losses != .0:
-        new_wk.append(['Zinseinnahmen:', '', '', '', f'{interest_gains:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Zinsausgaben:', '', '', '', f'{interest_losses:.2f}', 'Euro', '', '', '', '', ''])
-        new_wk.append(['Zinsen Gesamt:', '', '', '', f'{interest_gains + interest_losses:.2f}', 'Euro', '', '', '', '', ''])
-    if fee_adjustments != .0:
-        new_wk.append(['Ordergebühren:', '', '', '', f'{fee_adjustments:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    total_other = dividend_gains + dividend_losses + other_gains + other_losses + soption_gains + soption_losses \
-        + option_gains + option_losses + futures_gains + futures_losses + interest_gains + interest_losses + fee_adjustments
-    total = total_other + fonds_gains + fonds_losses + stock_gains + stock_losses + crypto_gains + crypto_losses
-    new_wk.append(['Alle Sonstige Gesamt:', '', '', '', f'{total_other:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['Gesamt:', '', '', '', f'{total:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['', '', '', '', '', '', '', '', '', '', ''])
-    new_wk.append(['Währungsgewinne USD:', '', '', '', f'{usd:.2f}', 'Euro', '', '', '', '', ''])
-    new_wk.append(['Währungsgewinne USD (steuerfrei):', '', '', '', f'{usd_notax:.2f}', 'Euro', '', '', '', '', ''])
-
-def check(wk, output_csv, output_excel, tax_output, output_summary, show):
+def check(wk, output_csv, output_excel, tax_output, show):
     splits = {}               # save data for stock/option splits
     fifos = {}
     cash_total = .0           # account cash total
@@ -1128,14 +967,10 @@ def check(wk, output_csv, output_excel, tax_output, output_summary, show):
 
     #wk.drop('Account Reference', axis=1, inplace=True)
     # XXX datetime -> date, time
-    # XXX --year=2021 zum Limitieren vom Jahr
     # XXX --verbose für einen langen Report, inklusive DIT, Prozent Gewinner, Durchschnitt Gewinn, Anzahl Gewinntrades
-    # XXX output: summary for one year and summary for all years
-    # XXX add summary lines into detailed output
     if tax_output:
         # XXX: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
-        get_summary(new_wk, tax_output)
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
@@ -1144,9 +979,11 @@ def check(wk, output_csv, output_excel, tax_output, output_summary, show):
             'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
             'tax_free', 'usd_gains', 'usd_gains_notax',
             'description', 'cash_total', 'net_total'))
-    if output_summary is not None:
-        stats = get_summary2(new_wk, tax_output, min_year, max_year)
-        print(stats)
+    stats = get_summary(new_wk, tax_output, min_year, max_year)
+    if tax_output:
+        stats.drop('total', axis=1, inplace=True)
+    print(stats)
+    new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
     if output_csv is not None:
         with open(output_csv, 'w') as f:
             new_wk.to_csv(f, index=False)
@@ -1167,9 +1004,9 @@ def check_csv(csv_file):
         sys.exit(1)
 
 def usage():
-    print('tw-pnl.py [--assume-individual-stock][--usd]' + \
+    print('tw-pnl.py [--assume-individual-stock][--tax-output=2021][--usd]' + \
         '[--output-csv=test.csv][--output-excel=test.xlsx][--help]' + \
-        '[--verbose] *.csv')
+        '[--verbose][--show] *.csv')
 
 def main(argv):
     #print_sp500()
@@ -1180,11 +1017,10 @@ def main(argv):
     output_excel = None
     tax_output = None
     #tax_output = '2021'
-    output_summary = None
     show = False
     try:
         opts, args = getopt.getopt(argv, 'huv', ['assume-individual-stock',
-            'help', 'output-csv=', 'output-excel=', 'summary=',
+            'help', 'output-csv=', 'output-excel=',
             'show', 'tax-output=', 'usd', 'verbose'])
     except getopt.GetoptError:
         usage()
@@ -1200,8 +1036,6 @@ def main(argv):
             output_csv = arg
         elif opt == '--output-excel':
             output_excel = arg
-        elif opt == '--summary':
-            output_summary = arg
         elif opt in ('-u', '--usd'):
             global convert_currency
             convert_currency = False
@@ -1219,7 +1053,7 @@ def main(argv):
     for csv_file in args:
         check_csv(csv_file)
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
-        check(wk, output_csv, output_excel, tax_output, output_summary, show)
+        check(wk, output_csv, output_excel, tax_output, show)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

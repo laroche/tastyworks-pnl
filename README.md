@@ -20,9 +20,9 @@ python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tasty
 soffice tastyworks-tax-2021.csv
 </pre>
 
-The following command outputs a summary page for all years and generates a list of all transactions:
+The following command outputs a more detailed csv report for your personal review:
 <pre>
-python3 tw-pnl.py --assume-individual-stock --summary=summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --output-csv=tastyworks-tax.csv transaction_history.csv
 </pre>
 
 [In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
@@ -48,9 +48,9 @@ python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tasty
 soffice tastyworks-tax-2021.csv
 </pre>
 
-Folgender Befehl gibt eine Übersichtsseite für alle Jahre und eine Liste mit Transaktionen:
+Folgender Befehl gibt einen detaillierten CSV Report für den persönlichen Review:
 <pre>
-python3 tw-pnl.py --assume-individual-stock --summary=summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --output-csv=tastyworks-tax.csv transaction_history.csv
 </pre>
 
 
@@ -83,8 +83,6 @@ from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
 
 The option __--usd__ can be used to not translate pnl data into Euro.
 
-The option __--verbose__ adds currency gains for each transaction.
-
 Per default the script stops on unknown trading symbols (underlyings) and you have
 to hardcode into the source code if it is an individual stock or some ETF/fond.
 You can use the __--assume-individual-stock__ option to assume individual stock for all unknown symbols.
@@ -97,8 +95,6 @@ Currency gains need to go into the 'Anlage SO' within a private German tax state
 The summary output lists all assets at the end of each year. 'account-usd' contains a FIFO list of all
 USD buys and the conversion price for Euro. This entry might be very long and look complicated. You might
 want to ignore this line and just look over the list of other assets.
-
-The option __--summary=summary.csv__ gives some summary of gains and losses for all years.
 
 The option __--show__ gives some summary graphs.
 
@@ -117,6 +113,12 @@ pip install pandas
 </code></p>
 <p><code>
 pip3 install pandas
+</code></p>
+
+For graphical output (--show), you need matplotlib:
+
+<p><code>
+sudo apt-get install python3-matplotlib
 </code></p>
 
 
