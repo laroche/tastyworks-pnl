@@ -209,18 +209,33 @@ TODO
 
 Important:
 
-- If a long option is assigned, the option buy price should be added to
-  the stock price. This is currently not done, but we print a warning
-  message for this case for manual adjustments in this rather rare case.
-- If you sell one option and then buy two of the same options, this transaction should be split for
-  a short option trade and a long option trade for German taxes. This is currently not done, but maybe
-  the checks for the yearly tax report will not work in this case. A real check and split of the
-  transactions needs to be added.
-- If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
-- REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
-- Print header with explanation of transaction output.
-- Can Excel output also include yearly summary data computed from Excel?
-  Can transactions also be grouped per year on different sheets/tabs?
+- stocks/ETFs
+   - REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
+   - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
+<pre>
+01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
+01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Sell,Close,54,,,,,0.00,9940.86,Forward split: Close 54.0 TQQQ,xxx...00
+</pre>
+      - Assumption: stock/option splits are tax neutral.
+      - stock splits are now implemented, but not tested at all. Options are not yet supported. Please send in more test data.
+   - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
+     als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
+   - Complete support for Investmentsteuergesetz (InvStG) 2018.
+      - German: Teilfreistellungen gelten auch für Dividenden
+   - Check if withholding tax is max 15% for dividends for US stocks as per DBA.
+     Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
+   - Complete the list of non-stocks.
+   - Does Tastyworks use BRK.B or BRK/B in transaction history?
+     Adjust the list of individual stocks accordingly.
+- Options:
+   - If a long option is assigned, the option buy price should be added to
+     the stock price. This is currently not done, but we print a warning
+     message for this case for manual adjustments in this rather rare case.
+   - If you sell one option and then buy two of the same options, this transaction should be split for
+     a short option trade and a long option trade for German taxes. This is currently not done, but maybe
+     the checks for the yearly tax report will not work in this case. A real check and split of the
+     transactions needs to be added.
+   - If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.
@@ -230,65 +245,54 @@ Important:
 - Cryptos:
    - I am not trading cryptos, so there is only minimal support for them.
    - Cryptos have their own group. pnl is calculated as with normal stocks. No 1-year-taxfree or any other stuff is done.
+- Currency gains:
+   - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
+   - For currency gains tax calculation you can reorder all transactions of one day and use the best
+     order to minimize tax payments. This is currently not done with the current source code.
+   - For currency gains you don't pay taxes for negative cash. Review on how this is computed in detail, is it
+     done correctly if going from negative cash to positive cash by splitting a transaction at 0 USD?
+   - If you transfer USD to another bank account, you need to choose between tax-neutral and normal tax transaction.
+   - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
+     als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
+     als "Sell-To-Open" verwendet.
+- Output
+   - Tax csv output: Sort transactions in the order they appear in the summary report.
+   - Add columne with automatic annotations. (warnings and error messages from conversion.)
+   - Instead of datetime in one columne, output date and time in two separate columns.
+   - Print header with explanation of transaction output. Or additional page for the tax athority with explanations.
+   - Generate documentation that can be passed on to the German tax authorities on how
+     the tax is computed and also document on how to fill out the official tax documents.
+      - Check this for docx reporting: <https://github.com/airens/interactive_brokers_tax>
+   - More German words in the output csv file for the German Finanzamt.
+   - Can Excel output also include yearly summary data computed from Excel? (How are formulas output?)
+     Can transactions also be grouped per year on different sheets/tabs? A yearly tab.
+   - Output open positions (assets) at start/end of year. Also include summary of unrealized gains.
+   - Is the time output using the correct timezone?
+   - Are we rounding output correctly?
+      - The EUR amount is internally stored with 4 digits, so if pnl computations are
+        done, we can have slightly different results. Maybe the EUR amount should already
+        be stored rounded to 2 digits for all further computations. As tax data should be
+        computed from the spreadsheet file, this is not really an issue.
+   - Use --summary=summary.csv to output tax information for all years into separate csv file.
+   - Output report as pdf in addition to csv: <https://github.com/probstj/ccGains>
 - Statistics:
-   - Add extra counter for all transactions to/from the account.
    - Options
-      - all premium sold, how much could be kept?
-      - average days in trade
-      - number of winning trades
-   - Statistics for stock/options combined for the same symbol
-- Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
-<pre>
-01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
-01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Sell,Close,54,,,,,0.00,9940.86,Forward split: Close 54.0 TQQQ,xxx...00
-</pre>
-   - Assumption: stock/option splits are tax neutral.
-   - stock splits are now implemented, but not tested at all. Options are not yet supported. Please send in more test data.
-- For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
-- For currency gains tax calculation you can reorder all transactions of one day and use the best
-  order to minimize tax payments. This is currently not done with the current source code.
-- For currency gains you don't pay taxes for negative cash. Review on how this is computed in detail, is it
-  done correctly if going from negative cash to positive cash by splitting a transaction at 0 USD?
-- If you transfer USD to another bank account, you need to choose between tax-neutral and normal tax transaction.
-- In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
-  als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
-  als "Sell-To-Open" verwendet.
-- In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
-  als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
-- Complete support for Investmentsteuergesetz (InvStG) 2018.
-   - German: Teilfreistellungen gelten auch für Dividenden
-- Add images on how to download csv-file within Tastyworks into docu.
-- Complete the list of non-stocks.
-- Done: For an individual stock whitelist we could list all SP500 and Nasdaq100 stocks.
-  How do we cope with historical data for this?
-- Specify non-realised gains to know how much tax needs to be paid for current net total.
-- Add performance reviews, graphs based on different time periods and underlyings.
-- Add description of the asset: SPY: SPDR S&P 500 ETF Trust
-- Check if withholding tax is max 15% for dividends for US stocks as per DBA.
-  Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
-- Are we rounding output correctly?
-   - The EUR amount is internally stored with 4 digits, so if pnl computations are
-     done, we can have slightly different results. Maybe the EUR amount should already
-     be stored rounded to 2 digits for all further computations. As tax data should be
-     computed from the spreadsheet file, this is not really an issue.
-- Is the time output using the correct timezone?
-- Does Tastyworks use BRK.B or BRK/B in transaction history?
-  Adjust the list of individual stocks accordingly.
-- Look at other libraries for currency conversion:
-  <https://github.com/alexprengere/currencyconverter> or
-  <https://github.com/flaxandteal/moneypandas>
-- Generate documentation that can be passed on to the German tax authorities on how
-  the tax is computed and also document on how to fill out the official tax documents.
-   - Check this for docx reporting: <https://github.com/airens/interactive_brokers_tax>
-- More German words in the output csv file for the German Finanzamt.
-- Output a list of assets at the beginning and at the end of a tax year.
-- Output report as pdf: <https://github.com/probstj/ccGains>
-- Useful statistics:
+      - Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
+      - Add DIT (Days In Trade), average days in trade
+      - number of winning trades (total and percentage), average gains
+   - Statistics for stocks/options combined for the same symbol
+   - Specify non-realised gains to know how much tax needs to be paid for current net total.
+   - Add performance reviews, graphs based on different time periods and underlyings.
    - How much premium can you keep for option trades. Tastyworks says this should be
      about 25 % of the sold premium. I am mostly selling only premium and can keep
      about 80 % of it in 2021.
    - How much fees do you pay for your option trades to the broker/exchange compared
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
+- Docu
+   - Add images on how to download csv-file within Tastyworks into docu.
+- Look at other libraries for currency conversion:
+  <https://github.com/alexprengere/currencyconverter> or
+  <https://github.com/flaxandteal/moneypandas>
 
 Nice:
 
@@ -296,6 +300,5 @@ Nice:
 - Add docu in German.
 - Add test data for users to try out.
 - Add testsuite to verify proper operation.
-- Improve output of open positions.
 - Use pandas.isna(x)?
 

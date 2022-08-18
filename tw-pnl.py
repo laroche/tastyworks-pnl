@@ -966,8 +966,6 @@ def check(wk, output_csv, output_excel, tax_output, show):
                 newdescription, '%.2f' % cash_total, '%.2f' % net_total])
 
     #wk.drop('Account Reference', axis=1, inplace=True)
-    # XXX datetime -> date, time
-    # XXX --verbose für einen langen Report, inklusive DIT, Prozent Gewinner, Durchschnitt Gewinn, Anzahl Gewinntrades
     if tax_output:
         # XXX: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
