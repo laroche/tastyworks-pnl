@@ -207,15 +207,9 @@ This description has moved to <https://laroche.github.io/private-geldanlage/steu
 TODO
 ----
 
-Important:
-
 - stocks/ETFs
    - REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
    - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
-<pre>
-01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
-01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Sell,Close,54,,,,,0.00,9940.86,Forward split: Close 54.0 TQQQ,xxx...00
-</pre>
       - Assumption: stock/option splits are tax neutral.
       - stock splits are now implemented, but not tested at all. Options are not yet supported. Please send in more test data.
    - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
@@ -291,15 +285,18 @@ Important:
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
 - Docu
    - Add images on how to download csv-file within Tastyworks into docu.
+   - Translate text output into German.
+   - Add docu in German.
+- Demo data and tests
+   - Add test data for users to try out.
+   - Add testsuite to verify proper operation.
+   - Use pandas.isna(x)?
 - Look at other libraries for currency conversion:
   <https://github.com/alexprengere/currencyconverter> or
   <https://github.com/flaxandteal/moneypandas>
-
-Nice:
-
-- Translate text output into German.
-- Add docu in German.
-- Add test data for users to try out.
-- Add testsuite to verify proper operation.
-- Use pandas.isna(x)?
+- Stock splits example:
+<pre>
+01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
+01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Sell,Close,54,,,,,0.00,9940.86,Forward split: Close 54.0 TQQQ,xxx...00
+</pre>
 
