@@ -279,6 +279,7 @@ Important:
    - Options
       - Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
       - Add DIT (Days In Trade), average days in trade
+      - Sold premium is already summed up, also premium kept as gains. Also calculate average premium by day.
       - number of winning trades (total and percentage), average gains
    - Statistics for stocks/options combined for the same symbol
    - Specify non-realised gains to know how much tax needs to be paid for current net total.
