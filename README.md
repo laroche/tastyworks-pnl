@@ -250,6 +250,7 @@ TODO
      als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
      als "Sell-To-Open" verwendet.
 - Output
+   - For --sumary allow excel output depending on filename extension.
    - Tax csv output: Sort transactions in the order they appear in the summary report.
    - Add columne with automatic annotations. (warnings and error messages from conversion.)
    - Instead of datetime in one columne, output date and time in two separate columns.

@@ -600,8 +600,9 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         stats.loc['Alle Gebühren in USD', year] = float(f'{ag:.2f}')
         ag = stats.loc['Alle Gebühren', year]
         stats.loc['Alle Gebühren', year] = float(f'{ag:.2f}')
-        stats.loc['Währungsgewinne USD Gesamt', year] = \
+        f = \
             stats.loc['Währungsgewinne USD', year] + stats.loc['Währungsgewinne USD (steuerfrei)', year]
+        stats.loc['Währungsgewinne USD Gesamt', year] = float(f'{f:.2f}')
         stats.loc['Aktien Gesamt', year] = \
             stats.loc['Aktiengewinne (Z20)', year] + stats.loc['Aktienverluste (Z23)', year]
         stats.loc['Sonstige Gesamt', year] = \
@@ -614,8 +615,9 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             stats.loc['Long-Optionen-Gewinne', year] + stats.loc['Long-Optionen-Verluste', year]
         stats.loc['Future Gesamt', year] = \
             stats.loc['Future-Gewinne', year] + stats.loc['Future-Verluste', year]
-        stats.loc['Zinsen Gesamt', year] = \
+        f = \
             stats.loc['Zinseinnahmen', year] + stats.loc['Zinsausgaben', year]
+        stats.loc['Zinsen Gesamt', year] = float(f'{f:.2f}')
         stats.loc['Anlage SO', year] = \
             stats.loc['Währungsgewinne USD', year] + \
             stats.loc['Krypto-Gewinne', year] + stats.loc['Krypto-Verluste', year]
@@ -628,7 +630,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         if anlage_so < 600.0:
             anlage_so = .0
         stats.loc['Anlage SO Steuern', year] = anlage_so
-        stats.loc['Anlage SO Verlustvortrag', year] = anlage_so_verlust
+        stats.loc['Anlage SO Verlustvortrag', year] = float(f'{anlage_so_verlust:.2f}')
         stats.loc['Anlage KAP-INV', year] = \
             stats.loc['Investmentfondsgewinne', year] + stats.loc['Investmentfondsverluste', year]
         z21 = \
@@ -657,7 +659,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         total = .0
         for year in years:
             total += stats.loc[i, year]
-        stats.loc[i, 'total'] = total
+        stats.loc[i, 'total'] = float(f'{total:.2f}')
     # XXX Compute unrealized sums of short options.
     return stats
 
@@ -676,7 +678,7 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
             df = df_append_row(df, [i, '', '', '', '', '', '%.2f' % stats.loc[i, year], '', '', '', ''] + end)
     return df
 
-def check(wk, output_csv, output_excel, tax_output, show):
+def check(wk, output_summary, output_csv, output_excel, tax_output, show):
     splits = {}               # save data for stock/option splits
     fifos = {}
     cash_total = .0           # account cash total
@@ -981,6 +983,9 @@ def check(wk, output_csv, output_excel, tax_output, show):
     if tax_output:
         stats.drop('total', axis=1, inplace=True)
     print(stats)
+    if output_summary:
+        with open(output_summary, 'w') as f:
+            stats.to_csv(f)
     if show:
         show_plt(new_wk)
     new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
@@ -1003,7 +1008,7 @@ def check_csv(csv_file):
 
 def usage():
     print('tw-pnl.py [--assume-individual-stock][--tax-output=2021][--usd]' + \
-        '[--output-csv=test.csv][--output-excel=test.xlsx][--help]' + \
+        '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' + \
         '[--verbose][--show] *.csv')
 
 def main(argv):
@@ -1011,6 +1016,7 @@ def main(argv):
     #print_nasdaq100()
     #sys.exit(0)
     verbose = False
+    output_summary = None
     output_csv = None
     output_excel = None
     tax_output = None
@@ -1018,7 +1024,7 @@ def main(argv):
     show = False
     try:
         opts, args = getopt.getopt(argv, 'huv', ['assume-individual-stock',
-            'help', 'output-csv=', 'output-excel=',
+            'help', 'summary=', 'output-csv=', 'output-excel=',
             'show', 'tax-output=', 'usd', 'verbose'])
     except getopt.GetoptError:
         usage()
@@ -1041,6 +1047,8 @@ def main(argv):
             verbose = True # XXX currently unused
         elif opt == '--show':
             show = True
+        elif opt == '--summary':
+            output_summary = arg
         elif opt == '--tax-output':
             tax_output = arg
     if len(args) == 0:
@@ -1051,7 +1059,7 @@ def main(argv):
     for csv_file in args:
         check_csv(csv_file)
         wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
-        check(wk, output_csv, output_excel, tax_output, show)
+        check(wk, output_summary, output_csv, output_excel, tax_output, show)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
