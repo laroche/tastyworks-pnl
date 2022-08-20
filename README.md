@@ -20,9 +20,10 @@ python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tasty
 soffice tastyworks-tax-2021.csv
 </pre>
 
-The following command outputs a more detailed csv report for your personal review:
+The following command outputs a more detailed csv report for your personal review together with a
+yearly summary for all years in the extra file tastyworks-summary.csv:
 <pre>
-python3 tw-pnl.py --assume-individual-stock --output-csv=tastyworks-tax.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --summary=tastyworks-summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
 </pre>
 
 [In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
@@ -48,9 +49,10 @@ python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tasty
 soffice tastyworks-tax-2021.csv
 </pre>
 
-Folgender Befehl gibt einen detaillierten CSV Report für den persönlichen Review:
+Folgender Befehl gibt einen detaillierten CSV Report für den persönlichen Review zusammen
+mit einem Jahresüberblick für alle Jahre in die extra Datei tastyworks-summary.csv:
 <pre>
-python3 tw-pnl.py --assume-individual-stock --output-csv=tastyworks-tax.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --summary=tastyworks-summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
 </pre>
 
 
