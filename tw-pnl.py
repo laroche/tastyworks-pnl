@@ -981,6 +981,8 @@ def check(wk, output_csv, output_excel, tax_output, show):
     if tax_output:
         stats.drop('total', axis=1, inplace=True)
     print(stats)
+    if show:
+        show_plt(new_wk)
     new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
     if output_csv is not None:
         with open(output_csv, 'w') as f:
@@ -988,8 +990,6 @@ def check(wk, output_csv, output_excel, tax_output, show):
     if output_excel is not None:
         with pandas.ExcelWriter(output_excel) as f:
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
-    if show:
-        show_plt(new_wk)
 
 def check_csv(csv_file):
     with open(csv_file) as f:
