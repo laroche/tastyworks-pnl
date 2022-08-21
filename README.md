@@ -272,6 +272,10 @@ TODO
         computed from the spreadsheet file, this is not really an issue.
    - Use --summary=summary.csv to output tax information for all years into separate csv file.
    - Output report as pdf in addition to csv: <https://github.com/probstj/ccGains>
+   - Output all warnings and error messages into an extra field.
+   - Allow new strategy field / cetegory to be filled out.
+   - Add an extra notes/comment field that can be edited.
+   - Verlustverrechnungstöpfe für Aktien, Sonstiges, Termingeschäfte. Berechnung der zu zahlenden Steuer.
 - Statistics:
    - Options
       - Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
@@ -286,6 +290,7 @@ TODO
      about 80 % of it in 2021.
    - How much fees do you pay for your option trades to the broker/exchange compared
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
+   - Show number of trades history.
 - Docu
    - Add images on how to download csv-file within Tastyworks into docu.
    - Translate text output into German.
