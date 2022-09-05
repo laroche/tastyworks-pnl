@@ -990,7 +990,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
         stats.drop('total', axis=1, inplace=True)
     print(stats.to_string())
     if output_summary:
-        with open(output_summary, 'w') as f:
+        with open(output_summary, 'w', encoding='UTF8') as f:
             stats.to_csv(f)
     if show:
         show_plt(new_wk)
