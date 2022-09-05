@@ -678,7 +678,13 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
             df = df_append_row(df, [i, '', '', '', '', '', '%.2f' % stats.loc[i, year], '', '', '', ''] + end)
     return df
 
-def check(wk, output_summary, output_csv, output_excel, tax_output, show):
+def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
+    if len(all_wk) == 1:
+        wk = all_wk[0]
+    else:
+        wk = pandas.concat(all_wk)
+        wk.sort_values(by=['Date/Time',], ascending=False, inplace=True)
+        wk.reset_index(drop=True, inplace=True)
     splits = {}               # save data for stock/option splits
     fifos = {}
     cash_total = .0           # account cash total
@@ -709,7 +715,7 @@ def check(wk, output_summary, output_csv, output_excel, tax_output, show):
         check_param(buysell, openclose, callput)
         if check_account_ref is None:
             check_account_ref = account_ref
-        if account_ref != check_account_ref: # check if this does not change over time
+        if len(all_wk) == 1 and account_ref != check_account_ref: # check if this does not change over time
             raise
         (amount, fees) = (float(amount), float(fees))
         # option/stock splits are tax neutral, so zero out amount/fees for it:
@@ -982,7 +988,7 @@ def check(wk, output_summary, output_csv, output_excel, tax_output, show):
     stats = get_summary(new_wk, tax_output, min_year, max_year)
     if tax_output:
         stats.drop('total', axis=1, inplace=True)
-    print(stats)
+    print(stats.to_string())
     if output_summary:
         with open(output_summary, 'w') as f:
             stats.to_csv(f)
@@ -990,14 +996,14 @@ def check(wk, output_summary, output_csv, output_excel, tax_output, show):
         show_plt(new_wk)
     new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
     if output_csv is not None:
-        with open(output_csv, 'w') as f:
+        with open(output_csv, 'w', encoding='UTF8') as f:
             new_wk.to_csv(f, index=False)
     if output_excel is not None:
         with pandas.ExcelWriter(output_excel) as f:
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
 
 def check_csv(csv_file):
-    with open(csv_file) as f:
+    with open(csv_file, encoding='UTF8') as f:
         content = f.readlines()
     if len(content) < 1 or content[0] != 'Date/Time,Transaction Code,' + \
         'Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,' + \
@@ -1056,10 +1062,11 @@ def main(argv):
         sys.exit()
     read_eurusd()
     args.reverse()
+    all_wk = []
     for csv_file in args:
         check_csv(csv_file)
-        wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
-        check(wk, output_summary, output_csv, output_excel, tax_output, show)
+        all_wk.append(pandas.read_csv(csv_file, parse_dates=['Date/Time']))
+    check(all_wk, output_summary, output_csv, output_excel, tax_output, show)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

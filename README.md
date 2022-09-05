@@ -209,9 +209,6 @@ This description has moved to <https://laroche.github.io/private-geldanlage/steu
 TODO
 ----
 
-- allow reading in several CSV files, also from different accounts:
-   - sort by date to allow time overlapping accounts
-   - (allow account refs to include several different accounts without any error/warning)
 - stocks/ETFs
    - REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
    - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
