@@ -24,6 +24,8 @@ The following command outputs a more detailed csv report for your personal revie
 yearly summary for all years in the extra file tastyworks-summary.csv:
 <pre>
 python3 tw-pnl.py --assume-individual-stock --summary=tastyworks-summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
+soffice tastyworks-tax.csv
+soffice tastyworks-summary.csv
 </pre>
 
 [In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
@@ -53,6 +55,8 @@ Folgender Befehl gibt einen detaillierten CSV Report für den persönlichen Revi
 mit einem Jahresüberblick für alle Jahre in die extra Datei tastyworks-summary.csv:
 <pre>
 python3 tw-pnl.py --assume-individual-stock --summary=tastyworks-summary.csv --output-csv=tastyworks-tax.csv transaction_history.csv
+soffice tastyworks-tax.csv
+soffice tastyworks-summary.csv
 </pre>
 
 
@@ -210,7 +214,6 @@ TODO
 ----
 
 - stocks/ETFs
-   - REITs should not be normal stocks, but go into the "Topf Sonstiges". Classify REITs accordingly.
    - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
       - Assumption: stock/option splits are tax neutral.
       - stock splits are now implemented, but not tested at all. Options are not yet supported. Please send in more test data.
@@ -255,6 +258,7 @@ TODO
    - For --sumary allow excel output depending on filename extension.
    - Tax csv output: Sort transactions in the order they appear in the summary report.
    - Add columne with automatic annotations. (warnings and error messages from conversion.)
+   - Add columne with undelying symbol (dividends and options) and Put/Call (for options).
    - Instead of datetime in one columne, output date and time in two separate columns.
    - Print header with explanation of transaction output. Or additional page for the tax athority with explanations.
    - Generate documentation that can be passed on to the German tax authorities on how
@@ -263,16 +267,14 @@ TODO
    - More German words in the output csv file for the German Finanzamt.
    - Can Excel output also include yearly summary data computed from Excel? (How are formulas output?)
      Can transactions also be grouped per year on different sheets/tabs? A yearly tab.
-   - Output open positions (assets) at start/end of year. Also include summary of unrealized gains.
+   - Output open positions (assets) at start/end of year. Also include summary of unrealized gains (including currencies).
    - Is the time output using the correct timezone?
    - Are we rounding output correctly?
       - The EUR amount is internally stored with 4 digits, so if pnl computations are
         done, we can have slightly different results. Maybe the EUR amount should already
         be stored rounded to 2 digits for all further computations. As tax data should be
         computed from the spreadsheet file, this is not really an issue.
-   - Use --summary=summary.csv to output tax information for all years into separate csv file.
    - Output report as pdf in addition to csv: <https://github.com/probstj/ccGains>
-   - Output all warnings and error messages into an extra field.
    - Allow new strategy field / cetegory to be filled out.
    - Add an extra notes/comment field that can be edited.
    - Verlustverrechnungstöpfe für Aktien, Sonstiges, Termingeschäfte. Berechnung der zu zahlenden Steuer.
@@ -287,10 +289,10 @@ TODO
    - Add performance reviews, graphs based on different time periods and underlyings.
    - How much premium can you keep for option trades. Tastyworks says this should be
      about 25 % of the sold premium. I am mostly selling only premium and can keep
-     about 80 % of it in 2021.
+     about 79 % of it as average over many years.
    - How much fees do you pay for your option trades to the broker/exchange compared
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
-   - Show number of trades history.
+   - Show number of trades/transactions history.
 - Docu
    - Add images on how to download csv-file within Tastyworks into docu.
    - Translate text output into German.

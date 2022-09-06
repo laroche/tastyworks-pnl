@@ -231,6 +231,10 @@ NASDAQ100 = ('ATVI', 'ADBE', 'ADP', 'ABNB', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AM
     'REGN', 'ROST', 'SGEN', 'SIRI', 'SWKS', 'SPLK', 'SBUX', 'SNPS', 'TMUS',
     'TSLA', 'TXN', 'VRSN', 'VRSK', 'VRTX', 'WBA', 'WDAY', 'XEL', 'ZM', 'ZS')
 
+REITS = ('ARE', 'AMT', 'AVB', 'BXP', 'CPT', 'CBRE', 'CCI', 'DLR', 'DRE', 'EQUIX',
+    'EQR', 'ESS', 'EXR', 'FRT', 'PEAK', 'HST', 'IRM', 'KIM', 'MAA', 'PLD',
+    'PSA', 'O', 'REG', 'SBAC', 'SPG', 'UDR', 'VTR', 'VICI', 'VNO', 'WELL', 'WY')
+
 def read_sp500():
     table = pandas.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
     df = table[0]
@@ -245,6 +249,7 @@ def print_sp500():
     symbols.sort()
     p = pprint.pformat(symbols, width=79, compact=True, indent=4)
     print(p)
+    # XXX print REITS: df['GICS Sector'] == 'Real Estate'
 
 def read_nasdaq100():
     table = pandas.read_html('https://en.wikipedia.org/wiki/NASDAQ-100')
@@ -280,7 +285,7 @@ def is_stock(symbol, tsubcode):
     if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO'):
         return AssetType.OtherStock
     # Well known individual stock names:
-    if symbol in SP500 or symbol in SP500old or symbol in NASDAQ100:
+    if (symbol in SP500 or symbol in SP500old or symbol in NASDAQ100) and symbol not in REITS:
         return AssetType.IndStock
     if symbol.startswith('/'):
         if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
@@ -470,10 +475,11 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Währungsgewinne USD', 'Währungsgewinne USD (steuerfrei)',
         'Währungsgewinne USD Gesamt',
         'Krypto-Gewinne', 'Krypto-Verluste',
-        'Anlage SO', 'Anlage SO Steuern', 'Anlage SO Verlustvortrag',
+        'Anlage SO', 'Anlage SO Steuerbetrag', 'Anlage SO Verlustvortrag',
         'Investmentfondsgewinne', 'Investmentfondsverluste',
         'Anlage KAP-INV',
         'Aktiengewinne (Z20)', 'Aktienverluste (Z23)', 'Aktien Gesamt',
+        'Aktien Steuerbetrag', 'Aktien Verlustvortrag',
         'Sonstige Gewinne', 'Sonstige Verluste', 'Sonstige Gesamt',
         'Stillhalter-Gewinne', 'Stillhalter-Verluste', 'Stillhalter Gesamt',
         'Stillhalter-Gewinne (FIFO)', 'Stillhalter-Verluste (FIFO)',
@@ -596,15 +602,18 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             raise
     # add sums of data:
     for year in years:
-        ag = stats.loc['Alle Gebühren in USD', year]
-        stats.loc['Alle Gebühren in USD', year] = float(f'{ag:.2f}')
-        ag = stats.loc['Alle Gebühren', year]
-        stats.loc['Alle Gebühren', year] = float(f'{ag:.2f}')
-        f = \
+        stats.loc['Währungsgewinne USD Gesamt', year] = \
             stats.loc['Währungsgewinne USD', year] + stats.loc['Währungsgewinne USD (steuerfrei)', year]
-        stats.loc['Währungsgewinne USD Gesamt', year] = float(f'{f:.2f}')
-        stats.loc['Aktien Gesamt', year] = \
+        stats.loc['Aktien Gesamt', year] = aktien_year = \
             stats.loc['Aktiengewinne (Z20)', year] + stats.loc['Aktienverluste (Z23)', year]
+        if year > min_year:
+            aktien_year += stats.loc['Aktien Verlustvortrag', year - 1]
+        aktien_verlust = .0
+        if aktien_year < .0:
+            aktien_verlust = aktien_year
+            aktien_year = .0
+        stats.loc['Aktien Steuerbetrag', year] = aktien_year
+        stats.loc['Aktien Verlustvortrag', year] = aktien_verlust
         stats.loc['Sonstige Gesamt', year] = \
             stats.loc['Sonstige Gewinne', year] + stats.loc['Sonstige Verluste', year]
         stats.loc['Stillhalter Gesamt', year] = \
@@ -615,9 +624,8 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             stats.loc['Long-Optionen-Gewinne', year] + stats.loc['Long-Optionen-Verluste', year]
         stats.loc['Future Gesamt', year] = \
             stats.loc['Future-Gewinne', year] + stats.loc['Future-Verluste', year]
-        f = \
+        stats.loc['Zinsen Gesamt', year] = \
             stats.loc['Zinseinnahmen', year] + stats.loc['Zinsausgaben', year]
-        stats.loc['Zinsen Gesamt', year] = float(f'{f:.2f}')
         stats.loc['Anlage SO', year] = \
             stats.loc['Währungsgewinne USD', year] + \
             stats.loc['Krypto-Gewinne', year] + stats.loc['Krypto-Verluste', year]
@@ -629,8 +637,8 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             anlage_so_verlust = anlage_so
         if anlage_so < 600.0:
             anlage_so = .0
-        stats.loc['Anlage SO Steuern', year] = anlage_so
-        stats.loc['Anlage SO Verlustvortrag', year] = float(f'{anlage_so_verlust:.2f}')
+        stats.loc['Anlage SO Steuerbetrag', year] = anlage_so
+        stats.loc['Anlage SO Verlustvortrag', year] = anlage_so_verlust
         stats.loc['Anlage KAP-INV', year] = \
             stats.loc['Investmentfondsgewinne', year] + stats.loc['Investmentfondsverluste', year]
         z21 = \
@@ -654,6 +662,11 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         stats.loc['KAP+KAP-INV', year] = \
             stats.loc['Z19 Ausländische Kapitalerträge', year] + \
             stats.loc['Anlage KAP-INV', year]
+    # limit to two decimal digits
+    for i in stats.index:
+        for year in years:
+            f = stats.loc[i, year]
+            stats.loc[i, year] = float(f'{f:.2f}')
     # sum of data over all years (not useful in some cases):
     for i in stats.index:
         total = .0
@@ -675,7 +688,7 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
         df = df_append_row(df, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
-            df = df_append_row(df, [i, '', '', '', '', '', '%.2f' % stats.loc[i, year], '', '', '', ''] + end)
+            df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', ''] + end)
     return df
 
 def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
