@@ -31,7 +31,6 @@
 import enum
 import sys
 import os
-import getopt
 from collections import deque
 import math
 import datetime as pydatetime
@@ -75,12 +74,12 @@ def get_eurusd(date, debug=False):
             print('EURUSD conversion not found for', date)
         date = str(pydatetime.date(*map(int, date.split('-'))) - pydatetime.timedelta(days=1))
 
-def eur2usd(x, date, conv=None):
-    if convert_currency:
-        if conv is None:
-            return x * get_eurusd(date)
-        return x * conv
-    return x
+#def eur2usd(x, date, conv=None):
+#    if convert_currency:
+#        if conv is None:
+#            return x * get_eurusd(date)
+#        return x * conv
+#    return x
 
 def usd2eur(x, date, conv=None):
     if convert_currency:
@@ -235,6 +234,7 @@ REITS = ('ARE', 'AMT', 'AVB', 'BXP', 'CPT', 'CBRE', 'CCI', 'DLR', 'DRE', 'EQUIX'
     'EQR', 'ESS', 'EXR', 'FRT', 'PEAK', 'HST', 'IRM', 'KIM', 'MAA', 'PLD',
     'PSA', 'O', 'REG', 'SBAC', 'SPG', 'UDR', 'VTR', 'VICI', 'VNO', 'WELL', 'WY')
 
+# Read all companies of the SP500 from wikipedia.
 def read_sp500():
     table = pandas.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
     df = table[0]
@@ -291,7 +291,7 @@ def is_stock(symbol, tsubcode):
         if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
             raise
         return AssetType.Future
-    # The conservative way is to through an exception if we are not sure.
+    # The conservative way is to throw an exception if we are not sure.
     if not assume_stock:
         print('No idea if this is a stock:', symbol)
         print('Use the option --assume-individual-stock to assume ' + \
@@ -407,6 +407,7 @@ def check_total(fifos, total):
         print(total)
         raise
 
+# Graphical output of some summary data:
 # How to change date-format output with pandas:
 # https://stackoverflow.com/questions/30133280/pandas-bar-plot-changes-date-format
 def show_plt(df):
@@ -458,12 +459,15 @@ def show_plt(df):
 
     plt.show()
 
+# Append "row" into pandas DataFrame "df".
 def df_append_row(df, row):
     #df = df.append(pandas.Series(row), ignore_index=True)
     df.loc[len(df)] = row
     #df = df.sort_index().reset_index(drop=True)
     return df
 
+# Take all transactions and create summaries for differnet
+# trading classes.
 def get_summary(new_wk, tax_output, min_year, max_year):
     # generate new (empty) pandas dataframe:
     if tax_output:
@@ -482,6 +486,11 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Aktien Steuerbetrag', 'Aktien Verlustvortrag',
         'Sonstige Gewinne', 'Sonstige Verluste', 'Sonstige Gesamt',
         'Stillhalter-Gewinne', 'Stillhalter-Verluste', 'Stillhalter Gesamt',
+        'Durchschnitt behaltene Prämien pro Tag',
+        'Stillhalter-Gewinne Calls (FIFO)', 'Stillhalter-Verluste Calls (FIFO)',
+        'Stillhalter Calls Gesamt (FIFO)',
+        'Stillhalter-Gewinne Puts (FIFO)', 'Stillhalter-Verluste Puts (FIFO)',
+        'Stillhalter Puts Gesamt (FIFO)',
         'Stillhalter-Gewinne (FIFO)', 'Stillhalter-Verluste (FIFO)',
         'Stillhalter Gesamt (FIFO)',
         'Long-Optionen-Gewinne', 'Long-Optionen-Verluste',
@@ -502,10 +511,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     for i in new_wk.index:
         fees = .0
         if tax_output:
-            (date, type, pnl, eur_amount, _, _, _, _,
+            (date, type, pnl, eur_amount, _, _, _, _, callput,
                 tax_free, usd_gains, usd_gains_notax) = new_wk.iloc[i]
         else:
-            (date, type, pnl, eur_amount, _, fees, _, _, _, _,
+            (date, type, pnl, eur_amount, _, fees, _, _, _, _, callput,
                 tax_free, usd_gains, usd_gains_notax, _, _, _) = new_wk.iloc[i]
         year = int(date[:4])
         # steuerfreie Zahlungen:
@@ -562,6 +571,16 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             else:
                 stats.loc['Long-Optionen-Gewinne', year] += pnl
         elif type == 'Stillhalter-Option':
+            if callput == 'C':
+                if pnl < .0:
+                    stats.loc['Stillhalter-Verluste Calls (FIFO)', year] += pnl
+                else:
+                    stats.loc['Stillhalter-Gewinne Calls (FIFO)', year] += pnl
+            else:
+                if pnl < .0:
+                    stats.loc['Stillhalter-Verluste Puts (FIFO)', year] += pnl
+                else:
+                    stats.loc['Stillhalter-Gewinne Puts (FIFO)', year] += pnl
             if pnl < .0:
                 stats.loc['Stillhalter-Verluste (FIFO)', year] += pnl
             else:
@@ -571,7 +590,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
                 stats.loc['Stillhalter-Verluste', year] += eur_amount
             else:
                 stats.loc['Stillhalter-Gewinne', year] += eur_amount
-            # Kontrolle:  Praemien sind alle steuerfrei, Glattstellungen nicht:
+            # Kontrolle: Praemien sind alle steuerfrei, Glattstellungen nicht:
             if bool(tax_free) is False:
                 if eur_amount > .0:
                     raise
@@ -618,6 +637,11 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             stats.loc['Sonstige Gewinne', year] + stats.loc['Sonstige Verluste', year]
         stats.loc['Stillhalter Gesamt', year] = \
             stats.loc['Stillhalter-Gewinne', year] + stats.loc['Stillhalter-Verluste', year]
+        stats.loc['Durchschnitt behaltene Prämien pro Tag', year] = stats.loc['Stillhalter Gesamt', year] / 250
+        stats.loc['Stillhalter Calls Gesamt (FIFO)', year] = \
+            stats.loc['Stillhalter-Gewinne Calls (FIFO)', year] + stats.loc['Stillhalter-Verluste Calls (FIFO)', year]
+        stats.loc['Stillhalter Puts Gesamt (FIFO)', year] = \
+            stats.loc['Stillhalter-Gewinne Puts (FIFO)', year] + stats.loc['Stillhalter-Verluste Puts (FIFO)', year]
         stats.loc['Stillhalter Gesamt (FIFO)', year] = \
             stats.loc['Stillhalter-Gewinne (FIFO)', year] + stats.loc['Stillhalter-Verluste (FIFO)', year]
         stats.loc['Long-Optionen Gesamt', year] = \
@@ -677,7 +701,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     return stats
 
 def append_yearly_stats(df, tax_output, stats, min_year, max_year):
-    end = [''] * 5
+    end = [''] * 6
     years = list(range(min_year, max_year + 1))
     if tax_output:
         end = []
@@ -758,9 +782,20 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
             not isnan(expire) and str(buysell) == 'Sell' and str(openclose) == 'Open':
             tax_free = True
         # USD as a big integer number:
-        (usd_gains, usd_gains_notax) = fifo_add(fifos, int((amount - fees) * 10000),
-            1 / conv_usd, 1, 'account-usd', date, tax_free)
-        (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
+        if False:
+            # Do not distinguish between price/amount and fees (which are alway tax free)
+            # for currency gains:
+            (usd_gains, usd_gains_notax) = fifo_add(fifos, int((amount - fees) * 10000),
+                1 / conv_usd, 1, 'account-usd', date, tax_free)
+            (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
+        else:
+            (usd_gains, usd_gains_notax) = fifo_add(fifos, int(amount * 10000),
+                1 / conv_usd, 1, 'account-usd', date, tax_free)
+            (usd_gains, usd_gains_notax) = (usd_gains / 10000.0, usd_gains_notax / 10000.0)
+            (usd_gains1, usd_gains_notax1) = fifo_add(fifos, int((- fees) * 10000),
+                1 / conv_usd, 1, 'account-usd', date, True)
+            (usd_gains1, usd_gains_notax1) = (usd_gains1 / 10000.0, usd_gains_notax1 / 10000.0)
+            (usd_gains, usd_gains_notax) = (usd_gains + usd_gains1, usd_gains_notax + usd_gains_notax1)
 
         asset = ''
         newdescription = ''
@@ -977,12 +1012,12 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
             if datetime[:4] == tax_output:
                 new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
                         '%.2f' % eur_amount, '%.4f' % (amount - fees), '%.4f' % conv_usd,
-                        quantity, asset,
+                        quantity, asset, callput,
                         tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
                 '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
-                quantity, asset, symbol,
+                quantity, asset, symbol, callput,
                 tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax,
                 newdescription, '%.2f' % cash_total, '%.2f' % net_total])
 
@@ -991,11 +1026,12 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
         # XXX: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
-            'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset',
+            'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset', 'callput,'
             'tax_free', 'usd_gains', 'usd_gains_notax'))
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
-            'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset', 'symbol',
+            'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset',
+            'symbol', 'callput',
             'tax_free', 'usd_gains', 'usd_gains_notax',
             'description', 'cash_total', 'net_total'))
     stats = get_summary(new_wk, tax_output, min_year, max_year)
@@ -1008,6 +1044,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
     if show:
         show_plt(new_wk)
     new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
+    new_wk.drop('callput', axis=1, inplace=True)
     if output_csv is not None:
         with open(output_csv, 'w', encoding='UTF8') as f:
             new_wk.to_csv(f, index=False)
@@ -1015,6 +1052,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
         with pandas.ExcelWriter(output_excel) as f:
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
 
+# check if the first line of the csv line contains the correct header:
 def check_csv(csv_file):
     with open(csv_file, encoding='UTF8') as f:
         content = f.readlines()
@@ -1031,6 +1069,7 @@ def usage():
         '[--verbose][--show] *.csv')
 
 def main(argv):
+    import getopt
     #print_sp500()
     #print_nasdaq100()
     #sys.exit(0)

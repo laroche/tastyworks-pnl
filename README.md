@@ -245,7 +245,7 @@ TODO
    - I am not trading cryptos, so there is only minimal support for them.
    - Cryptos have their own group. pnl is calculated as with normal stocks. No 1-year-taxfree or any other stuff is done.
 - Currency gains:
-   - For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
+   - Done: For currency gains, we could also add all fees as tax free by adding a separate booking/transaction.
    - For currency gains tax calculation you can reorder all transactions of one day and use the best
      order to minimize tax payments. This is currently not done with the current source code.
    - For currency gains you don't pay taxes for negative cash. Review on how this is computed in detail, is it
@@ -280,9 +280,11 @@ TODO
    - Verlustverrechnungstöpfe für Aktien, Sonstiges, Termingeschäfte. Berechnung der zu zahlenden Steuer.
 - Statistics:
    - Options
-      - Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
+      - Done: Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
       - Add DIT (Days In Trade), average days in trade
-      - Sold premium is already summed up, also premium kept as gains. Also calculate average premium by day.
+      - Compute actual premium per day over the DITs. Graph all sold options over all days in the year
+        to show distribution of sold premium over the course of the year.
+      - Done: Sold premium is already summed up, also premium kept as gains. Also calculate average premium by day.
       - number of winning trades (total and percentage), average gains
    - Statistics for stocks/options combined for the same symbol
    - Specify non-realised gains to know how much tax needs to be paid for current net total.
@@ -293,6 +295,7 @@ TODO
    - How much fees do you pay for your option trades to the broker/exchange compared
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
    - Show number of trades/transactions history.
+   - List of best and worst trades of the year.
 - Docu
    - Add images on how to download csv-file within Tastyworks into docu.
    - Translate text output into German.
