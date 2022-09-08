@@ -701,18 +701,18 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     return stats
 
 def append_yearly_stats(df, tax_output, stats, min_year, max_year):
-    end = [''] * 6
+    end = [''] * 5
     years = list(range(min_year, max_year + 1))
     if tax_output:
         end = []
         years = [int(tax_output)]
     for year in years:
-        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
-            df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', ''] + end)
+            df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', '', ''] + end)
     return df
 
 def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
