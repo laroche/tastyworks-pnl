@@ -1026,7 +1026,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
         # XXX: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
-            'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset', 'callput,'
+            'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset', 'callput',
             'tax_free', 'usd_gains', 'usd_gains_notax'))
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
