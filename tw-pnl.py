@@ -502,7 +502,8 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Z19 Ausländische Kapitalerträge',
         'Z21 Termingeschäftsgewinne+Stillhalter',
         'Z24 Termingeschäftsverluste',
-        'KAP+KAP-INV')
+        'KAP+KAP-INV',
+        'Cash Balance USD', 'Net Liquidating Value')
     data = []
     for _ in index:
         data.append([.0] * len(years_total))
@@ -510,12 +511,14 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     # check all transactions and record summary data per year:
     for i in new_wk.index:
         fees = .0
+        cash_total = .0
+        net_total = .0
         if tax_output:
             (date, type, pnl, eur_amount, _, _, _, _, callput,
                 tax_free, usd_gains, usd_gains_notax) = new_wk.iloc[i]
         else:
             (date, type, pnl, eur_amount, _, fees, _, _, _, _, callput,
-                tax_free, usd_gains, usd_gains_notax, _, _, _) = new_wk.iloc[i]
+                tax_free, usd_gains, usd_gains_notax, _, cash_total, net_total) = new_wk.iloc[i]
         year = int(date[:4])
         # steuerfreie Zahlungen:
         if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
@@ -526,6 +529,9 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
             if bool(tax_free) is True:
                 raise
+        # Cash und Net Total am Ende vom Jahr feststellen. Letzte Info ist Jahresende:
+        stats.loc['Cash Balance USD', year] = float(cash_total)
+        stats.loc['Net Liquidating Value', year] = float(net_total)
         # Währungsgewinne:
         stats.loc['Währungsgewinne USD', year] += float(usd_gains)
         stats.loc['Währungsgewinne USD (steuerfrei)', year] += float(usd_gains_notax)
