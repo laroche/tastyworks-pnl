@@ -721,7 +721,7 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
             df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', '', ''] + end)
     return df
 
-def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
+def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, debug):
     if len(all_wk) == 1:
         wk = all_wk[0]
     else:
@@ -740,6 +740,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show):
         # Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,\
         #   Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,\
         #   Account Reference
+        if debug:
+            print(wk.iloc[i].to_string())
         (datetime, tcode, tsubcode, symbol, buysell, openclose, quantity, expire, strike,
             callput, price, fees, amount, description, account_ref) = wk.iloc[i]
         if str(datetime)[16:] != ':00': # minimum output is minutes, seconds are 00 here
@@ -1072,7 +1074,7 @@ def check_csv(csv_file):
 def usage():
     print('tw-pnl.py [--assume-individual-stock][--tax-output=2021][--usd]' + \
         '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' + \
-        '[--verbose][--show] *.csv')
+        '[--verbose][--debug][--show] *.csv')
 
 def main(argv):
     import getopt
@@ -1080,6 +1082,7 @@ def main(argv):
     #print_nasdaq100()
     #sys.exit(0)
     verbose = False
+    debug = False
     output_summary = None
     output_csv = None
     output_excel = None
@@ -1087,9 +1090,9 @@ def main(argv):
     #tax_output = '2021'
     show = False
     try:
-        opts, args = getopt.getopt(argv, 'huv', ['assume-individual-stock',
+        opts, args = getopt.getopt(argv, 'dhuv', ['assume-individual-stock',
             'help', 'summary=', 'output-csv=', 'output-excel=',
-            'show', 'tax-output=', 'usd', 'verbose'])
+            'show', 'tax-output=', 'usd', 'verbose', 'debug'])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -1109,6 +1112,8 @@ def main(argv):
             convert_currency = False
         elif opt in ('-v', '--verbose'):
             verbose = True # XXX currently unused
+        elif opt in ('-d', '--debug'):
+            debug = True
         elif opt == '--show':
             show = True
         elif opt == '--summary':
@@ -1124,7 +1129,7 @@ def main(argv):
     for csv_file in args:
         check_csv(csv_file)
         all_wk.append(pandas.read_csv(csv_file, parse_dates=['Date/Time']))
-    check(all_wk, output_summary, output_csv, output_excel, tax_output, show)
+    check(all_wk, output_summary, output_csv, output_excel, tax_output, show, debug)
 
 if __name__ == '__main__':
     main(sys.argv[1:])
