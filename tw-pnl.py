@@ -502,7 +502,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Z19 Ausländische Kapitalerträge',
         'Z21 Termingeschäftsgewinne+Stillhalter',
         'Z24 Termingeschäftsverluste',
-        'KAP+KAP-INV',
+        'KAP+KAP-INV', 'KAP+KAP-INV KErSt+Soli', 'KAP+KAP-INV Verlustvortrag',
         'Cash Balance USD', 'Net Liquidating Value')
     data = []
     for _ in index:
@@ -692,6 +692,15 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         stats.loc['KAP+KAP-INV', year] = \
             stats.loc['Z19 Ausländische Kapitalerträge', year] + \
             stats.loc['Anlage KAP-INV', year]
+        kerstsoli = stats.loc['KAP+KAP-INV', year] * 0.26375
+        if year > min_year:
+            kerstsoli += stats.loc['KAP+KAP-INV Verlustvortrag', year - 1]
+        verlustvortrag = .0
+        if kerstsoli < .0:
+            verlustvortrag = kerstsoli
+            kerstsoli = .0
+        stats.loc['KAP+KAP-INV KErSt+Soli', year] = kerstsoli
+        stats.loc['KAP+KAP-INV Verlustvortrag', year] = verlustvortrag
     # limit to two decimal digits
     for i in stats.index:
         for year in years:
@@ -721,7 +730,7 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
             df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', '', ''] + end)
     return df
 
-def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, debug):
+def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, verbose, debug):
     if len(all_wk) == 1:
         wk = all_wk[0]
     else:
@@ -1053,6 +1062,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, de
         show_plt(new_wk)
     new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
     new_wk.drop('callput', axis=1, inplace=True)
+    if verbose:
+        print(new_wk.to_string())
     if output_csv is not None:
         with open(output_csv, 'w', encoding='UTF8') as f:
             new_wk.to_csv(f, index=False)
@@ -1111,7 +1122,7 @@ def main(argv):
             global convert_currency
             convert_currency = False
         elif opt in ('-v', '--verbose'):
-            verbose = True # XXX currently unused
+            verbose = True
         elif opt in ('-d', '--debug'):
             debug = True
         elif opt == '--show':
@@ -1129,7 +1140,7 @@ def main(argv):
     for csv_file in args:
         check_csv(csv_file)
         all_wk.append(pandas.read_csv(csv_file, parse_dates=['Date/Time']))
-    check(all_wk, output_summary, output_csv, output_excel, tax_output, show, debug)
+    check(all_wk, output_summary, output_csv, output_excel, tax_output, show, verbose, debug)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

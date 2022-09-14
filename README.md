@@ -28,6 +28,9 @@ soffice tastyworks-tax.csv
 soffice tastyworks-summary.csv
 </pre>
 
+If the script does not complete successfully, please add the option __--debug__ to see
+additional information on where it stops.
+
 [In German: Erstellt eine Gewinn- und Verlustberechnung für eine Steuererklärung
 in Deutschland für den US-Broker Tastyworks.
 Lade von Tastyworks alle Transaktionen in eine CSV-Datei herunter und generiere
@@ -58,6 +61,9 @@ python3 tw-pnl.py --assume-individual-stock --summary=tastyworks-summary.csv --o
 soffice tastyworks-tax.csv
 soffice tastyworks-summary.csv
 </pre>
+
+Falls das Skript nicht erfolgreich läuft, bitte die Option __--debug__ hinzufügen, damit man
+zusätzliche Informationen sieht, an welcher Stelle genau abgebrochen wird.
 
 
 How to use
@@ -103,6 +109,12 @@ USD buys and the conversion price for Euro. This entry might be very long and lo
 want to ignore this line and just look over the list of other assets.
 
 The option __--show__ gives some summary graphs.
+
+The option __--debug__ adds debug information on what data is currently processed to aid with
+debug reports on bugs and problems.
+
+The option __--verbose__ outputs the csv output data also as text on the screen. Just a way to see data
+differently, you normally should use the csv data for further processing.
 
 
 If you work on Linux with Ubuntu/Debian, you need to make sure
@@ -150,7 +162,7 @@ The CSV file contains floating point numbers in English(US) notation where a dec
 point (".") and no decimal comma (",") is used as decimal separator for floating point
 numbers like in "-0.2155".
 Usually Tastyworks provides floating point numbers with 4 decimals after the decimal separator.
-For yearly summaries I only output with the normal 2 decimal digits.
+For yearly summaries I only output with 2 decimal digits.
 
 Here the output transaction data in detail:
 
@@ -255,6 +267,7 @@ TODO
      als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
      als "Sell-To-Open" verwendet.
 - Output
+   - Output all decimal digits, even if they are 0.
    - For --sumary allow excel output depending on filename extension.
    - Tax csv output: Sort transactions in the order they appear in the summary report.
    - Add columne with automatic annotations. (warnings and error messages from conversion.)
@@ -304,6 +317,15 @@ TODO
    - Add test data for users to try out.
    - Add testsuite to verify proper operation.
    - Use pandas.isna(x)?
+- CPU profiling to improve python code
+   - How to run:
+      - sudo apt-get install graphviz
+      - python3 -m cProfile -s cumtime -o profile.pstats tw-pnl.py
+      - git clone https://github.com/jrfonseca/gprof2dot
+      - ln -s "$PWD"/gprof2dot/gprof2dot.py ~/bin
+      - gprof2dot.py -f pstats profile.pstats | dot -Tsvg -o callgraph.svg
+   - get_summary and append_yearly_stats(df_append_row) take too much CPU time, how to improve?
+      - Keep data in dictionary until final data is complete?
 - Look at other libraries for currency conversion:
   <https://github.com/alexprengere/currencyconverter> or
   <https://github.com/flaxandteal/moneypandas>
