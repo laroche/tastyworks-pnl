@@ -115,35 +115,35 @@ def transaction_type(asset_type):
 
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ('Money Movement', 'Trade', 'Receive Deliver'):
-        raise
+        raise Exception('Unknown tcode: %s' % tcode)
     if tcode == 'Money Movement':
         if tsubcode not in ('Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
             'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
-            raise
+            raise ValueError('Unknown tsubcode for Money Movement: %s' % tsubcode)
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment' \
             and not description.startswith('Fee Correction'):
-            raise
+            raise ValueError('Unknown Balance Adjustment: %s' % description)
     elif tcode == 'Trade':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Buy', 'Sell'):
-            raise
+            raise ValueError('Unknown tsubcode: %s' % tsubcode)
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
             'Special Dividend', 'Cash Settled Assignment', 'Cash Settled Exercise',
             'Futures Settlement', 'Transfer'):
-            raise
+            raise ValueError('Unknown Receive Deliver tsubcode: %s' % tsubcode)
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
-            raise
+            raise ValueError('Assignment with description %s' % description)
         if tsubcode == 'Exercise' and description != 'Removal of option due to exercise':
-            raise
+            raise ValueError('Exercise with description %s' % description)
 
 def check_param(buysell, openclose, callput):
     if str(buysell) not in ('nan', 'Buy', 'Sell'):
-        raise
+        raise ValueError('Unknown buysell: %s' % buysell)
     if str(openclose) not in ('nan', 'Open', 'Close'):
-        raise
+        raise ValueError('Unknown openclose: %s' % openclose)
     if str(callput) not in ('nan', 'C', 'P'):
-        raise
+        raise ValueError('Unknown callput: %s' % callput)
 
 def check_trade(tsubcode, check_amount, amount, asset_type):
     #print('FEHLER:', check_amount, amount, tsubcode)
@@ -153,10 +153,10 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
         if asset_type == AssetType.Crypto:
             if not math.isclose(check_amount, amount, abs_tol=0.01):
-                raise
+                raise ValueError('Amount mismatch for Crypto: %s != %s' % (check_amount, amount))
         else:
             if not math.isclose(check_amount, amount, abs_tol=0.001):
-                raise
+                raise ValueError('Amount mismatch: %s != %s' % (check_amount, amount))
     else:
         if not isnan(amount) and amount != .0:
             raise
@@ -289,14 +289,13 @@ def is_stock(symbol, tsubcode):
         return AssetType.IndStock
     if symbol.startswith('/'):
         if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
-            raise
+            raise ValueError('Unknown subcode: %s' % tsubcode)
         return AssetType.Future
     # The conservative way is to throw an exception if we are not sure.
     if not assume_stock:
-        print('No idea if this is a stock:', symbol)
-        print('Use the option --assume-individual-stock to assume ' + \
-            'individual stock for all unknown symbols.')
-        raise
+        raise ValueError('No idea if this is a stock: %s' % symbol + \
+            'Use the option --assume-individual-stock to assume individual stock ' + \
+            'for all unknown symbols.')
     # Just assume this is a normal stock if not in the above list
     return AssetType.IndStock
 
@@ -1004,7 +1003,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 pass
             elif asset_type == AssetType.Future:
                 if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
-                    raise
+                    raise ValueError('Unknown tsubcode for future: %s' % tsubcode)
                 # XXX For futures we just add all payments as-is for taxes. We should add them
                 # up until final closing instead. This should be changed. ???
                 local_pnl = eur_amount
@@ -1040,7 +1039,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
 
     #wk.drop('Account Reference', axis=1, inplace=True)
     if tax_output:
-        # XXX: better sort needed:
+        # TODO: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset', 'callput',
