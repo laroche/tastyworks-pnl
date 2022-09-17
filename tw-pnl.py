@@ -65,8 +65,8 @@ def get_eurusd(date, debug=False):
         try:
             x = eurusd[date]
         except KeyError:
-            print('ERROR: No EURUSD conversion data available for %s,'
-                ' please download newer data into the file eurusd.csv.' % date)
+            print(f'ERROR: No EURUSD conversion data available for {date},'
+                ' please download newer data into the file eurusd.csv.')
             sys.exit(1)
         if not isnan(x):
             return x
@@ -115,35 +115,35 @@ def transaction_type(asset_type):
 
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ('Money Movement', 'Trade', 'Receive Deliver'):
-        raise Exception('Unknown tcode: %s' % tcode)
+        raise Exception(f'Unknown tcode: {tcode}')
     if tcode == 'Money Movement':
         if tsubcode not in ('Transfer', 'Deposit', 'Credit Interest', 'Balance Adjustment',
             'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
-            raise ValueError('Unknown tsubcode for Money Movement: %s' % tsubcode)
+            raise ValueError(f'Unknown tsubcode for Money Movement: {tsubcode}')
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment' \
             and not description.startswith('Fee Correction'):
-            raise ValueError('Unknown Balance Adjustment: %s' % description)
+            raise ValueError(f'Unknown Balance Adjustment: {description}')
     elif tcode == 'Trade':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Buy', 'Sell'):
-            raise ValueError('Unknown tsubcode: %s' % tsubcode)
+            raise ValueError(f'Unknown tsubcode: {tsubcode}')
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
             'Special Dividend', 'Cash Settled Assignment', 'Cash Settled Exercise',
             'Futures Settlement', 'Transfer'):
-            raise ValueError('Unknown Receive Deliver tsubcode: %s' % tsubcode)
+            raise ValueError(f'Unknown Receive Deliver tsubcode: {tsubcode}')
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
-            raise ValueError('Assignment with description %s' % description)
+            raise ValueError(f'Assignment with description {description}')
         if tsubcode == 'Exercise' and description != 'Removal of option due to exercise':
-            raise ValueError('Exercise with description %s' % description)
+            raise ValueError(f'Exercise with description {description}')
 
 def check_param(buysell, openclose, callput):
     if str(buysell) not in ('nan', 'Buy', 'Sell'):
-        raise ValueError('Unknown buysell: %s' % buysell)
+        raise ValueError(f'Unknown buysell: {buysell}')
     if str(openclose) not in ('nan', 'Open', 'Close'):
-        raise ValueError('Unknown openclose: %s' % openclose)
+        raise ValueError(f'Unknown openclose: {openclose}')
     if str(callput) not in ('nan', 'C', 'P'):
-        raise ValueError('Unknown callput: %s' % callput)
+        raise ValueError(f'Unknown callput: {callput}')
 
 def check_trade(tsubcode, check_amount, amount, asset_type):
     #print('FEHLER:', check_amount, amount, tsubcode)
@@ -153,10 +153,10 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
         if asset_type == AssetType.Crypto:
             if not math.isclose(check_amount, amount, abs_tol=0.01):
-                raise ValueError('Amount mismatch for Crypto: %s != %s' % (check_amount, amount))
+                raise ValueError(f'Amount mismatch for Crypto: {check_amount} != {amount}')
         else:
             if not math.isclose(check_amount, amount, abs_tol=0.001):
-                raise ValueError('Amount mismatch: %s != %s' % (check_amount, amount))
+                raise ValueError(f'Amount mismatch: {check_amount} != {amount}')
     else:
         if not isnan(amount) and amount != .0:
             raise
@@ -289,11 +289,11 @@ def is_stock(symbol, tsubcode):
         return AssetType.IndStock
     if symbol.startswith('/'):
         if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
-            raise ValueError('Unknown subcode: %s' % tsubcode)
+            raise ValueError(f'Unknown subcode: {tsubcode}')
         return AssetType.Future
     # The conservative way is to throw an exception if we are not sure.
     if not assume_stock:
-        raise ValueError('No idea if this is a stock: %s' % symbol + \
+        raise ValueError(f'No idea if this is a stock: {symbol}' + \
             'Use the option --assume-individual-stock to assume individual stock ' + \
             'for all unknown symbols.')
     # Just assume this is a normal stock if not in the above list
@@ -723,7 +723,7 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
     for year in years:
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, ['Tastyworks %s' % year, '', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, [f'Tastyworks {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', '', ''] + end)
@@ -834,7 +834,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             raise
 
         if tcode == 'Money Movement':
-            local_pnl = '%.4f' % eur_amount
+            local_pnl = f'{eur_amount:.4f}'
             if tsubcode != 'Transfer' and fees != .0:
                 raise
             if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT'):
@@ -850,10 +850,10 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                         newdescription = description
                 else:
                     if amount > .0:
-                        asset = 'dividends for %s' % symbol
+                        asset = f'dividends for {symbol}'
                         asset_type = AssetType.Dividend
                     else:
-                        asset = 'withholding tax for %s' % symbol
+                        asset = f'withholding tax for {symbol}'
                         asset_type = AssetType.WithholdingTax
                     newdescription = description
             elif tsubcode == 'Balance Adjustment':
@@ -867,7 +867,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     newdescription = description
                 else:
                     # XXX In my case: stock borrow fee:
-                    asset = 'stock borrow fees for %s' % symbol
+                    asset = f'stock borrow fees for {symbol}'
                     asset_type = AssetType.Interest
                     newdescription = description
                     if amount >= .0:
@@ -875,7 +875,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             elif tsubcode == 'Withdrawal':
                 if not isnan(symbol):
                     # XXX In my case: dividends paid for short stock:
-                    asset = 'dividends paid for %s' % symbol
+                    asset = f'dividends paid for {symbol}'
                     asset_type = AssetType.Dividend
                     newdescription = description
                     if amount >= .0:
@@ -894,14 +894,14 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                         newdescription = description
             elif tsubcode == 'Dividend':
                 if amount > .0:
-                    asset = 'dividends for %s' % symbol
+                    asset = f'dividends for {symbol}'
                     asset_type = AssetType.Dividend
                 else:
-                    asset = 'withholding tax for %s' % symbol
+                    asset = f'withholding tax for {symbol}'
                     asset_type = AssetType.WithholdingTax
                 newdescription = description
             elif tsubcode == 'Mark to Market':
-                asset = 'mark-to-market for %s' % symbol
+                asset = f'mark-to-market for {symbol}'
                 asset_type = AssetType.Future
                 newdescription = description
         elif tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
@@ -976,7 +976,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     price *= 100.0
                 if int(strike) == strike: # convert to integer for full numbers
                     strike = int(strike)
-                asset = '%s %s%s %s' % (symbol, callput, strike, expire)
+                asset = f'{symbol} {callput}{strike} {expire}'
                 asset_type = AssetType.LongOption
                 if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or \
                     (str(buysell) == 'Buy' and str(openclose) == 'Close') or \
@@ -1003,7 +1003,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 pass
             elif asset_type == AssetType.Future:
                 if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
-                    raise ValueError('Unknown tsubcode for future: %s' % tsubcode)
+                    raise ValueError(f'Unknown tsubcode for future: {tsubcode}')
                 # XXX For futures we just add all payments as-is for taxes. We should add them
                 # up until final closing instead. This should be changed. ???
                 local_pnl = eur_amount
@@ -1016,30 +1016,30 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     elif asset_type == AssetType.ImmobilienFond:
                         local_pnl *= 0.20
             description = ''
-            local_pnl = '%.4f' % local_pnl
+            local_pnl = f'{local_pnl:.4f}'
 
         #check_total(fifos, cash_total)
 
         net_total = cash_total + fifos_sum_usd(fifos)
 
         if local_pnl != '':
-            local_pnl = '%.2f' % float(local_pnl)
+            local_pnl = f'{float(local_pnl):.2f}'
         if tax_output:
             if datetime[:4] == tax_output:
                 new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
-                        '%.2f' % eur_amount, '%.4f' % (amount - fees), '%.4f' % conv_usd,
+                        f'{eur_amount:.2f}', f'{amount - fees:.4f}', f'{conv_usd:.4f}',
                         quantity, asset, callput,
-                        tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax])
+                        tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}'])
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
-                '%.2f' % eur_amount, '%.4f' % amount, '%.4f' % fees, '%.4f' % conv_usd,
+                f'{eur_amount:.2f}', f'{amount:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
                 quantity, asset, symbol, callput,
-                tax_free, '%.2f' % usd_gains, '%.2f' % usd_gains_notax,
-                newdescription, '%.2f' % cash_total, '%.2f' % net_total])
+                tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}',
+                newdescription, f'{cash_total:.2f}', f'{net_total:.2f}'])
 
     #wk.drop('Account Reference', axis=1, inplace=True)
     if tax_output:
-        # TODO: better sort needed:
+        # XXX: better sort needed:
         new_wk = sorted(new_wk, key=lambda x: x[1])
         new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
             'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset', 'callput',
