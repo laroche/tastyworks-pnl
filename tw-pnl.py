@@ -522,12 +522,14 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         # steuerfreie Zahlungen:
         if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
             if not bool(tax_free):
-                raise ValueError(f'tax_free is False for type "{type}". Full row: "{new_wk.iloc[i]}"')
+                raise ValueError(
+                    f'tax_free is False for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # keine steuerfreien Zahlungen:
         if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
             'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
             if bool(tax_free):
-                raise ValueError(f'tax_free is True for type "{type}". Full row: "{new_wk.iloc[i]}"')
+                raise ValueError(
+                    f'tax_free is True for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # Cash und Net Total am Ende vom Jahr feststellen. Letzte Info ist Jahresende:
         stats.loc['Cash Balance USD', year] = float(cash_total)
         stats.loc['Net Liquidating Value', year] = float(net_total)
