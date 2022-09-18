@@ -866,7 +866,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     asset_type = AssetType.Fee
                     newdescription = description
                 else:
-                    # XXX In my case: stock borrow fee:
+                    # Todo: In my case: stock borrow fee:
                     asset = f'stock borrow fees for {symbol}'
                     asset_type = AssetType.Interest
                     newdescription = description
@@ -874,7 +874,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                         raise
             elif tsubcode == 'Withdrawal':
                 if not isnan(symbol):
-                    # XXX In my case: dividends paid for short stock:
+                    # Todo: In my case: dividends paid for short stock:
                     asset = f'dividends paid for {symbol}'
                     asset_type = AssetType.Dividend
                     newdescription = description
