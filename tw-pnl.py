@@ -121,7 +121,7 @@ def check_tcode(tcode, tsubcode, description):
             'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
             raise ValueError(f'Unknown tsubcode for Money Movement: {tsubcode}')
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment' \
-            and not description.startswith('Fee Correction'):
+            and not (description.startswith('Fee Correction') or description.startswith('Delayed Delivery_')):
             raise ValueError(f'Unknown Balance Adjustment: {description}')
     elif tcode == 'Trade':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Buy', 'Sell'):
