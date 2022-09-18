@@ -521,13 +521,13 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         year = int(date[:4])
         # steuerfreie Zahlungen:
         if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
-            if bool(tax_free) is False:
-                raise
+            if not bool(tax_free):
+                raise ValueError(f'tax_free is False for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # keine steuerfreien Zahlungen:
         if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
             'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
-            if bool(tax_free) is True:
-                raise
+            if bool(tax_free):
+                raise ValueError(f'tax_free is True for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # Cash und Net Total am Ende vom Jahr feststellen. Letzte Info ist Jahresende:
         stats.loc['Cash Balance USD', year] = float(cash_total)
         stats.loc['Net Liquidating Value', year] = float(net_total)
@@ -596,12 +596,12 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             else:
                 stats.loc['Stillhalter-Gewinne', year] += eur_amount
             # Kontrolle: Praemien sind alle steuerfrei, Glattstellungen nicht:
-            if bool(tax_free) is False:
+            if not bool(tax_free):
                 if eur_amount > .0:
-                    raise
+                    raise AssertionError(f'Premium is tax free, assignments not. Found "{eur_amount}" EUR.')
             else:
                 if eur_amount < .0:
-                    raise
+                    raise AssertionError(f'Premium is tax free, assignments not. Found "{eur_amount}" EUR.')
         elif type == 'Ordergebühr':
             stats.loc['zusätzliche Ordergebühren', year] += pnl
         elif type == 'Dividende':
@@ -831,12 +831,12 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if isnan(price):
             price = .0
         if price < .0:
-            raise
+            raise ValueError(f'Price must be positive, but is {price}')
 
         if tcode == 'Money Movement':
             local_pnl = f'{eur_amount:.4f}'
             if tsubcode != 'Transfer' and fees != .0:
-                raise
+                raise ValueError('Money Movement with fees')
             if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT'):
                 local_pnl = ''
                 asset = 'transfer'
