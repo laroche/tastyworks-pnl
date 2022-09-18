@@ -819,7 +819,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if isnan(quantity):
             quantity = 1
         else:
-            if tcode == 'Receive Deliver' and tsubcode in ('Forward Split' or tsubcode == 'Reverse Split'):
+            if tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
                 pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
                 # Hardcode AssetType.Crypto here again:
