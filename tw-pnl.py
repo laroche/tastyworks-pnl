@@ -35,6 +35,8 @@ from collections import deque
 import math
 import datetime as pydatetime
 import pandas
+from collections import namedtuple
+from pprint import pprint
 
 convert_currency = True
 
@@ -130,7 +132,7 @@ def check_tcode(tcode, tsubcode, description):
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
             'Special Dividend', 'Cash Settled Assignment', 'Cash Settled Exercise',
-            'Futures Settlement', 'Transfer'):
+                            'Futures Settlement', 'Transfer', 'Symbol Change'):
             raise ValueError(f'Unknown Receive Deliver tsubcode: {tsubcode}')
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
             raise ValueError(f'Assignment with description {description}')
@@ -390,6 +392,21 @@ def fifos_split(fifos, asset, ratio):
                 f[2] = f[2] * ratio
         # XXX: implement option strike adjustment
         # fifo == asset + ' ' + 'P/C' + Strike + ' '
+
+
+# renames a fifo entry
+def fifos_symbol_change(fifos, asset_old, asset_new):
+    for fifo in fifos.copy():
+        # example 'BFT P15 21-04-16'
+        if asset_old in fifo:
+            try:
+                [_, second_part] = fifo.split(asset_old)
+                fifos[asset_new + second_part] = fifos[fifo]
+                del fifos[fifo]
+            except ValueError as e:
+                raise ValueError(
+                    f'Could not find asset_old "{asset_old}" in fifo name "{fifo}"') from e
+    return True
 
 #def print_fifos(fifos):
 #    print('open positions:')
@@ -737,6 +754,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         wk.sort_values(by=['Date/Time',], ascending=False, inplace=True)
         wk.reset_index(drop=True, inplace=True)
     splits = {}               # save data for stock/option splits
+    symbol_changes = {}       # save data for symbol changes
     fifos = {}
     cash_total = .0           # account cash total
     cur_year = None
@@ -832,7 +850,6 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             price = .0
         if price < .0:
             raise ValueError(f'Price must be positive, but is {price}')
-
         if tcode == 'Money Movement':
             local_pnl = f'{eur_amount:.4f}'
             if tsubcode != 'Transfer' and fees != .0:
@@ -919,6 +936,25 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     ratio = int(ratio)
                 #print(symbol, quantity, oldquantity, ratio)
                 fifos_split(fifos, symbol, ratio)
+
+        # symbol changes appear as a close, followed by reopening the position with a new symbol in the transactions
+        # save the old symbol and hope that it's renamed at the same date
+        elif tcode == 'Receive Deliver' and tsubcode == 'Symbol Change':
+            if openclose == 'Close':
+                key = f"{symbol} {callput}{strike} {date}"
+                value = namedtuple('key', ('datetime', 'tcode', 'tsubcode', 'symbol', 'buysell', 'openclose', 'quantity',
+                                   'expire', 'strike', 'callput', 'price', 'fees', 'amount', 'description', 'account_ref'))
+                symbol_changes[key] = value(datetime, tcode, tsubcode, symbol, buysell, openclose, quantity, expire, strike,
+                                            callput, price, fees, amount, description, account_ref)
+            else:  # Open
+                try:
+                    symbol_old = symbol_changes[key].symbol
+                    if fifos_symbol_change(fifos, symbol_old, symbol):
+                        symbol_changes.pop(key)
+                except KeyError as e:
+                    raise ValueError(
+                        f'No old symbol found for "{symbol}" on "{date}". Look for possible candidates in "{symbol_changes}"') from e
+
         elif tcode == 'Receive Deliver' and tsubcode in ('Exercise', 'Assignment') and symbol == 'SPX':
             # SPX Options already have a "Cash Settled Exercise/Assignment" tsubcode that handels all
             # trade relevant data. So we just delete this Exercise/Assignment line altogether.
