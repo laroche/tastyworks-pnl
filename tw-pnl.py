@@ -785,7 +785,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if tsubcode == 'Deposit':
             if description != 'ACH DEPOSIT':
                 tax_free = True
-        if tsubcode == 'Withdrawal' and not isnan(symbol):
+        if tsubcode == 'Withdrawal' and (not isnan(symbol) or description[:5] == 'FROM '):
             tax_free = True
         # Stillhalterpraemien gelten als Zufluss und nicht als Anschaffung
         # und sind daher steuer-neutral:

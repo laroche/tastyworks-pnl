@@ -317,6 +317,9 @@ TODO
    - Add test data for users to try out.
    - Add testsuite to verify proper operation.
    - Use pandas.isna(x)?
+- If we move currency conversion gains to the end of the loop, we can defer the computation
+  of tax_free into the complete loop. E.g. detection of interest payments as tax_free is
+  currently made too complex.
 - CPU profiling to improve python code
    - How to run:
       - sudo apt-get install graphviz
