@@ -413,7 +413,7 @@ def show_plt(df):
     import matplotlib.pyplot as plt
 
     df2 = df.copy()
-    for i in ('cash_total', 'net_total', 'pnl', 'usd_gains'):
+    for i in ('net_total', 'pnl', 'usd_gains'):
         df2[i] = pandas.to_numeric(df2[i]) # df2[i].astype(float)
     df2.datetime = pandas.to_datetime(df2.datetime)
     df2.set_index('datetime', inplace=True)
