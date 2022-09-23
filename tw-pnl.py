@@ -113,6 +113,14 @@ def transaction_type(asset_type):
         return t[asset_type]
     return ''
 
+transaction_order = {
+    'Ein/Auszahlung': 1, 'Brokergebühr': 2, 'Krypto': 3,
+    'Aktienfond': 4, 'Mischfond': 5, 'Immobilienfond': 6,
+    'Aktie': 7, 'Dividende': 8, 'Quellensteuer': 9,
+    'Sonstiges': 10, 'Stillhalter-Option': 11,
+    'Long-Option': 12, 'Future': 13, 'Zinsen': 14, 'Ordergebühr': 15,
+}
+
 def check_tcode(tcode, tsubcode, description):
     if tcode not in ('Money Movement', 'Trade', 'Receive Deliver'):
         raise Exception(f'Unknown tcode: {tcode}')
@@ -474,7 +482,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     years = list(range(min_year, max_year + 1))
     years_total = years + ['total']
     index = ('Einzahlungen', 'Auszahlungen', 'Brokergebühren',
-        'Alle Gebühren in USD', 'Alle Gebühren',
+        'Alle Gebühren in USD', 'Alle Gebühren in Euro',
         'Währungsgewinne USD', 'Währungsgewinne USD (steuerfrei)',
         'Währungsgewinne USD Gesamt',
         'Krypto-Gewinne', 'Krypto-Verluste',
@@ -536,7 +544,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         stats.loc['Währungsgewinne USD (steuerfrei)', year] += float(usd_gains_notax)
         # sum of all fees paid:
         stats.loc['Alle Gebühren in USD', year] += float(fees)
-        stats.loc['Alle Gebühren', year] += usd2eur(float(fees), date[:10])
+        stats.loc['Alle Gebühren in Euro', year] += usd2eur(float(fees), date[:10])
         # PNL aufbereiten:
         if pnl == '':
             pnl = .0
@@ -723,11 +731,38 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
     for year in years:
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, [f'Tastyworks {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, [f'Tastyworks {year} Kapitalflussrechnung', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', '', ''] + end)
     return df
+
+# XXX hack for future multiples
+# check https://tastyworks.freshdesk.com/support/solutions/articles/43000435192
+# /GC and /MCL are not needed, these are the default multipliers
+mul_dict = {
+    # SP500/Nasdaq/Russel2000:
+    '/ES': 50.0, '/MES': 5.0, '/NQ': 20.0, '/MNQ': 2.0, '/RTY': 50.0, '/M2K': 5.0,
+    # silver and gold:
+    '/GC': 100.0, '/MGC': 10.0, '/SI': 5000.0, '/SIL': 1000.0,
+    # oil and gas:
+    '/CL': 1000.0, '/MCL': 100.0, '/QM': 500.0, '/NG': 10000.0,
+    # bitcoin:
+    '/BTC': 5.0, '/MBT': .1,
+    # interest rates:
+    '/ZT': 2000.0, '/ZF': 1000.0, '/ZN': 1000.0, '/ZB': 1000.0, '/UB': 1000.0,
+    # currencies:
+    '/6E': 125000.0,
+    # corn:
+    '/ZW': 50.0, '/ZS': 50.0, '/ZC': 50.0,
+}
+
+def get_multiplier(asset):
+    if asset[:4] in mul_dict:
+        return mul_dict[asset[:4]]
+    if asset[:3] in mul_dict:
+        return mul_dict[asset[:3]]
+    return 100.0
 
 def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, verbose, debug):
     if len(all_wk) == 1:
@@ -928,52 +963,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             asset = symbol
             if not isnan(expire):
                 expire = pydatetime.datetime.strptime(expire, '%m/%d/%Y').strftime('%y-%m-%d')
-                # XXX hack for future multiples
-                # check https://tastyworks.freshdesk.com/support/solutions/articles/43000435192
-                # SP500/Nasdaq/Russel2000 and corn:
-                if asset[:3] in ('/ES', '/ZW', '/ZS', '/ZC'):
-                    price *= 50.0
-                elif asset[:3] in ('/NQ',):
-                    price *= 20.0
-                elif asset[:3] in ('/MNQ',):
-                    price *= 2.0
-                elif asset[:4] in ('/RTY',):
-                    price *= 50.0
-                elif asset[:4] in ('/MES', '/M2K'):
-                    price *= 5.0
-                # silver and gold:
-                elif asset[:3] in ('/GC',):
-                    price *= 100.0
-                elif asset[:4] in ('/MGC',):
-                    price *= 10.0
-                elif asset[:3] in ('/SI',):
-                    price *= 5000.0
-                elif asset[:4] in ('/SIL',):
-                    price *= 1000.0
-                # oil and gas:
-                elif asset[:3] in ('/CL',):
-                    price *= 1000.0
-                elif asset[:4] in ('/MCL',):
-                    price *= 100.0
-                elif asset[:3] in ('/QM',):
-                    price *= 500.0
-                elif asset[:3] in ('/NG',):
-                    price *= 10000.0
-                # bitcoin:
-                elif asset[:4] in ('/BTC',):
-                    price *= 5.0
-                elif asset[:4] in ('/MBT',):
-                    price *= .1
-                # interest rates:
-                elif asset[:3] in ('/ZT',):
-                    price *= 2000.0
-                elif asset[:3] in ('/ZF', '/ZN', '/ZB', '/UB'):
-                    price *= 1000.0
-                # currencies:
-                elif asset[:3] in ('/6E',):
-                    price *= 125000.0
-                else:
-                    price *= 100.0
+                price *= get_multiplier(asset)
                 if int(strike) == strike: # convert to integer for full numbers
                     strike = int(strike)
                 asset = f'{symbol} {callput}{strike} {expire}'
@@ -1039,17 +1029,16 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
 
     #wk.drop('Account Reference', axis=1, inplace=True)
     if tax_output:
-        # XXX: better sort needed:
-        new_wk = sorted(new_wk, key=lambda x: x[1])
-        new_wk = pandas.DataFrame(new_wk, columns=('date', 'type', 'pnl',
-            'eur_amount', 'usd_amount', 'eurusd', 'quantity', 'asset', 'callput',
-            'tax_free', 'usd_gains', 'usd_gains_notax'))
+        new_wk = sorted(new_wk, key=lambda x: transaction_order[x[1]])
+        new_wk = pandas.DataFrame(new_wk, columns=('Datum', 'Transaktions-Typ', 'GuV',
+            'Euro-Preis', 'USD-Preis', 'EurUSD', 'Anzahl', 'Asset', 'callput',
+            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral'))
     else:
-        new_wk = pandas.DataFrame(new_wk, columns=('datetime', 'type', 'pnl',
-            'eur_amount', 'usd_amount', 'fees', 'eurusd', 'quantity', 'asset',
-            'symbol', 'callput',
-            'tax_free', 'usd_gains', 'usd_gains_notax',
-            'description', 'cash_total', 'net_total'))
+        new_wk = pandas.DataFrame(new_wk, columns=('Datum/Zeit', 'Transaktions-Typ', 'GuV',
+            'Euro-Preis', 'USD-Preis', 'USD-Gebühren', 'EurUSD', 'Anzahl', 'Asset',
+            'Basiswert', 'callput',
+            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral',
+            'Beschreibung', 'USD Cash Total', 'Net-Total'))
     stats = get_summary(new_wk, tax_output, min_year, max_year)
     if tax_output:
         stats.drop('total', axis=1, inplace=True)

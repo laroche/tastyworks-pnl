@@ -269,15 +269,15 @@ TODO
 - Output
    - Output all decimal digits, even if they are 0.
    - For --sumary allow excel output depending on filename extension.
-   - Tax csv output: Sort transactions in the order they appear in the summary report.
+   - Done: Tax csv output: Sort transactions in the order they appear in the summary report.
    - Add columne with automatic annotations. (warnings and error messages from conversion.)
-   - Add columne with undelying symbol (dividends and options) and Put/Call (for options).
+   - Done: Add columne with undelying symbol (dividends and options) and Put/Call (for options).
    - Instead of datetime in one columne, output date and time in two separate columns.
    - Print header with explanation of transaction output. Or additional page for the tax athority with explanations.
    - Generate documentation that can be passed on to the German tax authorities on how
      the tax is computed and also document on how to fill out the official tax documents.
       - Check this for docx reporting: <https://github.com/airens/interactive_brokers_tax>
-   - More German words in the output csv file for the German Finanzamt.
+   - Done: More German words in the output csv file for the German Finanzamt.
    - Can Excel output also include yearly summary data computed from Excel? (How are formulas output?)
      Can transactions also be grouped per year on different sheets/tabs? A yearly tab.
    - Output open positions (assets) at start/end of year. Also include summary of unrealized gains (including currencies).
@@ -292,6 +292,7 @@ TODO
    - Add an extra notes/comment field that can be edited.
    - Verlustverrechnungstöpfe für Aktien, Sonstiges, Termingeschäfte. Berechnung der zu zahlenden Steuer.
 - Statistics:
+   - "fees" output should also be correct if only one tax year is output
    - Options
       - Done: Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
       - Add DIT (Days In Trade), average days in trade
