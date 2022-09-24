@@ -422,43 +422,43 @@ def show_plt(df):
     import matplotlib.pyplot as plt
 
     df2 = df.copy()
-    for i in ('net_total', 'pnl', 'usd_gains'):
+    for i in ('Net-Total', 'GuV', 'USD-Gewinne'):
         df2[i] = pandas.to_numeric(df2[i]) # df2[i].astype(float)
-    df2.datetime = pandas.to_datetime(df2.datetime)
-    df2.set_index('datetime', inplace=True)
+    df2['Datum/Zeit'] = pandas.to_datetime(df2['Datum/Zeit'])
+    df2.set_index('Datum/Zeit', inplace=True)
 
     monthly_totals = df2.resample('MS').sum()
     monthly_last = df2.resample('MS').last() # .ohlc() .mean()
-    monthly_min = monthly_last.net_total.min() * 0.9
+    monthly_min = monthly_last['Net-Total'].min() * 0.9
     date_monthly = [x.strftime("%Y-%m") for x in monthly_totals.index]
-    ax = monthly_totals.plot(kind='bar', y='pnl', title='Monthly PnL Summary')
+    ax = monthly_totals.plot(kind='bar', y='GuV', title='Monthly PnL Summary')
     ax.set(xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
-    ax = monthly_totals.plot(kind='bar', y='usd_gains', title='Monthly USD Gains')
+    ax = monthly_totals.plot(kind='bar', y='USD-Gewinne', title='Monthly USD Gains')
     ax.set(xlabel='Date', ylabel='USD Gains')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
-    ax = monthly_last.plot(kind='bar', y='net_total', title='Monthly Net Total')
-    ax.set(xlabel='Date', ylabel='net_total')
+    ax = monthly_last.plot(kind='bar', y='Net-Total', title='Monthly Net Total')
+    ax.set(xlabel='Date', ylabel='Net-Total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_monthly)
     plt.ylim(bottom=monthly_min)
 
     quarterly_totals = df2.resample('QS').sum()
     quarterly_last = df2.resample('QS').last() # .ohlc() .mean()
-    quarterly_min = quarterly_last.net_total.min() * 0.9
+    quarterly_min = quarterly_last['Net-Total'].min() * 0.9
     date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
-    ax = quarterly_totals.plot(kind='bar', y='pnl', title='Quarterly PnL Summary')
+    ax = quarterly_totals.plot(kind='bar', y='GuV', title='Quarterly PnL Summary')
     ax.set(xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
-    ax = quarterly_totals.plot(kind='bar', y='usd_gains', title='Quarterly USD Gains')
+    ax = quarterly_totals.plot(kind='bar', y='USD-Gewinne', title='Quarterly USD Gains')
     ax.set(xlabel='Date', ylabel='USD Gains')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
-    ax = quarterly_last.plot(kind='bar', y='net_total', title='Quarterly Net Total')
-    ax.set(xlabel='Date', ylabel='net_total')
+    ax = quarterly_last.plot(kind='bar', y='Net-Total', title='Quarterly Net Total')
+    ax.set(xlabel='Date', ylabel='Net-Total')
     plt.subplots_adjust(bottom=0.2)
     ax.set_xticklabels(date_quarterly)
     plt.ylim(bottom=quarterly_min)
