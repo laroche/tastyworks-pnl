@@ -16,12 +16,17 @@ PARAM="--assume-individual-stock"
 # If you want to look at graphical output summary:
 #SHOW="--show"
 
+# Where to store the output reports:
+OUTPUTDIR=tax-reports
+
+mkdir -p $OUTPUTDIR
+
 # tax reports for individual years:
 for year in $YEARS ; do
-  python3 tw-pnl.py $PARAM --tax-output=$year --output-csv=tax-$year.csv $INPUT
+  python3 tw-pnl.py $PARAM --tax-output=$year --output-csv=$OUTPUTDIR/tax-$year.csv $INPUT
 done
 
 # One big summary report for all years as csv and txt.
 # Also one big csv file with all transactions:
-python3 tw-pnl.py $PARAM $SHOW --summary=tax-summary.csv --output-csv=tax-all.csv $INPUT > tax-summary.txt
+python3 tw-pnl.py $PARAM $SHOW --summary=$OUTPUTDIR/tax-summary.csv --output-csv=$OUTPUTDIR/tax-all.csv $INPUT > $OUTPUTDIR/tax-summary.txt
 
