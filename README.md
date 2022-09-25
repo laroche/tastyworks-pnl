@@ -28,6 +28,8 @@ soffice tastyworks-tax.csv
 soffice tastyworks-summary.csv
 </pre>
 
+[RUN.sh](RUN.sh) contains an example on how to generate all reports.
+
 If the script does not complete successfully, please add the option __--debug__ to see
 additional information on where it stops.
 
@@ -61,6 +63,8 @@ python3 tw-pnl.py --assume-individual-stock --summary=tastyworks-summary.csv --o
 soffice tastyworks-tax.csv
 soffice tastyworks-summary.csv
 </pre>
+
+[RUN.sh](RUN.sh) enthält Beispielaufrufe zur Generierung aller Reports.
 
 Falls das Skript nicht erfolgreich läuft, bitte die Option __--debug__ hinzufügen, damit man
 zusätzliche Informationen sieht, an welcher Stelle genau abgebrochen wird.
