@@ -712,8 +712,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     # limit to two decimal digits
     for i in stats.index:
         for year in years:
-            f = stats.loc[i, year]
-            stats.loc[i, year] = float(f'{f:.2f}')
+            stats.loc[i, year] = float(f'{stats.loc[i, year]:.2f}')
     # sum of data over all years (not useful in some cases):
     for i in stats.index:
         total = .0
