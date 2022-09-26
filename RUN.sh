@@ -19,6 +19,15 @@ PARAM="--assume-individual-stock"
 # Where to store the output reports:
 OUTPUTDIR=tax-reports
 
+# Check parameters:
+if test "X$1" = "X--show" ; then
+  SHOW="--show"
+  shift
+fi
+if test "X$*" != "X" ; then
+  INPUT="$*"
+fi
+
 mkdir -p $OUTPUTDIR
 
 # tax reports for individual years:
