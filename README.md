@@ -291,6 +291,8 @@ TODO
         done, we can have slightly different results. Maybe the EUR amount should already
         be stored rounded to 2 digits for all further computations. As tax data should be
         computed from the spreadsheet file, this is not really an issue.
+      - Since we store some data as float, then output is not always output with 2 digits.
+        E.g. 5.80 is output as 5.8. Storing numbers as string could change this.
    - Output report as pdf in addition to csv: <https://github.com/probstj/ccGains>
    - Allow new strategy field / cetegory to be filled out.
    - Add an extra notes/comment field that can be edited.
