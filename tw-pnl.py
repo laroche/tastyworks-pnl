@@ -25,7 +25,7 @@
 # sudo apt-get install python3-matplotlib
 #
 #
-# pylint: disable=C0103,C0111,C0114,C0116,C0301,E0704
+# pylint: disable=C0103,C0114,C0115,C0116,C0301,C0326,C0330,E0704
 #
 
 import enum
@@ -302,8 +302,8 @@ def is_stock(symbol, tsubcode):
         return AssetType.Future
     # The conservative way is to throw an exception if we are not sure.
     if not assume_stock:
-        raise ValueError(f'No idea if this is a stock: {symbol}' + \
-            'Use the option --assume-individual-stock to assume individual stock ' + \
+        raise ValueError(f'No idea if this is a stock: {symbol}' +
+            'Use the option --assume-individual-stock to assume individual stock ' +
             'for all unknown symbols.')
     # Just assume this is a normal stock if not in the above list
     return AssetType.IndStock
@@ -347,7 +347,7 @@ def fifo_add(fifos, quantity, price, price_usd, asset, date=None, tax_free=False
         if abs(fifo[0][2]) >= abs(quantity):
             p = quantity * (price - fifo[0][0])
             if date is None or \
-                (fifo[0][3] > prevyear and quantity < 0 and \
+                (fifo[0][3] > prevyear and quantity < 0 and
                 not fifo[0][4] and not tax_free):
                 pnl -= p
             else:
@@ -363,7 +363,7 @@ def fifo_add(fifos, quantity, price, price_usd, asset, date=None, tax_free=False
         # remaining entries into the FIFO).
         p = fifo[0][2] * (price - fifo[0][0])
         if date is None or \
-            (fifo[0][3] > prevyear and quantity < 0 and \
+            (fifo[0][3] > prevyear and quantity < 0 and
             not fifo[0][4] and not tax_free):
             pnl += p
         else:
@@ -968,8 +968,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     strike = int(strike)
                 asset = f'{symbol} {callput}{strike} {expire}'
                 asset_type = AssetType.LongOption
-                if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or \
-                    (str(buysell) == 'Buy' and str(openclose) == 'Close') or \
+                if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or
+                    (str(buysell) == 'Buy' and str(openclose) == 'Close') or
                     (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and not fifos_islong(fifos, asset))):
                     asset_type = AssetType.ShortOption
             else:
@@ -1071,8 +1071,8 @@ def check_csv(csv_file):
         sys.exit(1)
 
 def usage():
-    print('tw-pnl.py [--assume-individual-stock][--tax-output=2021][--usd]' + \
-        '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' + \
+    print('tw-pnl.py [--assume-individual-stock][--tax-output=2021][--usd]' +
+        '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' +
         '[--verbose][--debug][--show] *.csv')
 
 def main(argv):
