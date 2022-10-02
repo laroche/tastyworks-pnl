@@ -250,6 +250,7 @@ TODO
      a short option trade and a long option trade for German taxes. This is currently not done, but maybe
      the checks for the yearly tax report will not work in this case. A real check and split of the
      transactions needs to be added.
+   - A separate bucket for all long-options that expire worthless should be created.
    - If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
