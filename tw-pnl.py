@@ -49,18 +49,24 @@ eurusd = None
 # If the file 'eurusd.csv' does not exist, download the data from
 # the bundesbank directly.
 def read_eurusd():
+    import csv
     global eurusd
     url = 'eurusd.csv'
     if not os.path.exists(url):
         url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
-    eurusd = pandas.read_csv(url, skiprows=5, skipfooter=2, names=['date', 'eurusd', 'nix'],
-        usecols=['date', 'eurusd'], na_values=['.'], engine='python')
-    eurusd = dict(eurusd.values.tolist())
+    eurusd = {}
+    with open(url, 'r', encoding='UTF8') as csv_file:
+        reader = csv.reader(csv_file)
+        for _ in range(5):
+            next(reader)
+        for (date, usd, _) in reader:
+            if date != '':
+                if usd != '.':
+                    eurusd[date] = float(usd)
+                else:
+                    eurusd[date] = None
 
-def isnan(x):
-    return str(x) == 'nan'
-
-def get_eurusd(date, debug=False):
+def get_eurusd(date):
     while True:
         try:
             x = eurusd[date]
@@ -68,10 +74,8 @@ def get_eurusd(date, debug=False):
             print(f'ERROR: No EURUSD conversion data available for {date},'
                 ' please download newer data into the file eurusd.csv.')
             sys.exit(1)
-        if not isnan(x):
+        if x is not None:
             return x
-        if debug:
-            print('EURUSD conversion not found for', date)
         date = str(pydatetime.date(*map(int, date.split('-'))) - pydatetime.timedelta(days=1))
 
 #def eur2usd(x, date, conv=None):
@@ -87,6 +91,9 @@ def usd2eur(x, date, conv=None):
             return x / get_eurusd(date)
         return x / conv
     return x
+
+def isnan(x):
+    return str(x) == 'nan'
 
 class AssetType(enum.IntEnum):
     LongOption = 1
@@ -430,7 +437,7 @@ def show_plt(df):
     monthly_totals = df2.resample('MS').sum()
     monthly_last = df2.resample('MS').last() # .ohlc() .mean()
     monthly_min = monthly_last['Net-Total'].min() * 0.9
-    date_monthly = [x.strftime("%Y-%m") for x in monthly_totals.index]
+    date_monthly = [x.strftime('%Y-%m') for x in monthly_totals.index]
     ax = monthly_totals.plot(kind='bar', y='GuV', title='Monthly PnL Summary')
     ax.set(xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
@@ -448,7 +455,7 @@ def show_plt(df):
     quarterly_totals = df2.resample('QS').sum()
     quarterly_last = df2.resample('QS').last() # .ohlc() .mean()
     quarterly_min = quarterly_last['Net-Total'].min() * 0.9
-    date_quarterly = [x.strftime("%Y-%m") for x in quarterly_totals.index]
+    date_quarterly = [x.strftime('%Y-%m') for x in quarterly_totals.index]
     ax = quarterly_totals.plot(kind='bar', y='GuV', title='Quarterly PnL Summary')
     ax.set(xlabel='Date', ylabel='PnL')
     plt.subplots_adjust(bottom=0.2)
@@ -734,7 +741,10 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
         df = df_append_row(df, [f'Tastyworks {year} Kapitalflussrechnung', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
-            df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], '', '', '', '', ''] + end)
+            if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value'):
+                df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], 'USD', '', '', '', ''] + end)
+            else:
+                df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], 'Euro', '', '', '', ''] + end)
     return df
 
 # XXX hack for future multiples
