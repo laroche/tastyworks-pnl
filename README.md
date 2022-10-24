@@ -274,6 +274,7 @@ TODO
 - Output
    - Output all decimal digits, even if they are 0.
    - For --sumary allow excel output depending on filename extension.
+   - Output yearly summary data at the beginning of the file, before all individual transactions.
    - Done: Tax csv output: Sort transactions in the order they appear in the summary report.
    - Add columne with automatic annotations. (warnings and error messages from conversion.)
    - Done: Add columne with undelying symbol (dividends and options) and Put/Call (for options).
