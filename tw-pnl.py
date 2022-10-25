@@ -741,6 +741,9 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
         df = df_append_row(df, [f'Tastyworks {year} Kapitalflussrechnung', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
+            # XXX enable these again if data is complete also for yearly stats:
+            if tax_output and i in ('Cash Balance USD', 'Net Liquidating Value', 'Alle Gebühren in USD', 'Alle Gebühren in Euro'):
+                continue
             if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value'):
                 df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], 'USD', '', '', '', ''] + end)
             else:
