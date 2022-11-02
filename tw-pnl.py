@@ -34,6 +34,8 @@ import os
 from collections import deque
 import math
 import datetime as pydatetime
+from urllib import request
+
 import pandas
 
 convert_currency = True
@@ -51,11 +53,13 @@ eurusd = None
 def read_eurusd():
     import csv
     global eurusd
-    url = 'eurusd.csv'
-    if not os.path.exists(url):
-        url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
+    file = os.path.join(os.path.dirname(__file__), 'eurusd.csv')
+    if not os.path.exists(file):
+        with request.urlopen('https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010') as response:
+            with open(file, 'wb') as csv_file:
+                csv_file.write(response.read())
     eurusd = {}
-    with open(url, 'r', encoding='UTF8') as csv_file:
+    with open(file, 'r', encoding='UTF8') as csv_file:
         reader = csv.reader(csv_file)
         for _ in range(5):
             next(reader)
