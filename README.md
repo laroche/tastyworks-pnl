@@ -131,10 +131,10 @@ sudo apt-get install python3-pandas
 Or use pip or pip3 for a local install:
 
 <p><code>
-pip install pandas
+pip install -r requirements.txt
 </code></p>
 <p><code>
-pip3 install pandas
+pip3 install -r requirements.txt
 </code></p>
 
 For graphical output (--show), you need matplotlib:
