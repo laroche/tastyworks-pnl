@@ -55,7 +55,7 @@ def read_eurusd():
     if not os.path.exists(url):
         url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
     eurusd = {}
-    with open(url, 'r', encoding='UTF8') as csv_file:
+    with open(url, encoding='UTF8') as csv_file:
         reader = csv.reader(csv_file)
         for _ in range(5):
             next(reader)
@@ -309,7 +309,7 @@ def is_stock(symbol, tsubcode):
         return AssetType.Future
     # The conservative way is to throw an exception if we are not sure.
     if not assume_stock:
-        raise ValueError(f'No idea if this is a stock: {symbol}' +
+        raise ValueError(f'No idea if this is a stock: {symbol}\n' +
             'Use the option --assume-individual-stock to assume individual stock ' +
             'for all unknown symbols.')
     # Just assume this is a normal stock if not in the above list
