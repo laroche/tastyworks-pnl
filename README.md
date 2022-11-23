@@ -209,8 +209,11 @@ FAQ
 - Either github issues or email works for me to enhance/fix this program. Sample data
   is best to resolve issues.
 - If you read in the csv-file from Tastyworks into Excel, the floating point price values
-  can get converted from US style to German notation. This breaks this skript, so please
+  can get converted from US style to German notation. This breaks this script, so please
   stay with original data from Tastyworks or use a normal editor instead of Excel to change data.
+- Some people say the csv download from Tastyworks is limited to about 250 lines. Here is a similar
+  bug description: <https://github.com/blais/tastybugs/issues/8>
+- Issues of the Tastyworks (web) application: <https://github.com/blais/tastybugs/issues>
 - One check is to look at the computed value of "account cash balance" from this script and compare it
   to the official value "Cash Balance" from Tastyworks at <https://manage.tastyworks.com/#/accounts/balances>.
   After 550 transactions the final cash balance value is on the cent identical to the
@@ -318,6 +321,7 @@ TODO
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
    - Show number of trades/transactions history.
    - List of best and worst trades of the year.
+   - Check stats output from: <https://github.com/Jcuevas97/OrderParser>
 - Docu
    - Add images on how to download csv-file within Tastyworks into docu.
    - Translate text output into German.
@@ -326,6 +330,7 @@ TODO
    - Add test data for users to try out.
    - Add testsuite to verify proper operation.
    - Use pandas.isna(x)?
+   - Can CSV files use ";" as separator instead of ","?
 - If we move currency conversion gains to the end of the loop, we can defer the computation
   of tax_free into the complete loop. E.g. detection of interest payments as tax_free is
   currently made too complex.
@@ -346,5 +351,18 @@ TODO
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Buy,Open,108,,,,,0.00,-9940.86,Forward split: Open 108.0 TQQQ,xxx...00
 01/21/2021 12:39 PM,Receive Deliver,Forward Split,TQQQ,Sell,Close,54,,,,,0.00,9940.86,Forward split: Close 54.0 TQQQ,xxx...00
 </pre>
-- Similar project: <https://github.com/avion23/tastyworksTaxes>
+- Similar/related projects:
+   - <https://github.com/avion23/tastyworksTaxes>
+   - <https://github.com/leonk2210/tastyworks-tax-de>
+   - <https://github.com/neogeo/tasty-trade-csv-import-profit-loss>
+   - <https://github.com/jblanfrey/tastyworks-matlab-cli>
+   - <<https://github.com/Jcuevas97/OrderParser>>
+   - SQL import of all trades: <https://github.com/Dtrodler/TastyPlTracker>
+   - MySQL import of all trades: <https://github.com/jx666jx/TastyTrader> 
+   - Convert from Interactive Brokers to Tastyworks: <https://github.com/cmer/interactive_brokers_2_tasty_works>
+   - Tastyworks API:
+      - <https://github.com/boyan-soubachov/tastyworks_api>
+      - <https://github.com/c4syner/tastyscrape>
+   - Tastyworks risk simulator: <https://github.com/iloire/tastyworks-risk>
+   - Google Sheets portfolio analysis: <https://github.com/jarthursquiers/FireByArthurTradingEngine>
 
