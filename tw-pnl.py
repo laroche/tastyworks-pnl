@@ -738,7 +738,7 @@ def append_yearly_stats(df, tax_output, stats, min_year, max_year):
     for year in years:
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, [f'Tastyworks {year} Kapitalflussrechnung', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        df = df_append_row(df, [f'Tastyworks Kapitalflussrechnung {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
         df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             # XXX enable these again if data is complete also for yearly stats:
@@ -1012,6 +1012,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 local_pnl = eur_amount
             else:
                 if cur_year >= '2018':
+                    # Teilfreistellungen: https://www.gesetze-im-internet.de/invstg_2018/__20.html
                     if asset_type == AssetType.AktienFond:
                         local_pnl *= 0.70
                     elif asset_type == AssetType.MischFond:
