@@ -7,8 +7,8 @@
 INPUT=transaction_history.csv
 #INPUT="../TW-*.csv"
 
-YEARS="2017 2018 2019 2020 2021 2022"
-#YEARS="`seq 2017 2022`"
+YEARS="2017 2018 2019 2020 2021 2022 2023"
+#YEARS="`seq 2017 2023`"
 
 # Additional parameters:
 PARAM="--assume-individual-stock"
