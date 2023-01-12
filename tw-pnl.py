@@ -44,6 +44,8 @@ assume_stock = False
 
 eurusd = None
 
+eurusd_url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
+
 # Setup 'eurusd' as dict() to contain the EURUSD exchange rate on a given date
 # based on official data from bundesbank.de.
 # If the file 'eurusd.csv' does not exist, download the data from
@@ -53,7 +55,9 @@ def read_eurusd():
     global eurusd
     url = 'eurusd.csv'
     if not os.path.exists(url):
-        url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
+        url = os.path.join(os.path.dirname(__file__), 'eurusd.csv')
+    if not os.path.exists(url):
+        url = eurusd_url
     eurusd = {}
     with open(url, encoding='UTF8') as csv_file:
         reader = csv.reader(csv_file)
@@ -1085,7 +1089,7 @@ def check_csv(csv_file):
         sys.exit(1)
 
 def usage():
-    print('tw-pnl.py [--assume-individual-stock][--tax-output=2021][--usd]' +
+    print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2021][--usd]' +
         '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' +
         '[--verbose][--debug][--show] *.csv')
 
@@ -1104,6 +1108,7 @@ def main(argv):
     show = False
     try:
         opts, args = getopt.getopt(argv, 'dhuv', ['assume-individual-stock',
+            'download-eurusd',
             'help', 'summary=', 'output-csv=', 'output-excel=',
             'show', 'tax-output=', 'usd', 'verbose', 'debug'])
     except getopt.GetoptError:
@@ -1115,6 +1120,12 @@ def main(argv):
             assume_stock = True
         elif opt in ('-h', '--help'):
             usage()
+            sys.exit()
+        elif opt == '--download-eurusd':
+            filename = 'eurusd.csv'
+            if not os.path.exists(filename):
+                import urllib.request
+                urllib.request.urlretrieve(eurusd_url, filename)
             sys.exit()
         elif opt == '--output-csv':
             output_csv = arg

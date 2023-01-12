@@ -96,6 +96,12 @@ Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quanti
 If you delete the __eurusd.csv__ file, a current version is downloaded directly
 from <https://www.bundesbank.de/de/statistiken/wechselkurse>.
 (Link to the data: [eurusd.csv](https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010))
+You can also download a new eurusd.csv file in the current directory with
+<pre>
+python3 tw-pnl.py --download-eurusd
+</pre>
+If you invoke the tw-pnl.py script from another directory, you can also place
+an updated eurusd.csv file into the current directory.
 
 The option __--usd__ can be used to not translate pnl data into Euro.
 
