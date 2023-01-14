@@ -261,6 +261,8 @@ TODO
      transactions needs to be added.
    - A separate bucket for all long-options that expire worthless should be created.
    - If option writing is cash-settled, the cash-settlement needs to go into "Termingeschäftsverluste".
+   - Termingeschäftsverluste are capped at 20.000 Euro per year. Make this configurable as couples
+     have double the amount. Depend this automatically on the account name (contains "joint").
 - Does not work with futures.
    - A first quick implementation is done, further checks are needed on real account data.
      Let me know if you can provide full account data to check/verify.

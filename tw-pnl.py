@@ -520,7 +520,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Zinseinnahmen', 'Zinsausgaben', 'Zinsen Gesamt',
         'Z19 Ausländische Kapitalerträge',
         'Z21 Termingeschäftsgewinne+Stillhalter',
-        'Z24 Termingeschäftsverluste',
+        'Z24 Termingeschäftsverluste', 'Termingeschäftsverlustvortrag',
         'KAP+KAP-INV', 'KAP+KAP-INV KErSt+Soli', 'KAP+KAP-INV Verlustvortrag',
         'Cash Balance USD', 'Net Liquidating Value')
     data = []
@@ -703,14 +703,22 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             stats.loc['Dividenden', year] + \
             stats.loc['Zinsen Gesamt', year] + \
             stats.loc['zusätzliche Ordergebühren', year]
+        terminverlust = .0
         if year >= 2021:
             stats.loc['Z21 Termingeschäftsgewinne+Stillhalter', year] = z21
             stats.loc['Z24 Termingeschäftsverluste', year] = z24
+            terminverlust = z24
+            if year > min_year and year > 2021:
+                terminverlust += stats.loc['Termingeschäftsverlustvortrag', year - 1]
+            if terminverlust < -20000.0:
+                stats.loc['Termingeschäftsverlustvortrag', year] = terminverlust + 20000.0
+                terminverlust = -20000.0
         else:
             stats.loc['Z19 Ausländische Kapitalerträge', year] += z24
         stats.loc['KAP+KAP-INV', year] = \
             stats.loc['Z19 Ausländische Kapitalerträge', year] + \
-            stats.loc['Anlage KAP-INV', year]
+            stats.loc['Anlage KAP-INV', year] + \
+            terminverlust
         kerstsoli = stats.loc['KAP+KAP-INV', year] * 0.26375
         if year > min_year:
             kerstsoli += stats.loc['KAP+KAP-INV Verlustvortrag', year - 1]
