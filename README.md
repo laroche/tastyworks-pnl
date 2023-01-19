@@ -13,10 +13,14 @@ at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
 
-Run the following command for your 2021 tax statement and continue with
-your [libreoffice](https://libreoffice.org/) spreadsheet:
+Run the following command to convert from the tastyworks csv file (transaction_history.csv)
+to a 2021 tax statement as csv file (tastyworks-tax-2021.csv):
 <pre>
 python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
+</pre>
+
+Continue with [libreoffice](https://libreoffice.org/) spreadsheet to finalize your tax report:
+<pre>
 soffice tastyworks-tax-2021.csv
 </pre>
 
@@ -49,10 +53,14 @@ Details zur Steuererklärung in Deutschland sind unter
 Eine Web-Applikation für dieses Python-Skript wird in Zukunft
 unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 
-Starte folgenden Kommandozeilen-Aufruf für eine Steuerausgabe 2021 und
-lade die Daten in Deine [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation:
+Starte folgenden Kommandozeilen-Aufruf für eine Konvertierung von einer Tastyworks csv-Datei (transaction_history.csv)
+zu einer Steuerausgabe für 2021 als CSV-Datei (tastyworks-tax-2021.csv):
 <pre>
 python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
+</pre>
+
+Starte die [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation mit der CSV Ausgabedatei tastyworks-tax-2021.csv:
+<pre>
 soffice tastyworks-tax-2021.csv
 </pre>
 
