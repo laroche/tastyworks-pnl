@@ -372,9 +372,9 @@ TODO
    - <https://github.com/leonk2210/tastyworks-tax-de>
    - <https://github.com/neogeo/tasty-trade-csv-import-profit-loss>
    - <https://github.com/jblanfrey/tastyworks-matlab-cli>
-   - <<https://github.com/Jcuevas97/OrderParser>>
+   - <https://github.com/Jcuevas97/OrderParser>
    - SQL import of all trades: <https://github.com/Dtrodler/TastyPlTracker>
-   - MySQL import of all trades: <https://github.com/jx666jx/TastyTrader> 
+   - MySQL import of all trades: <https://github.com/jx666jx/TastyTrader>
    - Convert from Interactive Brokers to Tastyworks: <https://github.com/cmer/interactive_brokers_2_tasty_works>
    - Tastyworks API:
       - <https://github.com/boyan-soubachov/tastyworks_api>
