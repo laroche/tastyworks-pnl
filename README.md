@@ -318,6 +318,7 @@ TODO
    - Allow new strategy field / cetegory to be filled out.
    - Add an extra notes/comment field that can be edited.
    - Verlustverrechnungstöpfe für Aktien, Sonstiges, Termingeschäfte. Berechnung der zu zahlenden Steuer.
+   - If data might be stored locally, you can also use parquet dataformat: pd.to_parquet() and pd.read_parquet().
 - Statistics:
    - "fees" output should also be correct if only one tax year is output
    - Options
