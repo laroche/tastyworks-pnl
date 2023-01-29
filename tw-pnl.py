@@ -157,11 +157,11 @@ def check_tcode(tcode, tsubcode, description):
             raise ValueError(f'Exercise with description {description}')
 
 def check_param(buysell, openclose, callput):
-    if str(buysell) not in ('nan', 'Buy', 'Sell'):
+    if buysell not in ('', 'Buy', 'Sell'):
         raise ValueError(f'Unknown buysell: {buysell}')
-    if str(openclose) not in ('nan', 'Open', 'Close'):
+    if openclose not in ('', 'Open', 'Close'):
         raise ValueError(f'Unknown openclose: {openclose}')
-    if str(callput) not in ('nan', 'C', 'P'):
+    if callput not in ('', 'C', 'P'):
         raise ValueError(f'Unknown callput: {callput}')
 
 def check_trade(tsubcode, check_amount, amount, asset_type):
@@ -855,7 +855,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         # as one transaction, we should split the currency gains transaction as well.
         # Could we detect this bad case within transactions?
         if tcode != 'Money Movement' and \
-            not isnan(expire) and str(buysell) == 'Sell' and str(openclose) == 'Open':
+            not isnan(expire) and buysell == 'Sell' and openclose == 'Open':
             tax_free = True
         # USD as a big integer number:
         if False:
@@ -969,8 +969,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             x = symbol + '-' + date
             # quantity for splits seems to be more like strike price and how it changes.
             # We use it to calculate the split ration / reverse ratio.
-            if (tsubcode == 'Forward Split' and str(buysell) == 'Sell') or \
-               (tsubcode == 'Reverse Split' and str(buysell) == 'Buy'):
+            if (tsubcode == 'Forward Split' and buysell == 'Sell') or \
+               (tsubcode == 'Reverse Split' and buysell == 'Buy'):
                 splits[x] = quantity
             else:
                 oldquantity = splits[x]
@@ -993,8 +993,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     strike = int(strike)
                 asset = f'{symbol} {callput}{strike} {expire}'
                 asset_type = AssetType.LongOption
-                if not isnan(expire) and ((str(buysell) == 'Sell' and str(openclose) == 'Open') or
-                    (str(buysell) == 'Buy' and str(openclose) == 'Close') or
+                if not isnan(expire) and ((buysell == 'Sell' and openclose == 'Open') or
+                    (buysell == 'Buy' and openclose == 'Close') or
                     (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and not fifos_islong(fifos, asset))):
                     asset_type = AssetType.ShortOption
             else:
@@ -1002,7 +1002,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             # 'buysell' is not set correctly for 'Expiration'/'Exercise'/'Assignment' entries,
             # so we look into existing positions to check if we are long or short (we cannot
             # be both, so this test should be safe):
-            if str(buysell) == 'Sell' or \
+            if buysell == 'Sell' or \
                 (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and fifos_islong(fifos, asset)):
                 #print('Switching quantity from long to short:')
                 quantity = - quantity
@@ -1096,6 +1096,33 @@ def check_csv(csv_file):
         print('ERROR: Wrong first line in csv file.')
         sys.exit(1)
 
+def read_csv_tasty(csv_file):
+    check_csv(csv_file)
+    wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
+    #print(wk.head())
+    #print(wk.memory_usage(deep=True))
+    #print(wk.memory_usage(deep=True).sum())
+    #print(wk.dtypes)
+    #(wk
+    # .assign(['Open/Close']=['Open/Close'].fillna('').astype('category')
+    for i in ('Open/Close', 'Buy/Sell', 'Call/Put'):
+        #print(wk[i].value_counts(dropna=False))
+        wk[i] = wk[i].fillna('').astype('category')
+        #print(wk[i].value_counts(dropna=False))
+    for i in ('Account Reference', 'Transaction Subcode', 'Transaction Code'):
+        #print(wk[i].value_counts(dropna=False))
+        wk[i] = wk[i].astype('category')
+        #print(wk[i].value_counts(dropna=False))
+    #for i in ('Symbol', 'Expiration Date', 'Description'):
+        #print(wk[i].value_counts(dropna=False))
+        #wk[i] = wk[i].fillna('').astype('str')
+        #print(wk[i].value_counts(dropna=False))
+    #print(wk.head())
+    #print(wk.memory_usage(deep=True))
+    #print(wk.memory_usage(deep=True).sum())
+    #print(wk.dtypes)
+    return wk
+
 def usage():
     print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2021][--usd]' +
         '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' +
@@ -1159,8 +1186,7 @@ def main(argv):
     args.reverse()
     all_wk = []
     for csv_file in args:
-        check_csv(csv_file)
-        all_wk.append(pandas.read_csv(csv_file, parse_dates=['Date/Time']))
+        all_wk.append(read_csv_tasty(csv_file))
     check(all_wk, output_summary, output_csv, output_excel, tax_output, show, verbose, debug)
 
 if __name__ == '__main__':
