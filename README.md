@@ -336,6 +336,7 @@ TODO
      about 79 % of it as average over many years.
    - How much fees do you pay for your option trades to the broker/exchange compared
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
+   - Premium per day should be calculated differnetly for the current year. Based on actual days within the year.
    - Show number of trades/transactions history.
    - List of best and worst trades of the year.
    - Check stats output from: <https://github.com/Jcuevas97/OrderParser>
