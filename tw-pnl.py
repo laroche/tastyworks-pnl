@@ -645,6 +645,9 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             print(type, i)
             raise
     # add sums of data:
+    now = pydatetime.datetime.now()
+    curyear = now.year
+    curdaysperyear = (now - pydatetime.datetime(curyear, 1, 1)).days * 5 // 7
     for year in years:
         stats.loc['Währungsgewinne USD Gesamt', year] = \
             stats.loc['Währungsgewinne USD', year] + stats.loc['Währungsgewinne USD (steuerfrei)', year]
@@ -662,7 +665,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             stats.loc['Sonstige Gewinne', year] + stats.loc['Sonstige Verluste', year]
         stats.loc['Stillhalter Gesamt', year] = \
             stats.loc['Stillhalter-Gewinne', year] + stats.loc['Stillhalter-Verluste', year]
-        stats.loc['Durchschnitt behaltene Prämien pro Tag', year] = stats.loc['Stillhalter Gesamt', year] / 250
+        daysperyear = 250
+        if curyear == year and curdaysperyear < 250:
+            daysperyear = curdaysperyear
+        stats.loc['Durchschnitt behaltene Prämien pro Tag', year] = stats.loc['Stillhalter Gesamt', year] / daysperyear
         stats.loc['Stillhalter Calls Gesamt (FIFO)', year] = \
             stats.loc['Stillhalter-Gewinne Calls (FIFO)', year] + stats.loc['Stillhalter-Verluste Calls (FIFO)', year]
         stats.loc['Stillhalter Puts Gesamt (FIFO)', year] = \
@@ -1124,7 +1130,7 @@ def read_csv_tasty(csv_file):
     return wk
 
 def usage():
-    print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2021][--usd]' +
+    print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2022][--usd]' +
         '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' +
         '[--verbose][--debug][--show] *.csv')
 
@@ -1139,7 +1145,7 @@ def main(argv):
     output_csv = None
     output_excel = None
     tax_output = None
-    #tax_output = '2021'
+    #tax_output = '2022'
     show = False
     try:
         opts, args = getopt.getopt(argv, 'dhuv', ['assume-individual-stock',

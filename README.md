@@ -6,7 +6,7 @@ Download all transactions from Tastyworks into a csv-file and create with this
 python-script a new enhanced csv-file. This new csv-file adds a currency conversion
 from USD to Euro and computes the realised profits and losses based on the FIFO method.
 Also all currency gains for the USD-cash-account are added.
-A summary for all stock, fonds, dividend, option and future gains/losses is output.
+A summary for all stock, fond, dividend, option and future gains/losses is output.
 
 Details on German taxes are written up
 at <https://laroche.github.io/private-geldanlage/steuern.html>.
@@ -14,14 +14,14 @@ at <https://laroche.github.io/private-geldanlage/steuern.html>.
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
 
 Run the following command to convert from the tastyworks csv file (transaction_history.csv)
-to a 2021 tax statement as csv file (tastyworks-tax-2021.csv):
+to a 2022 tax statement as csv file (tastyworks-tax-2022.csv):
 <pre>
-python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2022 --output-csv=tastyworks-tax-2022.csv transaction_history.csv
 </pre>
 
 Continue with [libreoffice](https://libreoffice.org/) spreadsheet to finalize your tax report:
 <pre>
-soffice tastyworks-tax-2021.csv
+soffice tastyworks-tax-2022.csv
 </pre>
 
 The following command outputs a more detailed csv report for your personal review together with a
@@ -54,14 +54,14 @@ Eine Web-Applikation für dieses Python-Skript wird in Zukunft
 unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 
 Starte folgenden Kommandozeilen-Aufruf für eine Konvertierung von einer Tastyworks csv-Datei (transaction_history.csv)
-zu einer Steuerausgabe für 2021 als CSV-Datei (tastyworks-tax-2021.csv):
+zu einer Steuerausgabe für 2022 als CSV-Datei (tastyworks-tax-2022.csv):
 <pre>
-python3 tw-pnl.py --assume-individual-stock --tax-output=2021 --output-csv=tastyworks-tax-2021.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2022 --output-csv=tastyworks-tax-2022.csv transaction_history.csv
 </pre>
 
-Starte die [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation mit der CSV Ausgabedatei tastyworks-tax-2021.csv:
+Starte die [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation mit der CSV Ausgabedatei tastyworks-tax-2022.csv:
 <pre>
-soffice tastyworks-tax-2021.csv
+soffice tastyworks-tax-2022.csv
 </pre>
 
 Folgender Befehl gibt einen detaillierten CSV Report für den persönlichen Review zusammen
@@ -84,7 +84,7 @@ How to use
 Clone or download this repository onto your local computer. If you don't have git installed,
 you can download the current zip file from <https://github.com/laroche/tastyworks-pnl/archive/refs/heads/main.zip>.
 
-Download your trade history as csv file from
+Download your trade history as csv file from the web-browser via
 <https://trade.tastyworks.com/index.html#/transactionHistoryPage>.
 (Choose "Activity" and then "History" and then setup the filter for a
 custom period of time and download it as csv file. Beware that Tastyworks
@@ -172,7 +172,7 @@ pnl generated data as well as eurusd conversion data. You probably do not have t
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
 
-If you provide the option __--tax-output=2021__, your output file will be
+If you provide the option __--tax-output=2022__, your output file will be
 optimized for tax output for a special year. Only transactions for that year are output.
 The datetime will only contain the day, but no time information. Fewer other data is output.
 
@@ -225,6 +225,8 @@ FAQ
 - If you read in the csv-file from Tastyworks into Excel, the floating point price values
   can get converted from US style to German notation. This breaks this script, so please
   stay with original data from Tastyworks or use a normal editor instead of Excel to change data.
+- Even the tax report is currently in US notation. I recommend to use libreoffice to read in this
+  data and then store it in German notation plus output it into a pdf for tax authorities.
 - Some people say the csv download from Tastyworks is limited to about 250 lines. Here is a similar
   bug description: <https://github.com/blais/tastybugs/issues/8>
 - Issues of the Tastyworks (web) application: <https://github.com/blais/tastybugs/issues>
@@ -292,11 +294,11 @@ TODO
      als "Sell-To-Open" verwendet.
 - Output
    - Output all decimal digits, even if they are 0.
-   - For --sumary allow excel output depending on filename extension.
+   - For --summary allow excel output depending on filename extension.
    - Output yearly summary data at the beginning of the file, before all individual transactions.
    - Done: Tax csv output: Sort transactions in the order they appear in the summary report.
    - Add columne with automatic annotations. (warnings and error messages from conversion.)
-   - Done: Add columne with undelying symbol (dividends and options) and Put/Call (for options).
+   - Done: Add columne with underlying symbol (dividends and options) and Put/Call (for options).
    - Instead of datetime in one columne, output date and time in two separate columns.
    - Print header with explanation of transaction output. Or additional page for the tax athority with explanations.
    - Generate documentation that can be passed on to the German tax authorities on how
@@ -322,24 +324,24 @@ TODO
 - Statistics:
    - "fees" output should also be correct if only one tax year is output
    - Options
-      - Done: Yearly summary of short options should output data for Puts and Calls separately. (FIFO is enough.)
       - Add DIT (Days In Trade), average days in trade
       - Compute actual premium per day over the DITs. Graph all sold options over all days in the year
         to show distribution of sold premium over the course of the year.
-      - Done: Sold premium is already summed up, also premium kept as gains. Also calculate average premium by day.
       - number of winning trades (total and percentage), average gains
-   - Statistics for stocks/options combined for the same symbol
+   - Statistics for stocks/options combined for the same symbol/underlying
    - Specify non-realised gains to know how much tax needs to be paid for current net total.
    - Add performance reviews, graphs based on different time periods and underlyings.
    - How much premium can you keep for option trades. Tastyworks says this should be
-     about 25 % of the sold premium. I am mostly selling only premium and can keep
+     about 25 % of the premium sold. I am mostly selling only premium (and no spreads) and can keep
      about 79 % of it as average over many years.
    - How much fees do you pay for your option trades to the broker/exchange compared
      to your overall profit? This seems to be less than 1.5 % for me in 2021.
-   - Premium per day should be calculated differnetly for the current year. Based on actual days within the year.
    - Show number of trades/transactions history.
    - List of best and worst trades of the year.
    - Check stats output from: <https://github.com/Jcuevas97/OrderParser>
+   - We use the current day while running this script to compute premium/day statistic for
+     the current year. Maybe using the last day of trading activity from the logs would be
+     better?
 - Docu
    - Add images on how to download csv-file within Tastyworks into docu.
    - Translate text output into German.
@@ -348,7 +350,6 @@ TODO
    - Add test data for users to try out.
    - Add testsuite to verify proper operation.
    - Use pandas.isna(x)?
-   - Can CSV files use ";" as separator instead of ","?
 - If we move currency conversion gains to the end of the loop, we can defer the computation
   of tax_free into the complete loop. E.g. detection of interest payments as tax_free is
   currently made too complex.
