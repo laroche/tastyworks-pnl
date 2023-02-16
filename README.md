@@ -222,6 +222,9 @@ FAQ
 
 - Either github issues or email works for me to enhance/fix this program. Sample data
   is best to resolve issues.
+- This script needs the input CSV file to be in encoding format UTF-8 with numbers
+  in US-format. Output is also in US-format, so you need to convert this into German
+  style of numbers. libreoffice is doing this very easily.
 - If you read in the csv-file from Tastyworks into Excel, the floating point price values
   can get converted from US style to German notation. This breaks this script, so please
   stay with original data from Tastyworks or use a normal editor instead of Excel to change data.
