@@ -1099,7 +1099,7 @@ def check_csv(csv_file):
         'Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,' + \
         'Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,' + \
         'Account Reference\n':
-        print('ERROR: Wrong first line in csv file.')
+        print('ERROR: Wrong first line in csv file. Please download trade history from the web page.')
         sys.exit(1)
 
 def read_csv_tasty(csv_file):
