@@ -438,7 +438,7 @@ def show_plt(df):
     df2['Datum/Zeit'] = pandas.to_datetime(df2['Datum/Zeit'])
     df2.set_index('Datum/Zeit', inplace=True)
 
-    monthly_totals = df2.resample('MS').sum()
+    monthly_totals = df2.resample('MS').sum(numeric_only=True)
     monthly_last = df2.resample('MS').last() # .ohlc() .mean()
     monthly_min = monthly_last['Net-Total'].min() * 0.9
     date_monthly = [x.strftime('%Y-%m') for x in monthly_totals.index]
@@ -456,7 +456,7 @@ def show_plt(df):
     ax.set_xticklabels(date_monthly)
     plt.ylim(bottom=monthly_min)
 
-    quarterly_totals = df2.resample('QS').sum()
+    quarterly_totals = df2.resample('QS').sum(numeric_only=True)
     quarterly_last = df2.resample('QS').last() # .ohlc() .mean()
     quarterly_min = quarterly_last['Net-Total'].min() * 0.9
     date_quarterly = [x.strftime('%Y-%m') for x in quarterly_totals.index]
@@ -1107,7 +1107,7 @@ def read_csv_tasty(csv_file):
     wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
     #print(wk.head())
     #print(wk.memory_usage(deep=True))
-    #print(wk.memory_usage(deep=True).sum())
+    #print(wk.memory_usage(deep=True).sum(numeric_only=True))
     #print(wk.dtypes)
     #(wk
     # .assign(['Open/Close']=['Open/Close'].fillna('').astype('category')
@@ -1125,7 +1125,7 @@ def read_csv_tasty(csv_file):
         #print(wk[i].value_counts(dropna=False))
     #print(wk.head())
     #print(wk.memory_usage(deep=True))
-    #print(wk.memory_usage(deep=True).sum())
+    #print(wk.memory_usage(deep=True).sum(numeric_only=True))
     #print(wk.dtypes)
     return wk
 
