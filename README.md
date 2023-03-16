@@ -295,6 +295,8 @@ TODO
    - In German: Stillhalterpraemien gelten auch nicht als Währungsanschaffung, sondern
      als Zufluss und sind daher steuer-neutral. Im Source wird dazu die Auszeichnung von Tastyworks
      als "Sell-To-Open" verwendet.
+   - If you are short stock, the additional cash is not really part of "settled cash". Interest payments are not
+     changed by this.
 - Output
    - Output all decimal digits, even if they are 0.
    - For --summary allow excel output depending on filename extension.
