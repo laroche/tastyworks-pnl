@@ -665,6 +665,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             stats.loc['Sonstige Gewinne', year] + stats.loc['Sonstige Verluste', year]
         stats.loc['Stillhalter Gesamt', year] = \
             stats.loc['Stillhalter-Gewinne', year] + stats.loc['Stillhalter-Verluste', year]
+        # One year has on average 252 trading days. Often also 256=16*16 is used within formulas.
         daysperyear = 250
         if curyear == year and curdaysperyear < 250:
             daysperyear = curdaysperyear
