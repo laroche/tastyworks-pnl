@@ -333,6 +333,7 @@ TODO
       - Compute actual premium per day over the DITs. Graph all sold options over all days in the year
         to show distribution of sold premium over the course of the year.
       - number of winning trades (total and percentage), average gains
+      - cagr = Decimal((quantity * price) / basis) **  Decimal(Decimal(1) / (Decimal(length_held)/Decimal(365.25))) - 1
    - Statistics for stocks/options combined for the same symbol/underlying
    - Specify non-realised gains to know how much tax needs to be paid for current net total.
    - Add performance reviews, graphs based on different time periods and underlyings.
@@ -377,6 +378,7 @@ TODO
 </pre>
 - Similar/related projects:
    - <https://github.com/avion23/tastyworksTaxes>
+   - <https://github.com/elch78/tastyworks-tax-calculator>
    - <https://github.com/leonk2210/tastyworks-tax-de>
    - <https://github.com/neogeo/tasty-trade-csv-import-profit-loss>
    - <https://github.com/jblanfrey/tastyworks-matlab-cli>
@@ -389,4 +391,5 @@ TODO
       - <https://github.com/c4syner/tastyscrape>
    - Tastyworks risk simulator: <https://github.com/iloire/tastyworks-risk>
    - Google Sheets portfolio analysis: <https://github.com/jarthursquiers/FireByArthurTradingEngine>
+   - <https://github.com/TylerSafe/Tastyworks-tax-calculator>
 
