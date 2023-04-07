@@ -927,7 +927,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 asset = 'balance adjustment'
                 asset_type = AssetType.OrderPayments
             elif tsubcode == 'Fee':
-                if description == 'INTL WIRE FEE':
+                if description in ('INTL WIRE FEE', 'DOMESTIC WIRE FEE'):
                     local_pnl = ''
                     asset = 'fee'
                     asset_type = AssetType.Fee
