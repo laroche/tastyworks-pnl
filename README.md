@@ -264,6 +264,8 @@ TODO
    - Complete the list of non-stocks.
    - Does Tastyworks use BRK.B or BRK/B in transaction history?
      Adjust the list of individual stocks accordingly.
+   - If you select to automatically reinvest Dividends, then also partional amounts of stocks are bought.
+     This is currently not supported.
 - Options:
    - If a long option is assigned, the option buy price should be added to
      the stock price. This is currently not done, but we print a warning
