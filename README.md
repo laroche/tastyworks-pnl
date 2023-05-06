@@ -251,6 +251,7 @@ This description has moved to <https://laroche.github.io/private-geldanlage/steu
 TODO
 ----
 
+- Tastytrade API: <https://support.tastyworks.com/support/solutions/articles/43000700385-tastytrade-open-api>
 - stocks/ETFs
    - Stock splits and spinoffs are not fully supported. (Option strike prices also need to be adjusted.) Example entry:
       - Assumption: stock/option splits are tax neutral.
