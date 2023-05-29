@@ -2,7 +2,7 @@
 "",Euro foreign exchange reference rate of the ECB / EUR 1 = USD ... / United States,
 unit,USD,
 unit multiplier,one,
-last update,2023-03-24 15:57:47,
+last update,2023-05-26 15:59:07,
 2010-01-01,.,No value available
 2010-01-02,.,No value available
 2010-01-03,.,No value available
@@ -4834,5 +4834,68 @@ last update,2023-03-24 15:57:47,
 2023-03-22,1.0785,
 2023-03-23,1.0879,
 2023-03-24,1.0745,
+2023-03-25,.,No value available
+2023-03-26,.,No value available
+2023-03-27,1.0773,
+2023-03-28,1.0841,
+2023-03-29,1.0847,
+2023-03-30,1.0886,
+2023-03-31,1.0875,
+2023-04-01,.,No value available
+2023-04-02,.,No value available
+2023-04-03,1.0870,
+2023-04-04,1.0901,
+2023-04-05,1.0940,
+2023-04-06,1.0915,
+2023-04-07,.,No value available
+2023-04-08,.,No value available
+2023-04-09,.,No value available
+2023-04-10,.,No value available
+2023-04-11,1.0905,
+2023-04-12,1.0922,
+2023-04-13,1.1015,
+2023-04-14,1.1057,
+2023-04-15,.,No value available
+2023-04-16,.,No value available
+2023-04-17,1.0981,
+2023-04-18,1.0972,
+2023-04-19,1.0933,
+2023-04-20,1.0944,
+2023-04-21,1.0978,
+2023-04-22,.,No value available
+2023-04-23,.,No value available
+2023-04-24,1.1002,
+2023-04-25,1.1022,
+2023-04-26,1.1039,
+2023-04-27,1.1042,
+2023-04-28,1.0981,
+2023-04-29,.,No value available
+2023-04-30,.,No value available
+2023-05-01,.,No value available
+2023-05-02,1.0965,
+2023-05-03,1.1043,
+2023-05-04,1.1074,
+2023-05-05,1.1014,
+2023-05-06,.,No value available
+2023-05-07,.,No value available
+2023-05-08,1.1037,
+2023-05-09,1.0959,
+2023-05-10,1.0950,
+2023-05-11,1.0930,
+2023-05-12,1.0892,
+2023-05-13,.,No value available
+2023-05-14,.,No value available
+2023-05-15,1.0876,
+2023-05-16,1.0881,
+2023-05-17,1.0829,
+2023-05-18,1.0813,
+2023-05-19,1.0808,
+2023-05-20,.,No value available
+2023-05-21,.,No value available
+2023-05-22,1.0822,
+2023-05-23,1.0779,
+2023-05-24,1.0785,
+2023-05-25,1.0735,
+2023-05-26,1.0751,
 "","General: The ECB publishes daily euro foreign exchange reference rates, which are calculated on the basis of the concertation between central banks at 14.15.",
 "",Source: European Central Bank (ECB).,
