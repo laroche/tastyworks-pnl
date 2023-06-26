@@ -36,21 +36,21 @@ import math
 import datetime as pydatetime
 import pandas
 
-convert_currency = True
+convert_currency: bool = True
 
 # For an unknown symbol (underlying), assume it is a individual/normal stock.
 # Otherwise you need to adjust the hardcoded list in this script.
-assume_stock = False
+assume_stock: bool = False
 
 eurusd = None
 
-eurusd_url = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
+eurusd_url: str = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
 
 # Setup 'eurusd' as dict() to contain the EURUSD exchange rate on a given date
 # based on official data from bundesbank.de.
 # If the file 'eurusd.csv' does not exist, download the data from
 # the bundesbank directly.
-def read_eurusd():
+def read_eurusd() -> None:
     import csv
     global eurusd
     url = 'eurusd.csv'
@@ -70,7 +70,7 @@ def read_eurusd():
                 else:
                     eurusd[date] = None
 
-def get_eurusd(date):
+def get_eurusd(date: str) -> float:
     while True:
         try:
             x = eurusd[date]
@@ -82,21 +82,21 @@ def get_eurusd(date):
             return x
         date = str(pydatetime.date(*map(int, date.split('-'))) - pydatetime.timedelta(days=1))
 
-#def eur2usd(x, date, conv=None):
+#def eur2usd(x: float, date: str, conv=None) -> float:
 #    if convert_currency:
 #        if conv is None:
 #            return x * get_eurusd(date)
 #        return x * conv
 #    return x
 
-def usd2eur(x, date, conv=None):
+def usd2eur(x: float, date: str, conv=None) -> float:
     if convert_currency:
         if conv is None:
             return x / get_eurusd(date)
         return x / conv
     return x
 
-def isnan(x):
+def isnan(x) -> bool:
     return str(x) == 'nan'
 
 class AssetType(enum.IntEnum):
@@ -183,7 +183,7 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
             raise
 
 # https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
-SP500 = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACGL', 'ACN', 'ADBE',
+SP500: tuple[str, ...] = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACGL', 'ACN', 'ADBE',
     'ADI', 'ADM', 'ADP', 'ADSK', 'AEE', 'AEP', 'AES', 'AFL', 'AIG', 'AIZ',
     'AJG', 'AKAM', 'ALB', 'ALGN', 'ALK', 'ALL', 'ALLE', 'AMAT', 'AMCR', 'AMD',
     'AME', 'AMGN', 'AMP', 'AMT', 'AMZN', 'ANET', 'ANSS', 'AON', 'AOS', 'APA',
@@ -235,10 +235,10 @@ SP500 = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACGL', 'ACN', 'ADBE',
     'XRAY', 'XYL', 'YUM', 'ZBH', 'ZBRA', 'ZION', 'ZTS')
 
 # old stock symbols who got merged, renamed, removed:
-SP500old = ('FB', 'PVH')
+SP500old: tuple[str, ...] = ('FB', 'PVH')
 
 # https://en.wikipedia.org/wiki/NASDAQ-100
-NASDAQ100 = ('ATVI', 'ADBE', 'ADP', 'ABNB', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AMD',
+NASDAQ100: tuple[str, ...] = ('ATVI', 'ADBE', 'ADP', 'ABNB', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AMD',
     'AEP', 'AMGN', 'ADI', 'ANSS', 'AAPL', 'AMAT', 'ASML', 'AZN', 'TEAM',
     'ADSK', 'BKR', 'BIIB', 'BKNG', 'AVGO', 'CDNS', 'CHTR', 'CTAS', 'CSCO',
     'CTSH', 'CMCSA', 'CEG', 'CPRT', 'CSGP', 'COST', 'CRWD', 'CSX', 'DDOG',
@@ -250,19 +250,19 @@ NASDAQ100 = ('ATVI', 'ADBE', 'ADP', 'ABNB', 'ALGN', 'GOOGL', 'GOOG', 'AMZN', 'AM
     'QCOM', 'REGN', 'ROST', 'SGEN', 'SIRI', 'SBUX', 'SNPS', 'TMUS', 'TSLA',
     'TXN', 'VRSK', 'VRTX', 'WBA', 'WBD', 'WDAY', 'XEL', 'ZM', 'ZS')
 
-REITS = ('ARE', 'AMT', 'AVB', 'BXP', 'CPT', 'CBRE', 'CCI', 'DLR', 'DRE', 'EQUIX',
+REITS: tuple[str, ...] = ('ARE', 'AMT', 'AVB', 'BXP', 'CPT', 'CBRE', 'CCI', 'DLR', 'DRE', 'EQUIX',
     'EQR', 'ESS', 'EXR', 'FRT', 'PEAK', 'HST', 'IRM', 'KIM', 'MAA', 'PLD',
     'PSA', 'O', 'REG', 'SBAC', 'SPG', 'UDR', 'VTR', 'VICI', 'VNO', 'WELL', 'WY')
 
 # Read all companies of the SP500 from wikipedia.
-def read_sp500():
+def read_sp500() -> pandas.DataFrame:
     table = pandas.read_html('https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
     df = table[0]
     #print(df.info())
     #df.drop('SEC filings', axis=1, inplace=True)
     return df
 
-def print_sp500():
+def print_sp500() -> None:
     import pprint
     df = read_sp500()
     #df['Symbol'] = df['Symbol'].str.replace('.', '/')
@@ -272,12 +272,12 @@ def print_sp500():
     print(p)
     # XXX print REITS: df['GICS Sector'] == 'Real Estate'
 
-def read_nasdaq100():
+def read_nasdaq100() -> pandas.DataFrame:
     table = pandas.read_html('https://en.wikipedia.org/wiki/NASDAQ-100')
     df = table[4]
     return df
 
-def print_nasdaq100():
+def print_nasdaq100() -> None:
     import pprint
     df = read_nasdaq100()
     #df['Ticker'] = df['Ticker'].str.replace('.', '/')
@@ -326,7 +326,7 @@ def sign(x):
     return -1
 
 # return date of one year earlier:
-def prev_year(date):
+def prev_year(date: str):
     if date is None:
         return None
     return str(int(date[:4]) - 1) + date[4:]
@@ -419,7 +419,7 @@ def fifos_split(fifos, asset, ratio):
 
 # account-usd should always be the same as total together with
 # EURUSD conversion data. So just a sanity check:
-def check_total(fifos, total):
+def check_total(fifos, total: float) -> None:
     #for (price, price_usd, quantity, date, tax_free) in fifos['account-usd']:
     for (_, _, quantity, _, _) in fifos['account-usd']:
         total -= quantity / 10000
@@ -430,7 +430,7 @@ def check_total(fifos, total):
 # Graphical output of some summary data:
 # How to change date-format output with pandas:
 # https://stackoverflow.com/questions/30133280/pandas-bar-plot-changes-date-format
-def show_plt(df):
+def show_plt(df: pandas.DataFrame) -> None:
     import matplotlib.pyplot as plt
 
     df2 = df.copy()
@@ -480,7 +480,7 @@ def show_plt(df):
     plt.show()
 
 # Append "row" into pandas DataFrame "df".
-def df_append_row(df, row):
+def df_append_row(df, row) -> pandas.DataFrame:
     #df = df.append(pandas.Series(row), ignore_index=True)
     df.loc[len(df)] = row
     #df = df.sort_index().reset_index(drop=True)
@@ -749,7 +749,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     # XXX Compute unrealized sums of short options.
     return stats
 
-def append_yearly_stats(df, tax_output, stats, min_year, max_year):
+def append_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_year) -> pandas.DataFrame:
     end = [''] * 5
     years = list(range(min_year, max_year + 1))
     if tax_output:
@@ -790,7 +790,7 @@ mul_dict = {
     '/ZW': 50.0, '/ZS': 50.0, '/ZC': 50.0,
 }
 
-def get_multiplier(asset):
+def get_multiplier(asset: str) -> float:
     if asset[:4] in mul_dict:
         return mul_dict[asset[:4]]
     if asset[:3] in mul_dict:
@@ -1093,7 +1093,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
 
 # check if the first line of the csv line contains the correct header:
-def check_csv(csv_file):
+def check_csv(csv_file) -> None:
     with open(csv_file, encoding='UTF8') as f:
         content = f.readlines()
     if len(content) < 1 or content[0] != 'Date/Time,Transaction Code,' + \
@@ -1103,7 +1103,7 @@ def check_csv(csv_file):
         print('ERROR: Wrong first line in csv file. Please download trade history from the web page.')
         sys.exit(1)
 
-def read_csv_tasty(csv_file):
+def read_csv_tasty(csv_file: str) -> pandas.DataFrame:
     check_csv(csv_file)
     wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
     #print(wk.info())
@@ -1132,12 +1132,12 @@ def read_csv_tasty(csv_file):
     #print(wk.dtypes)
     return wk
 
-def usage():
+def usage() -> None:
     print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2022][--usd]' +
         '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' +
         '[--verbose][--debug][--show] *.csv')
 
-def main(argv):
+def main(argv) -> None:
     import getopt
     #print_sp500()
     #print_nasdaq100()
