@@ -251,7 +251,7 @@ NASDAQ100: tuple[str, ...] = ('ATVI', 'ADBE', 'ADP', 'ABNB', 'ALGN', 'GOOGL', 'G
     'TXN', 'VRSK', 'VRTX', 'WBA', 'WBD', 'WDAY', 'XEL', 'ZM', 'ZS')
 
 REITS: tuple[str, ...] = ('ARE', 'AMT', 'AVB', 'BXP', 'CPT', 'CBRE', 'CCI', 'DLR', 'DRE', 'EQUIX',
-    'EQR', 'ESS', 'EXR', 'FRT', 'PEAK', 'HST', 'IRM', 'KIM', 'MAA', 'PLD',
+    'EQR', 'ESS', 'EXR', 'FRT', 'PEAK', 'HST', 'INVH', 'IRM', 'KIM', 'MAA', 'PLD',
     'PSA', 'O', 'REG', 'SBAC', 'SPG', 'UDR', 'VTR', 'VICI', 'VNO', 'WELL', 'WY')
 
 # Read all companies of the SP500 from wikipedia.
