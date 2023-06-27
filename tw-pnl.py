@@ -480,11 +480,11 @@ def show_plt(df: pandas.DataFrame) -> None:
     plt.show()
 
 # Append "row" into pandas DataFrame "df".
-def df_append_row(df, row) -> pandas.DataFrame:
-    #df = df.append(pandas.Series(row), ignore_index=True)
-    df.loc[len(df)] = row
-    #df = df.sort_index().reset_index(drop=True)
-    return df
+#def df_append_row(df, row) -> pandas.DataFrame:
+#    #df = df.append(pandas.Series(row), ignore_index=True)
+#    df.loc[len(df)] = row
+#    #df = df.sort_index().reset_index(drop=True)
+#    return df
 
 # Take all transactions and create summaries for differnet
 # trading classes.
@@ -749,25 +749,31 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     # XXX Compute unrealized sums of short options.
     return stats
 
-def append_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_year) -> pandas.DataFrame:
+def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_year) -> pandas.DataFrame:
+    out = []
     end = [''] * 5
     years = list(range(min_year, max_year + 1))
     if tax_output:
         end = []
         years = [int(tax_output)]
     for year in years:
-        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, [f'Tastyworks Kapitalflussrechnung {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        df = df_append_row(df, ['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        out.append([f'Tastyworks Kapitalflussrechnung {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             # XXX enable these again if data is complete also for yearly stats:
             if tax_output and i in ('Cash Balance USD', 'Net Liquidating Value', 'Alle Gebühren in USD', 'Alle Gebühren in Euro'):
                 continue
             if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value'):
-                df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], 'USD', '', '', '', ''] + end)
+                out.append([i, '', '', '', '', '', stats.loc[i, year], 'USD', '', '', '', ''] + end)
             else:
-                df = df_append_row(df, [i, '', '', '', '', '', stats.loc[i, year], 'Euro', '', '', '', ''] + end)
+                out.append([i, '', '', '', '', '', stats.loc[i, year], 'Euro', '', '', '', ''] + end)
+    out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+    out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+    #df = pandas.DataFrame(out, columns=df.columns).append(df)
+    dfnew = pandas.DataFrame(out, columns=df.columns)
+    df = pandas.concat([dfnew, df], ignore_index=True)
     return df
 
 # XXX hack for future multiples
@@ -1081,7 +1087,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             stats.to_csv(f)
     if show:
         show_plt(new_wk)
-    new_wk = append_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
+    new_wk = prepend_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
     new_wk.drop('callput', axis=1, inplace=True)
     if verbose:
         print(new_wk.to_string())
