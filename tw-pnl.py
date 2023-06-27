@@ -20,7 +20,7 @@
 #
 # sudo apt-get install python3-pandas
 #
-# for grphical output (--show) you need at least:
+# for graphical output (--show) you need at least:
 #
 # sudo apt-get install python3-matplotlib
 #
