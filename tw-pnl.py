@@ -771,6 +771,7 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
                 out.append([i, '', '', '', '', '', stats.loc[i, year], 'Euro', '', '', '', ''] + end)
     out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
     out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
+    out.append(df.columns)
     #df = pandas.DataFrame(out, columns=df.columns).append(df)
     dfnew = pandas.DataFrame(out, columns=df.columns)
     df = pandas.concat([dfnew, df], ignore_index=True)
