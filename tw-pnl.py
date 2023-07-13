@@ -486,7 +486,7 @@ def show_plt(df: pandas.DataFrame) -> None:
 #    #df = df.sort_index().reset_index(drop=True)
 #    return df
 
-# Take all transactions and create summaries for differnet
+# Take all transactions and create summaries for different
 # trading classes.
 def get_summary(new_wk, tax_output, min_year, max_year):
     # generate new (empty) pandas dataframe:
@@ -494,8 +494,12 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         min_year = max_year = int(tax_output)
     years = list(range(min_year, max_year + 1))
     years_total = years + ['total']
-    index = ('Einzahlungen', 'Auszahlungen', 'Brokergebühren',
-        'Alle Gebühren in USD', 'Alle Gebühren in Euro',
+    first_transaction_date = new_wk.iloc[0][0][:10]
+    last_transaction_date = new_wk.iloc[len(new_wk) - 1][0][:10]
+    years_of_data = (pydatetime.date.fromisoformat(last_transaction_date) - \
+        pydatetime.date.fromisoformat(first_transaction_date)).days / 365.2425
+    index = ('Einzahlungen', 'Einzahlungen USD', 'Auszahlungen', 'Auszahlungen USD',
+        'Brokergebühren', 'Alle Gebühren in USD', 'Alle Gebühren in Euro',
         'Währungsgewinne USD', 'Währungsgewinne USD (steuerfrei)',
         'Währungsgewinne USD Gesamt',
         'Krypto-Gewinne', 'Krypto-Verluste',
@@ -523,21 +527,25 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Z21 Termingeschäftsgewinne+Stillhalter',
         'Z24 Termingeschäftsverluste', 'Termingeschäftsverlustvortrag',
         'KAP+KAP-INV', 'KAP+KAP-INV KErSt+Soli', 'KAP+KAP-INV Verlustvortrag',
-        'Cash Balance USD', 'Net Liquidating Value')
+        'Cash Balance USD', 'Net Liquidating Value', 'Net Liquidating Value EUR',
+        'Time Weighted Return USD', 'Time Weighted Return EUR')
     data = []
     for _ in index:
         data.append([.0] * len(years_total))
     stats = pandas.DataFrame(data, columns=years_total, index=index)
+    now = pydatetime.datetime.now()
+    curyear = now.year
+    curdaysperyear = (now - pydatetime.datetime(curyear, 1, 1)).days * 5 // 7
     # check all transactions and record summary data per year:
     for i in new_wk.index:
         fees = .0
         cash_total = .0
         net_total = .0
         if tax_output:
-            (date, type, pnl, eur_amount, _, _, _, _, callput,
+            (date, type, pnl, eur_amount, usd_amount, _, _, _, callput,
                 tax_free, usd_gains, usd_gains_notax) = new_wk.iloc[i]
         else:
-            (date, type, pnl, eur_amount, _, fees, _, _, _, _, callput,
+            (date, type, pnl, eur_amount, usd_amount, fees, _, _, _, _, callput,
                 tax_free, usd_gains, usd_gains_notax, _, cash_total, net_total) = new_wk.iloc[i]
         year = int(date[:4])
         # steuerfreie Zahlungen:
@@ -552,6 +560,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         # Cash und Net Total am Ende vom Jahr feststellen. Letzte Info ist Jahresende:
         stats.loc['Cash Balance USD', year] = float(cash_total)
         stats.loc['Net Liquidating Value', year] = float(net_total)
+        if year == curyear:
+            stats.loc['Net Liquidating Value EUR', year] = usd2eur(float(net_total), last_transaction_date)
+        else:
+            stats.loc['Net Liquidating Value EUR', year] = usd2eur(float(net_total), str(year) + '-12-31')
         # Währungsgewinne:
         stats.loc['Währungsgewinne USD', year] += float(usd_gains)
         stats.loc['Währungsgewinne USD (steuerfrei)', year] += float(usd_gains_notax)
@@ -567,8 +579,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         if type == 'Ein/Auszahlung':
             if float(eur_amount) < .0:
                 stats.loc['Auszahlungen', year] += float(eur_amount)
+                stats.loc['Auszahlungen USD', year] += float(usd_amount)
             else:
                 stats.loc['Einzahlungen', year] += float(eur_amount)
+                stats.loc['Einzahlungen USD', year] += float(usd_amount)
         elif type == 'Brokergebühr':
             stats.loc['Brokergebühren', year] += pnl
         elif type in ('Aktienfond', 'Mischfond', 'Immobilienfond'):
@@ -646,9 +660,6 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             print(type, i)
             raise
     # add sums of data:
-    now = pydatetime.datetime.now()
-    curyear = now.year
-    curdaysperyear = (now - pydatetime.datetime(curyear, 1, 1)).days * 5 // 7
     for year in years:
         stats.loc['Währungsgewinne USD Gesamt', year] = \
             stats.loc['Währungsgewinne USD', year] + stats.loc['Währungsgewinne USD (steuerfrei)', year]
@@ -736,6 +747,18 @@ def get_summary(new_wk, tax_output, min_year, max_year):
             kerstsoli = .0
         stats.loc['KAP+KAP-INV KErSt+Soli', year] = kerstsoli
         stats.loc['KAP+KAP-INV Verlustvortrag', year] = verlustvortrag
+        start_value = stats.loc['Einzahlungen USD', year] + stats.loc['Auszahlungen USD', year]
+        if year > min_year:
+            start_value += stats.loc['Net Liquidating Value', year - 1]
+        stats.loc['Time Weighted Return USD', year] = .0
+        if start_value != .0:
+            stats.loc['Time Weighted Return USD', year] = (stats.loc['Net Liquidating Value', year] - start_value) * 100 / start_value
+        start_value = stats.loc['Einzahlungen', year] + stats.loc['Auszahlungen', year]
+        if year > min_year:
+            start_value += stats.loc['Net Liquidating Value EUR', year - 1]
+        stats.loc['Time Weighted Return EUR', year] = .0
+        if start_value != .0:
+            stats.loc['Time Weighted Return EUR', year] = (stats.loc['Net Liquidating Value EUR', year] - start_value) * 100 / start_value
     # limit to two decimal digits
     for i in stats.index:
         for year in years:
@@ -746,6 +769,20 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         for year in years:
             total += stats.loc[i, year]
         stats.loc[i, 'total'] = float(f'{total:.2f}')
+    # Very rough calculation of time weighted return. Even better would be
+    # add all yearly calulations: (1 + yearly) * ...
+    start_value = stats.loc['Einzahlungen USD', 'total'] + stats.loc['Auszahlungen USD', 'total']
+    total_return = .0
+    if start_value != .0:
+        total_return = (stats.loc['Net Liquidating Value', max_year] - start_value) / start_value
+    annualized_return = (((1 + total_return)**(1 / years_of_data)) - 1) * 100.0
+    stats.loc['Time Weighted Return USD', 'total'] = float(f'{annualized_return:.2f}')
+    start_value = stats.loc['Einzahlungen', 'total'] + stats.loc['Auszahlungen', 'total']
+    total_return = .0
+    if start_value != .0:
+        total_return = (stats.loc['Net Liquidating Value EUR', max_year] - start_value) / start_value
+    annualized_return = (((1 + total_return)**(1 / years_of_data)) - 1) * 100.0
+    stats.loc['Time Weighted Return EUR', 'total'] = float(f'{annualized_return:.2f}')
     # XXX Compute unrealized sums of short options.
     return stats
 
@@ -763,12 +800,16 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
         out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             # XXX enable these again if data is complete also for yearly stats:
-            if tax_output and i in ('Cash Balance USD', 'Net Liquidating Value', 'Alle Gebühren in USD', 'Alle Gebühren in Euro'):
+            if tax_output and i in ('Cash Balance USD', 'Net Liquidating Value', 'Net Liquidating Value EUR',
+                'Alle Gebühren in USD', 'Alle Gebühren in Euro', 'Time Weighted Return EUR', 'Time Weighted Return USD'):
                 continue
-            if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value'):
-                out.append([i, '', '', '', '', '', stats.loc[i, year], 'USD', '', '', '', ''] + end)
-            else:
-                out.append([i, '', '', '', '', '', stats.loc[i, year], 'Euro', '', '', '', ''] + end)
+            unit = 'Euro'
+            if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value',
+                'Einzahlungen USD', 'Auszahlungen USD'):
+                unit = 'USD'
+            if i in ('Time Weighted Return EUR', 'Time Weighted Return USD'):
+                unit = '%'
+            out.append([i, '', '', '', '', '', stats.loc[i, year], unit, '', '', '', ''] + end)
     out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
     out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
     out.append(df.columns)
@@ -982,7 +1023,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             # XXX: We might check that the two relevant entries have the same data for 'amount'.
             x = symbol + '-' + date
             # quantity for splits seems to be more like strike price and how it changes.
-            # We use it to calculate the split ration / reverse ratio.
+            # We use it to calculate the split ratio / reverse ratio.
             if (tsubcode == 'Forward Split' and buysell == 'Sell') or \
                (tsubcode == 'Reverse Split' and buysell == 'Buy'):
                 splits[x] = quantity
