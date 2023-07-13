@@ -2,7 +2,7 @@
 "",Euro foreign exchange reference rate of the ECB / EUR 1 = USD ... / United States,
 unit,USD,
 unit multiplier,one,
-last update,2023-06-23 15:58:12,
+last update,2023-07-13 15:58:08,
 2010-01-01,.,No value available
 2010-01-02,.,No value available
 2010-01-03,.,No value available
@@ -4925,5 +4925,25 @@ last update,2023-06-23 15:58:12,
 2023-06-21,1.0923,
 2023-06-22,1.0985,
 2023-06-23,1.0884,
+2023-06-24,.,No value available
+2023-06-25,.,No value available
+2023-06-26,1.0918,
+2023-06-27,1.0951,
+2023-06-28,1.0938,
+2023-06-29,1.0938,
+2023-06-30,1.0866,
+2023-07-01,.,No value available
+2023-07-02,.,No value available
+2023-07-03,1.0899,
+2023-07-04,1.0895,
+2023-07-05,1.0879,
+2023-07-06,1.0899,
+2023-07-07,1.0888,
+2023-07-08,.,No value available
+2023-07-09,.,No value available
+2023-07-10,1.0956,
+2023-07-11,1.0989,
+2023-07-12,1.1022,
+2023-07-13,1.1182,
 "","General: The ECB publishes daily euro foreign exchange reference rates, which are calculated on the basis of the concertation between central banks at 14.15.",
 "",Source: European Central Bank (ECB).,
