@@ -538,12 +538,9 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     curdaysperyear = (now - pydatetime.datetime(curyear, 1, 1)).days * 5 // 7
     # check all transactions and record summary data per year:
     for i in new_wk.index:
-        fees = .0
-        cash_total = .0
-        net_total = .0
         if tax_output:
-            (date, type, pnl, eur_amount, usd_amount, _, _, _, callput,
-                tax_free, usd_gains, usd_gains_notax) = new_wk.iloc[i]
+            (date, type, pnl, eur_amount, usd_amount, fees, _, _, _, callput,
+                tax_free, usd_gains, usd_gains_notax, cash_total, net_total) = new_wk.iloc[i]
         else:
             (date, type, pnl, eur_amount, usd_amount, fees, _, _, _, _, callput,
                 tax_free, usd_gains, usd_gains_notax, _, cash_total, net_total) = new_wk.iloc[i]
@@ -749,12 +746,14 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         stats.loc['KAP+KAP-INV Verlustvortrag', year] = verlustvortrag
         start_value = stats.loc['Einzahlungen USD', year] + stats.loc['Auszahlungen USD', year]
         if year > min_year:
+            # XXX This does not work if output is only done for one tax year:
             start_value += stats.loc['Net Liquidating Value', year - 1]
         stats.loc['Time Weighted Return USD', year] = .0
         if start_value != .0:
             stats.loc['Time Weighted Return USD', year] = (stats.loc['Net Liquidating Value', year] - start_value) * 100 / start_value
         start_value = stats.loc['Einzahlungen', year] + stats.loc['Auszahlungen', year]
         if year > min_year:
+            # XXX This does not work if output is only done for one tax year:
             start_value += stats.loc['Net Liquidating Value EUR', year - 1]
         stats.loc['Time Weighted Return EUR', year] = .0
         if start_value != .0:
@@ -800,8 +799,7 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
         out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             # XXX enable these again if data is complete also for yearly stats:
-            if tax_output and i in ('Cash Balance USD', 'Net Liquidating Value', 'Net Liquidating Value EUR',
-                'Alle Gebühren in USD', 'Alle Gebühren in Euro', 'Time Weighted Return EUR', 'Time Weighted Return USD'):
+            if tax_output and i in ('Time Weighted Return EUR', 'Time Weighted Return USD'):
                 continue
             unit = 'Euro'
             if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value',
@@ -1098,9 +1096,10 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if tax_output:
             if datetime[:4] == tax_output:
                 new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
-                        f'{eur_amount:.2f}', f'{amount - fees:.4f}', f'{conv_usd:.4f}',
+                        f'{eur_amount:.2f}', f'{amount - fees:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
                         quantity, asset, callput,
-                        tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}'])
+                        tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}',
+                        f'{cash_total:.2f}', f'{net_total:.2f}'])
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
                 f'{eur_amount:.2f}', f'{amount:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
@@ -1112,8 +1111,9 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
     if tax_output:
         new_wk = sorted(new_wk, key=lambda x: transaction_order[x[1]])
         new_wk = pandas.DataFrame(new_wk, columns=('Datum', 'Transaktions-Typ', 'GuV',
-            'Euro-Preis', 'USD-Preis', 'EurUSD', 'Anzahl', 'Asset', 'callput',
-            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral'))
+            'Euro-Preis', 'USD-Preis', 'USD-Gebhren', 'EurUSD', 'Anzahl', 'Asset', 'callput',
+            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral',
+            'USDCashTotal', 'Net-Total'))
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('Datum/Zeit', 'Transaktions-Typ', 'GuV',
             'Euro-Preis', 'USD-Preis', 'USD-Gebühren', 'EurUSD', 'Anzahl', 'Asset',
@@ -1129,6 +1129,10 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             stats.to_csv(f)
     if show:
         show_plt(new_wk)
+    if tax_output:
+        new_wk.drop('USD-Gebhren', axis=1, inplace=True)
+        new_wk.drop('USDCashTotal', axis=1, inplace=True)
+        new_wk.drop('Net-Total', axis=1, inplace=True)
     new_wk = prepend_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
     new_wk.drop('callput', axis=1, inplace=True)
     if verbose:
