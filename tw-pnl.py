@@ -768,20 +768,23 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         for year in years:
             total += stats.loc[i, year]
         stats.loc[i, 'total'] = float(f'{total:.2f}')
-    # Very rough calculation of time weighted return. Even better would be
-    # add all yearly calulations: (1 + yearly) * ...
-    start_value = stats.loc['Einzahlungen USD', 'total'] + stats.loc['Auszahlungen USD', 'total']
-    total_return = .0
-    if start_value != .0:
-        total_return = (stats.loc['Net Liquidating Value', max_year] - start_value) / start_value
-    annualized_return = (((1 + total_return)**(1 / years_of_data)) - 1) * 100.0
-    stats.loc['Time Weighted Return USD', 'total'] = float(f'{annualized_return:.2f}')
-    start_value = stats.loc['Einzahlungen', 'total'] + stats.loc['Auszahlungen', 'total']
-    total_return = .0
-    if start_value != .0:
-        total_return = (stats.loc['Net Liquidating Value EUR', max_year] - start_value) / start_value
-    annualized_return = (((1 + total_return)**(1 / years_of_data)) - 1) * 100.0
-    stats.loc['Time Weighted Return EUR', 'total'] = float(f'{annualized_return:.2f}')
+    if not tax_output:
+        # Very rough calculation of time weighted return. Even better would be
+        # to add all yearly calculations: (1 + yearly) * ...
+        start_value = stats.loc['Einzahlungen USD', 'total'] + stats.loc['Auszahlungen USD', 'total']
+        total_return = .0
+        if start_value != .0:
+            total_return = (stats.loc['Net Liquidating Value', max_year] - start_value) / start_value
+        #print("total_return:", total_return, "years_of_data:", years_of_data)
+        annualized_return = (((1 + total_return)**(1 / years_of_data)) - 1) * 100.0
+        stats.loc['Time Weighted Return USD', 'total'] = float(f'{annualized_return:.2f}')
+        start_value = stats.loc['Einzahlungen', 'total'] + stats.loc['Auszahlungen', 'total']
+        total_return = .0
+        if start_value != .0:
+            total_return = (stats.loc['Net Liquidating Value EUR', max_year] - start_value) / start_value
+        #print("2 total_return:", total_return, "years_of_data:", years_of_data)
+        annualized_return = (((1 + total_return)**(1 / years_of_data)) - 1) * 100.0
+        stats.loc['Time Weighted Return EUR', 'total'] = float(f'{annualized_return:.2f}')
     # XXX Compute unrealized sums of short options.
     return stats
 
