@@ -540,10 +540,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
     for i in new_wk.index:
         if tax_output:
             (date, type, pnl, eur_amount, usd_amount, fees, _, _, _, callput,
-                tax_free, usd_gains, usd_gains_notax, cash_total, net_total) = new_wk.iloc[i]
+                tax_free, usd_gains, usd_gains_notax, _, cash_total, net_total) = new_wk.iloc[i]
         else:
             (date, type, pnl, eur_amount, usd_amount, fees, _, _, _, _, callput,
-                tax_free, usd_gains, usd_gains_notax, _, cash_total, net_total) = new_wk.iloc[i]
+                tax_free, usd_gains, usd_gains_notax, _, _, cash_total, net_total) = new_wk.iloc[i]
         year = int(date[:4])
         # steuerfreie Zahlungen:
         if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
@@ -790,7 +790,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
 
 def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_year) -> pandas.DataFrame:
     out = []
-    end = [''] * 5
+    end = [''] * 6
     years = list(range(min_year, max_year + 1))
     if tax_output:
         end = []
@@ -1101,13 +1101,13 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
                         f'{eur_amount:.2f}', f'{amount - fees:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
                         quantity, asset, callput,
-                        tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}',
+                        tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}', f'{usd_gains + usd_gains_notax:.2f}',
                         f'{cash_total:.2f}', f'{net_total:.2f}'])
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
                 f'{eur_amount:.2f}', f'{amount:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
                 quantity, asset, symbol, callput,
-                tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}',
+                tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}', f'{usd_gains + usd_gains_notax:.2f}',
                 newdescription, f'{cash_total:.2f}', f'{net_total:.2f}'])
 
     #wk.drop('Account Reference', axis=1, inplace=True)
@@ -1115,13 +1115,13 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         new_wk = sorted(new_wk, key=lambda x: transaction_order[x[1]])
         new_wk = pandas.DataFrame(new_wk, columns=('Datum', 'Transaktions-Typ', 'GuV',
             'Euro-Preis', 'USD-Preis', 'USD-Gebhren', 'EurUSD', 'Anzahl', 'Asset', 'callput',
-            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral',
+            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral', 'USD-Gewinne Gesamt',
             'USDCashTotal', 'Net-Total'))
     else:
         new_wk = pandas.DataFrame(new_wk, columns=('Datum/Zeit', 'Transaktions-Typ', 'GuV',
             'Euro-Preis', 'USD-Preis', 'USD-Gebühren', 'EurUSD', 'Anzahl', 'Asset',
             'Basiswert', 'callput',
-            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral',
+            'Steuerneutral', 'USD-Gewinne', 'USD-Gewinne steuerneutral', 'USD-Gewinne Gesamt',
             'Beschreibung', 'USD Cash Total', 'Net-Total'))
     stats = get_summary(new_wk, tax_output, min_year, max_year)
     if tax_output:
