@@ -183,6 +183,7 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
             raise
 
 # https://en.wikipedia.org/wiki/List_of_S%26P_500_companies
+# also check: https://github.com/deltaray-io/US-Stock-Symbols
 SP500: tuple[str, ...] = ('A', 'AAL', 'AAP', 'AAPL', 'ABBV', 'ABC', 'ABT', 'ACGL', 'ACN', 'ADBE',
     'ADI', 'ADM', 'ADP', 'ADSK', 'AEE', 'AEP', 'AES', 'AFL', 'AIG', 'AIZ',
     'AJG', 'AKAM', 'ALB', 'ALGN', 'ALK', 'ALL', 'ALLE', 'AMAT', 'AMCR', 'AMD',
