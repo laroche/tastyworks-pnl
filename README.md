@@ -258,14 +258,13 @@ TODO
       - stock splits are now implemented, but not tested at all. Options are not yet supported. Please send in more test data.
    - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
      als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
-   - Complete support for Investmentsteuergesetz (InvStG) 2018.
-      - German: Teilfreistellungen gelten auch für Dividenden
+   - Complete support for Investmentsteuergesetz (InvStG) 2018: Zahlungen am Anfang vom Jahr.
    - Check if withholding tax is max 15% for dividends for US stocks as per DBA.
      Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
    - Complete the list of non-stocks.
    - Does Tastyworks use BRK.B or BRK/B in transaction history?
      Adjust the list of individual stocks accordingly.
-   - If you select to automatically reinvest Dividends, then also partional amounts of stocks are bought.
+   - If you select to automatically reinvest Dividends, then also partial amounts of stocks are bought.
      This is currently not supported.
 - Options:
    - If a long option is assigned, the option buy price should be added to

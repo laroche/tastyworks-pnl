@@ -111,25 +111,31 @@ class AssetType(enum.IntEnum):
     Future = 9
     Transfer = 10
     Dividend = 11
-    Interest = 12
-    WithholdingTax = 13
-    OrderPayments = 14
-    Fee = 15
+    DividendAktienFond = 12
+    DividendMischFond = 13
+    DividendImmobilienFond = 14
+    Interest = 15
+    WithholdingTax = 16
+    OrderPayments = 17
+    Fee = 18
 
 def transaction_type(asset_type):
     t = ['', 'Long-Option', 'Stillhalter-Option', 'Aktie', 'Aktienfond', 'Mischfond', 'Immobilienfond',
-        'Sonstiges', 'Krypto', 'Future', 'Ein/Auszahlung', 'Dividende', 'Zinsen',
-        'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
-    if int(asset_type) >= 1 and int(asset_type) <= 15:
+        'Sonstiges', 'Krypto', 'Future', 'Ein/Auszahlung',
+        'Dividende', 'Dividende Aktienfond', 'Dividende Mischfond', 'Dividende Immobilienfond',
+        'Zinsen', 'Quellensteuer', 'Ordergebühr', 'Brokergebühr']
+    if int(asset_type) >= 1 and int(asset_type) <= 18:
         return t[asset_type]
     return ''
 
 transaction_order = {
     'Ein/Auszahlung': 1, 'Brokergebühr': 2, 'Krypto': 3,
     'Aktienfond': 4, 'Mischfond': 5, 'Immobilienfond': 6,
-    'Aktie': 7, 'Dividende': 8, 'Quellensteuer': 9,
-    'Sonstiges': 10, 'Stillhalter-Option': 11,
-    'Long-Option': 12, 'Future': 13, 'Zinsen': 14, 'Ordergebühr': 15,
+    'Aktie': 7, 'Dividende': 8, 'Dividende Aktienfond': 9,
+    'Dividende Mischfond': 10, 'Dividende Immobilienfond': 11,
+    'Quellensteuer': 12,
+    'Sonstiges': 13, 'Stillhalter-Option': 14,
+    'Long-Option': 15, 'Future': 16, 'Zinsen': 17, 'Ordergebühr': 18,
 }
 
 def check_tcode(tcode, tsubcode, description):
@@ -293,21 +299,18 @@ def is_stock(symbol, tsubcode):
     # Crypto assets like BTC/USD or ETH/USD:
     if symbol[-4:] == '/USD':
         return AssetType.Crypto
-    #if symbol in ('SPY','IWM','QQQ'):
-    #    return AssetType.AktienFond
     # Well known ETFs:
-    if symbol in ('DIA','DXJ','EEM','EFA','EFA','EWW','EWZ','FEZ','FXB','FXE','FXI',
+    if symbol in ('DIA','DXJ','EEM','EFA','EFA','EQQQ','EWW','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','IWM','IYR','KRE','OIH','QQQ','TQQQ',
         'RSX','SMH','SPY','NOBL','UNG','XBI','XHB','XLB',
         'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT','XLRE'):
-        return AssetType.OtherStock # AktienFond
-    # Just an example, unfortunately EQQQ cannot be traded with Tastyworks:
-    if symbol in ('EQQQ',):
         return AssetType.AktienFond
     if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO'):
         return AssetType.OtherStock
+    if symbol in REITS:
+        return AssetType.ImmobilienFond
     # Well known individual stock names:
-    if (symbol in SP500 or symbol in SP500old or symbol in NASDAQ100) and symbol not in REITS:
+    if (symbol in SP500 or symbol in SP500old or symbol in NASDAQ100): # and symbol not in REITS:
         return AssetType.IndStock
     if symbol.startswith('/'):
         if tsubcode not in ('Buy', 'Sell', 'Futures Settlement'):
@@ -506,6 +509,7 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         'Krypto-Gewinne', 'Krypto-Verluste',
         'Anlage SO', 'Anlage SO Steuerbetrag', 'Anlage SO Verlustvortrag',
         'Investmentfondsgewinne', 'Investmentfondsverluste',
+        'Dividenden Aktienfond', 'Dividenden Mischfond', 'Dividenden Immobilienfond',
         'Anlage KAP-INV',
         'Aktiengewinne (Z20)', 'Aktienverluste (Z23)', 'Aktien Gesamt',
         'Aktien Steuerbetrag', 'Aktien Verlustvortrag',
@@ -547,7 +551,8 @@ def get_summary(new_wk, tax_output, min_year, max_year):
                 tax_free, usd_gains, usd_gains_notax, _, _, cash_total, net_total) = new_wk.iloc[i]
         year = int(date[:4])
         # steuerfreie Zahlungen:
-        if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Quellensteuer'):
+        if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Dividende Aktienfond',
+            'Dividende Mischfond', 'Dividende Immobilienfond', 'Quellensteuer'):
             if not bool(tax_free):
                 raise ValueError(f'tax_free is False for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # keine steuerfreien Zahlungen:
@@ -642,6 +647,21 @@ def get_summary(new_wk, tax_output, min_year, max_year):
                 stats.loc['bezahlte Dividenden', year] += pnl
             else:
                 stats.loc['Dividenden', year] += pnl
+        elif type == 'Dividende Aktienfond':
+            if pnl < .0:
+                stats.loc['bezahlte Dividenden', year] += pnl
+            else:
+                stats.loc['Dividenden Aktienfond', year] += pnl
+        elif type == 'Dividende Mischfond':
+            if pnl < .0:
+                stats.loc['bezahlte Dividenden', year] += pnl
+            else:
+                stats.loc['Dividenden Mischfond', year] += pnl
+        elif type == 'Dividende Immobilienfond':
+            if pnl < .0:
+                stats.loc['bezahlte Dividenden', year] += pnl
+            else:
+                stats.loc['Dividenden Immobilienfond', year] += pnl
         elif type == 'Quellensteuer':
             stats.loc['Quellensteuer (Z41)', year] += pnl
         elif type == 'Zinsen':
@@ -706,7 +726,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         stats.loc['Anlage SO Steuerbetrag', year] = anlage_so
         stats.loc['Anlage SO Verlustvortrag', year] = anlage_so_verlust
         stats.loc['Anlage KAP-INV', year] = \
-            stats.loc['Investmentfondsgewinne', year] + stats.loc['Investmentfondsverluste', year]
+            stats.loc['Investmentfondsgewinne', year] + stats.loc['Investmentfondsverluste', year] + \
+            stats.loc['Dividenden Aktienfond', year] + \
+            stats.loc['Dividenden Mischfond', year] + \
+            stats.loc['Dividenden Immobilienfond', year]
         z21 = \
             stats.loc['Long-Optionen-Gewinne', year] + stats.loc['Future-Gewinne', year] + \
             stats.loc['Stillhalter Gesamt', year]
@@ -1092,6 +1115,18 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             local_pnl = f'{local_pnl:.4f}'
 
         #check_total(fifos, cash_total)
+
+        if asset_type == AssetType.Dividend:
+            div_type = is_stock(symbol, 'Buy', cur_year)
+            if div_type == AssetType.AktienFond:
+                local_pnl = f'{float(local_pnl)*0.70:.4f}'
+                asset_type = AssetType.DividendAktienFond
+            if div_type == AssetType.MischFond:
+                local_pnl = f'{float(local_pnl)*0.85:.4f}'
+                asset_type = AssetType.DividendMischFond
+            if div_type == AssetType.ImmobilienFond:
+                local_pnl = f'{float(local_pnl)*0.20:.4f}'
+                asset_type = AssetType.DividendImmobilienFond
 
         net_total = cash_total + fifos_sum_usd(fifos)
 
