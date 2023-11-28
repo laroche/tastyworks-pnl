@@ -1224,7 +1224,7 @@ def read_csv_tasty(csv_file: str) -> pandas.DataFrame:
     return wk
 
 def usage() -> None:
-    print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2022][--usd]' +
+    print('tw-pnl.py [--download-eurusd][--assume-individual-stock][--tax-output=2023][--usd]' +
         '[--summary=summary.csv][--output-csv=test.csv][--output-excel=test.xlsx][--help]' +
         '[--verbose][--debug][--show] *.csv')
 
@@ -1239,7 +1239,7 @@ def main(argv) -> None:
     output_csv = None
     output_excel = None
     tax_output = None
-    #tax_output = '2022'
+    #tax_output = '2023'
     show = False
     try:
         opts, args = getopt.getopt(argv, 'dhuv', ['assume-individual-stock',

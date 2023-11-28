@@ -14,14 +14,14 @@ at <https://laroche.github.io/private-geldanlage/steuern.html>.
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
 
 Run the following command to convert from the tastyworks csv file (transaction_history.csv)
-to a 2022 tax statement as csv file (tastyworks-tax-2022.csv):
+to a 2023 tax statement as csv file (tastyworks-tax-2023.csv):
 <pre>
-python3 tw-pnl.py --assume-individual-stock --tax-output=2022 --output-csv=tastyworks-tax-2022.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2023 --output-csv=tastyworks-tax-2023.csv transaction_history.csv
 </pre>
 
 Continue with [libreoffice](https://libreoffice.org/) spreadsheet to finalize your tax report:
 <pre>
-soffice tastyworks-tax-2022.csv
+soffice tastyworks-tax-2023.csv
 </pre>
 
 The following command outputs a more detailed csv report for your personal review together with a
@@ -54,14 +54,14 @@ Eine Web-Applikation für dieses Python-Skript wird in Zukunft
 unter <https://knorke2.homedns.org/depot-pnl> aufgebaut.]
 
 Starte folgenden Kommandozeilen-Aufruf für eine Konvertierung von einer Tastyworks csv-Datei (transaction_history.csv)
-zu einer Steuerausgabe für 2022 als CSV-Datei (tastyworks-tax-2022.csv):
+zu einer Steuerausgabe für 2023 als CSV-Datei (tastyworks-tax-2023.csv):
 <pre>
-python3 tw-pnl.py --assume-individual-stock --tax-output=2022 --output-csv=tastyworks-tax-2022.csv transaction_history.csv
+python3 tw-pnl.py --assume-individual-stock --tax-output=2023 --output-csv=tastyworks-tax-2023.csv transaction_history.csv
 </pre>
 
-Starte die [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation mit der CSV Ausgabedatei tastyworks-tax-2022.csv:
+Starte die [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation mit der CSV Ausgabedatei tastyworks-tax-2023.csv:
 <pre>
-soffice tastyworks-tax-2022.csv
+soffice tastyworks-tax-2023.csv
 </pre>
 
 Folgender Befehl gibt einen detaillierten CSV Report für den persönlichen Review zusammen
@@ -172,7 +172,7 @@ pnl generated data as well as eurusd conversion data. You probably do not have t
 provide all data in a tax statement, some is only added for further data processing
 convenience in your spreadsheet program.
 
-If you provide the option __--tax-output=2022__, your output file will be
+If you provide the option __--tax-output=2023__, your output file will be
 optimized for tax output for a special year. Only transactions for that year are output.
 The datetime will only contain the day, but no time information. Fewer other data is output.
 
