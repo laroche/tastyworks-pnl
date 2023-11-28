@@ -1117,7 +1117,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         #check_total(fifos, cash_total)
 
         if asset_type == AssetType.Dividend:
-            div_type = is_stock(symbol, 'Buy', cur_year)
+            div_type = is_stock(symbol, 'Buy')
             if div_type == AssetType.AktienFond:
                 local_pnl = f'{float(local_pnl)*0.70:.4f}'
                 asset_type = AssetType.DividendAktienFond
