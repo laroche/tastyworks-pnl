@@ -834,7 +834,7 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
                 unit = 'USD'
             if i in ('Time Weighted Return EUR', 'Time Weighted Return USD'):
                 unit = '%'
-            out.append([i, '', '', '', '', '', stats.loc[i, year], unit, '', '', '', ''] + end)
+            out.append([i, '', '', '', '', '', f'{stats.loc[i, year]:.2f}', unit, '', '', '', ''] + end)
     out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
     out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
     out.append(df.columns)
