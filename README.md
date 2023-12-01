@@ -19,7 +19,8 @@ to a 2023 tax statement as csv file (tastyworks-tax-2023.csv):
 python3 tw-pnl.py --assume-individual-stock --tax-output=2023 --output-csv=tastyworks-tax-2023.csv transaction_history.csv
 </pre>
 
-Continue with [libreoffice](https://libreoffice.org/) spreadsheet to finalize your tax report:
+Continue with [Google Spreadsheets](https://docs.google.com/spreadsheets/) or
+[libreoffice](https://libreoffice.org/) spreadsheet to finalize your tax report:
 <pre>
 soffice tastyworks-tax-2023.csv
 </pre>
@@ -59,7 +60,12 @@ zu einer Steuerausgabe für 2023 als CSV-Datei (tastyworks-tax-2023.csv):
 python3 tw-pnl.py --assume-individual-stock --tax-output=2023 --output-csv=tastyworks-tax-2023.csv transaction_history.csv
 </pre>
 
-Starte die [libreoffice](https://de.libreoffice.org/) Tabellenkalkulation mit der CSV Ausgabedatei tastyworks-tax-2023.csv:
+Für einen schönen Ausdruck lade ich die csv-Ausgabedatei in [Google Spreadsheets](https://docs.google.com/spreadsheets/).
+Dabei einfach keine Konvertierung von Zahlen zulassen. Dann die Überschrift groß und in Fettdruck darstelllen,
+einige Spalten auf Rechts-Formaierung stellen und fürs Finanzamt unnötige Daten löschen.
+
+iAls Alternative kann man die Tabellenkalkulation [libreoffice](https://de.libreoffice.org/) mit der
+CSV Ausgabedatei tastyworks-tax-2023.csv starten:
 <pre>
 soffice tastyworks-tax-2023.csv
 </pre>
