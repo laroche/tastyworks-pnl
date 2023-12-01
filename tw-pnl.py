@@ -1103,14 +1103,15 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 # up until final closing instead. This should be changed. ???
                 local_pnl = eur_amount
             else:
-                if cur_year >= '2018':
-                    # Teilfreistellungen: https://www.gesetze-im-internet.de/invstg_2018/__20.html
-                    if asset_type == AssetType.AktienFond:
-                        local_pnl *= 0.70
-                    elif asset_type == AssetType.MischFond:
-                        local_pnl *= 0.85
-                    elif asset_type == AssetType.ImmobilienFond:
-                        local_pnl *= 0.20
+                pass
+                #if cur_year >= '2018':
+                #    # Teilfreistellungen: https://www.gesetze-im-internet.de/invstg_2018/__20.html
+                #    if asset_type == AssetType.AktienFond:
+                #        local_pnl *= 0.70
+                #    elif asset_type == AssetType.MischFond:
+                #        local_pnl *= 0.85
+                #    elif asset_type == AssetType.ImmobilienFond:
+                #        local_pnl *= 0.20
             description = ''
             local_pnl = f'{local_pnl:.4f}'
 
@@ -1119,13 +1120,13 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if asset_type == AssetType.Dividend:
             div_type = is_stock(symbol, 'Buy')
             if div_type == AssetType.AktienFond:
-                local_pnl = f'{float(local_pnl)*0.70:.4f}'
+                #local_pnl = f'{float(local_pnl)*0.70:.4f}'
                 asset_type = AssetType.DividendAktienFond
             if div_type == AssetType.MischFond:
-                local_pnl = f'{float(local_pnl)*0.85:.4f}'
+                #local_pnl = f'{float(local_pnl)*0.85:.4f}'
                 asset_type = AssetType.DividendMischFond
             if div_type == AssetType.ImmobilienFond:
-                local_pnl = f'{float(local_pnl)*0.20:.4f}'
+                #local_pnl = f'{float(local_pnl)*0.20:.4f}'
                 asset_type = AssetType.DividendImmobilienFond
 
         net_total = cash_total + fifos_sum_usd(fifos)
