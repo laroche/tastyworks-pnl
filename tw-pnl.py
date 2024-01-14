@@ -724,7 +724,10 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         anlage_so_verlust = .0
         if anlage_so < .0:
             anlage_so_verlust = anlage_so
-        if anlage_so < 600.0:
+        so_freigrenze = 600.0
+        if year >= 2024:
+            so_freigrenze = 1000.0
+        if anlage_so < so_freigrenze:
             anlage_so = .0
         stats.loc['Anlage SO Steuerbetrag', year] = anlage_so
         stats.loc['Anlage SO Verlustvortrag', year] = anlage_so_verlust
