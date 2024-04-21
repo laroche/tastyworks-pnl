@@ -146,7 +146,7 @@ def check_tcode(tcode, tsubcode, description):
             'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
             raise ValueError(f'Unknown tsubcode for Money Movement: {tsubcode}')
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment' \
-            and not description.startswith('Fee Correction'):
+            and not (description.startswith('Fee Correction') or description.startswith('Delayed Delivery_')):
             raise ValueError(f'Unknown Balance Adjustment: {description}')
     elif tcode == 'Trade':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close', 'Buy', 'Sell'):
@@ -557,12 +557,14 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         if type in ('Brokergebühr', 'Ordergebühr', 'Zinsen', 'Dividende', 'Dividende Aktienfond',
             'Dividende Mischfond', 'Dividende Immobilienfond', 'Quellensteuer'):
             if not bool(tax_free):
-                raise ValueError(f'tax_free is False for type "{type}". Full row: "{new_wk.iloc[i]}"')
+                raise ValueError(
+                    f'tax_free is False for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # keine steuerfreien Zahlungen:
         if type in ('Ein/Auszahlung', 'Aktie', 'Aktienfond', 'Mischfond',
             'Immobilienfond', 'Sonstiges', 'Long-Option', 'Future'):
             if bool(tax_free):
-                raise ValueError(f'tax_free is True for type "{type}". Full row: "{new_wk.iloc[i]}"')
+                raise ValueError(
+                    f'tax_free is True for type "{type}". Full row: "{new_wk.iloc[i]}"')
         # Cash und Net Total am Ende vom Jahr feststellen. Letzte Info ist Jahresende:
         stats.loc['Cash Balance USD', year] = float(cash_total)
         stats.loc['Net Liquidating Value', year] = float(net_total)
@@ -1012,7 +1014,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     asset_type = AssetType.Fee
                     newdescription = description
                 else:
-                    # XXX In my case: stock borrow fee:
+                    # Todo: In my case: stock borrow fee:
                     asset = f'stock borrow fees for {symbol}'
                     asset_type = AssetType.Interest
                     newdescription = description
@@ -1020,7 +1022,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                         raise
             elif tsubcode == 'Withdrawal':
                 if not isnan(symbol):
-                    # XXX In my case: dividends paid for short stock:
+                    # Todo: In my case: dividends paid for short stock:
                     asset = f'dividends paid for {symbol}'
                     asset_type = AssetType.Dividend
                     newdescription = description
