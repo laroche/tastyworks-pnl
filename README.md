@@ -13,6 +13,18 @@ at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
 A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
 
+## Installation & Setup
+
+### Dependencies Installation
+
+Before running the project, ensure all dependencies are installed. Execute the following command:
+
+```bash
+pip install -r requirements.txt
+```
+
+## Execution
+
 Run the following command to convert from the tastyworks csv file (transaction_history.csv)
 to a 2023 tax statement as csv file (tastyworks-tax-2023.csv):
 <pre>
