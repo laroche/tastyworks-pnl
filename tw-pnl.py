@@ -503,8 +503,8 @@ def get_summary(new_wk, tax_output, min_year, max_year):
         min_year = max_year = int(tax_output)
     years = list(range(min_year, max_year + 1))
     years_total = years + ['total']
-    first_transaction_date = new_wk.iloc[0][0][:10]
-    last_transaction_date = new_wk.iloc[len(new_wk) - 1][0][:10]
+    first_transaction_date = new_wk.iloc[0].iloc[0][:10]
+    last_transaction_date = new_wk.iloc[len(new_wk) - 1].iloc[0][:10]
     years_of_data = (pydatetime.date.fromisoformat(last_transaction_date) - \
         pydatetime.date.fromisoformat(first_transaction_date)).days / 365.2425
     index = ('Einzahlungen', 'Einzahlungen USD', 'Auszahlungen', 'Auszahlungen USD',
