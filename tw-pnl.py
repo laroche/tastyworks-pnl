@@ -28,7 +28,9 @@
 # pylint: disable=C0103,C0114,C0115,C0116,C0301,C0326,C0330,E0704
 #
 
+import csv
 import enum
+from io import StringIO
 import sys
 import os
 from collections import deque
@@ -180,7 +182,7 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
             if not math.isclose(check_amount, amount, abs_tol=0.01):
                 raise ValueError(f'Amount mismatch for Crypto: {check_amount} != {amount}')
         else:
-            if not math.isclose(check_amount, amount, abs_tol=0.001):
+            if not math.isclose(check_amount, amount, rel_tol=0.0001):      # Allow 0.01% difference
                 raise ValueError(f'Amount mismatch: {check_amount} != {amount}')
     else:
         if not isnan(amount) and amount != .0:
@@ -864,7 +866,7 @@ mul_dict = {
     # interest rates:
     '/ZT': 2000.0, '/ZF': 1000.0, '/ZN': 1000.0, '/ZB': 1000.0, '/UB': 1000.0,
     # currencies:
-    '/6E': 125000.0,
+    '/6E': 125000.0, '/6B': 62500.0, '/6J': 12500000.0, '/6A': 100000.0, '/6C': 100000.0,
     # corn:
     '/ZW': 50.0, '/ZS': 50.0, '/ZC': 50.0,
 }
@@ -929,7 +931,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if tsubcode in ('Credit Interest', 'Debit Interest', 'Dividend',
             'Fee', 'Balance Adjustment', 'Special Dividend'):
             tax_free = True
-        if tsubcode == 'Deposit' and description != 'ACH DEPOSIT':
+        if tsubcode == 'Deposit' and description != 'ACH DEPOSIT' and description != 'Wire Funds Received':
             tax_free = True
         if tsubcode == 'Withdrawal' and (not isnan(symbol) or description[:5] == 'FROM '):
             tax_free = True
@@ -983,7 +985,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             local_pnl = f'{eur_amount:.4f}'
             if tsubcode != 'Transfer' and fees != .0:
                 raise ValueError('Money Movement with fees')
-            if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT'):
+            if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT') or (tsubcode == 'Deposit' and description == 'Wire Funds Received'):
                 local_pnl = ''
                 asset = 'transfer'
                 newdescription = description
@@ -1190,20 +1192,114 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         with pandas.ExcelWriter(output_excel) as f:
             new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
 
-# check if the first line of the csv line contains the correct header:
-def check_csv(csv_file) -> None:
+def price_from_description(description: str) -> float:
+    """
+    Extract the price from the description string.
+    """
+    price = .0
+    if len(description) == 0 or not description.startswith('Bought') and not description.startswith('Sold'):
+        return price
+
+    parts = description.split('@')
+    if len(parts) == 1:
+        return price
+    
+    price = float(parts[-1].strip())
+    return price
+
+def transform_csv(csv_file: str) -> str:
+    """
+    Transform the CSV file data from new data format back to the old data format.
+    """
+    transformed_data = 'Date/Time,Transaction Code,Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,Account Reference'
+    with open(csv_file, encoding='UTF8') as f:
+        reader = csv.reader(f, delimiter=',')
+        for row in reader:
+            if row[0] == 'Date':
+                continue
+            date = pydatetime.datetime.fromisoformat(row[0]).strftime('%m/%d/%Y %H:%M') # Convert ISO date to old date format
+
+            transaction_code = row[1]
+            transaction_subcode = row[2]
+            action = row[3]
+            symbol = row[4]
+            if symbol.startswith('.'):  # Remove leading dot from symbol
+                symbol = symbol[1:]
+
+            # Extract buy/sell and open/close from action
+            buy_sell = ''
+            open_close = ''
+            if action.startswith('BUY'):
+                buy_sell = 'Buy'
+            elif action.startswith('SELL'):
+                buy_sell = 'Sell'
+            if action.endswith('TO_OPEN'):
+                open_close = 'Open'
+            elif action.endswith('TO_CLOSE'):
+                open_close = 'Close'
+
+            quantity = row[8]
+
+            # Transform the expiration date
+            if row[15] != '':
+                expiration_date = pydatetime.datetime.strptime(row[15], '%m/%d/%y').strftime('%m/%d/%Y')
+            else:
+                expiration_date = ''
+
+            strike = row[16]
+
+            if len(row[17]) > 0:
+                call_put = row[17][0]
+            else:
+                call_put = ''
+
+            description = row[6]
+            price = price_from_description(description)
+
+            fees = float(row[11])
+            try:
+                commission = float(row[10])
+                fees += commission
+            except ValueError:
+                pass
+            fees = abs(fees) # Fees are always positive in the old format
+
+            amount = row[7].replace(',', '')
+
+            account_refrerence = 'account'
+
+            transformed_data += f'\n{date},{transaction_code},{transaction_subcode},{symbol},{buy_sell},{open_close},{quantity},{expiration_date},{strike},{call_put},{price},{fees},{amount},{description},{account_refrerence}'
+
+    return transformed_data        
+
+def is_legacy_csv(csv_file) -> bool:
+    """ Checks the first line of the csv data file if the header fits the legacy or the current format.
+    """
+    header_legacy = 'Date/Time,Transaction Code,' + \
+    			'Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,' + \
+				'Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,' + \
+				'Account Reference\n'
+    header = 'Date,Type,Sub Type,Action,Symbol,Instrument Type,Description,Value,Quantity,' + \
+        		'Average Price,Commissions,Fees,Multiplier,Root Symbol,Underlying Symbol,Expiration Date,' + \
+                'Strike Price,Call or Put,Order #,Currency\n'
     with open(csv_file, encoding='UTF8') as f:
         content = f.readlines()
-    if len(content) < 1 or content[0] != 'Date/Time,Transaction Code,' + \
-        'Transaction Subcode,Symbol,Buy/Sell,Open/Close,Quantity,' + \
-        'Expiration Date,Strike,Call/Put,Price,Fees,Amount,Description,' + \
-        'Account Reference\n':
-        print('ERROR: Wrong first line in csv file. Please download trade history from the web page.')
+    if content[0] == header_legacy:
+        legacy_format = True
+    elif content[0] == header:
+        legacy_format = False
+    else:
+        print('ERROR: Wrong first line in csv file. Please download trade history from the Tastytrade app!')
         sys.exit(1)
+    return legacy_format
 
 def read_csv_tasty(csv_file: str) -> pandas.DataFrame:
-    check_csv(csv_file)
-    wk = pandas.read_csv(csv_file, parse_dates=['Date/Time'])
+    """ Read the csv file from tastyworks and return a pandas DataFrame.
+    """
+    csv_string = csv_file
+    if not is_legacy_csv(csv_file):
+        csv_string = StringIO(transform_csv(csv_file))
+    wk = pandas.read_csv(csv_string, parse_dates=['Date/Time'])
     #print(wk.info())
     #print(wk.head())
     #print(wk.memory_usage(deep=True))
