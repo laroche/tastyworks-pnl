@@ -148,6 +148,7 @@ def check_tcode(tcode, tsubcode, description):
             'Fee', 'Withdrawal', 'Dividend', 'Debit Interest', 'Mark to Market'):
             raise ValueError(f'Unknown tsubcode for Money Movement: {tsubcode}')
         if tsubcode == 'Balance Adjustment' and description != 'Regulatory fee adjustment' \
+            and description != 'Reg Fee Adjustment Frac Penny Adj to flatten balance' \
             and not description.startswith('Fee Correction'):
             raise ValueError(f'Unknown Balance Adjustment: {description}')
     elif tcode == 'Trade':
@@ -156,7 +157,7 @@ def check_tcode(tcode, tsubcode, description):
     elif tcode == 'Receive Deliver':
         if tsubcode not in ('Sell to Open', 'Buy to Close', 'Buy to Open', 'Sell to Close',
             'Expiration', 'Assignment', 'Exercise', 'Forward Split', 'Reverse Split',
-            'Special Dividend', 'Cash Settled Assignment', 'Cash Settled Exercise',
+            'Special Dividend', 'Dividend', 'Cash Settled Assignment', 'Cash Settled Exercise',
             'Futures Settlement', 'Transfer'):
             raise ValueError(f'Unknown Receive Deliver tsubcode: {tsubcode}')
         if tsubcode == 'Assignment' and description != 'Removal of option due to assignment':
@@ -174,8 +175,9 @@ def check_param(buysell, openclose, callput):
 
 def check_trade(tsubcode, check_amount, amount, asset_type):
     #print('FEHLER:', check_amount, amount, tsubcode)
-    if tsubcode in ('Buy', 'Sell', 'Cash Settled Assignment', 'Cash Settled Exercise',
-        'Special Dividend', 'Futures Settlement'):
+    if tsubcode in ('Buy', 'Buy to Close', 'Buy to Open', 'Sell', 'Sell to Close', 'Sell to Open',
+        'Cash Settled Assignment', 'Cash Settled Exercise', 'Special Dividend', 'Dividend',
+        'Futures Settlement'):
         pass
     elif tsubcode not in ('Expiration', 'Assignment', 'Exercise'):
         if asset_type == AssetType.Crypto:
@@ -183,7 +185,7 @@ def check_trade(tsubcode, check_amount, amount, asset_type):
                 raise ValueError(f'Amount mismatch for Crypto: {check_amount} != {amount}')
         else:
             if not math.isclose(check_amount, amount, rel_tol=0.0001):      # Allow 0.01% difference
-                raise ValueError(f'Amount mismatch: {check_amount} != {amount}')
+                raise ValueError(f'Amount mismatch: {tsubcode}: {check_amount} != {amount}')
     else:
         if not isnan(amount) and amount != .0:
             raise
@@ -967,7 +969,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if isnan(quantity):
             quantity = 1
         else:
-            if tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split'):
+            if tcode == 'Receive Deliver' and tsubcode in ('Forward Split', 'Reverse Split', 'Dividend'):
                 pass # splits might have further data, not quantity
             elif int(quantity) != quantity:
                 # Hardcode AssetType.Crypto here again:
@@ -1217,7 +1219,7 @@ def transform_csv(csv_file: str) -> str:
         for row in reader:
             if row[0] == 'Date':
                 continue
-            date = pydatetime.datetime.fromisoformat(row[0]).strftime('%m/%d/%Y %H:%M') # Convert ISO date to old date format
+            date = pydatetime.datetime.fromisoformat(row[0][:19]).strftime('%m/%d/%Y %H:%M') # Convert ISO date to old date format
 
             transaction_code = row[1]
             transaction_subcode = row[2]

@@ -11,8 +11,6 @@ A summary for all stock, fond, dividend, option and future gains/losses is outpu
 Details on German taxes are written up
 at <https://laroche.github.io/private-geldanlage/steuern.html>.
 
-A web-based application will be built up at <https://knorke2.homedns.org/depot-pnl>.
-
 ## Installation & Setup
 
 ### Dependencies Installation
