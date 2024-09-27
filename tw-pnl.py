@@ -40,6 +40,9 @@ import pandas
 
 convert_currency: bool = True
 
+# Starting year where we try to separate for KAP-INV:
+KAPINV_YEAR = '2018'
+
 # For an unknown symbol (underlying), assume it is a individual/normal stock.
 # Otherwise you need to adjust the hardcoded list in this script.
 assume_stock: bool = False
@@ -302,7 +305,7 @@ def print_nasdaq100() -> None:
 
 # Is the symbol a individual stock or anything else
 # like an ETF or fond?
-def is_stock(symbol, tsubcode):
+def is_stock(symbol, tsubcode, cur_year):
     # Crypto assets like BTC/USD or ETH/USD:
     if symbol[-4:] == '/USD':
         return AssetType.Crypto
@@ -311,7 +314,9 @@ def is_stock(symbol, tsubcode):
         'GDX','GDXJ','IWM','IYR','KRE','OIH','QQQ','TQQQ',
         'RSX','SMH','SPY','NOBL','UNG','XBI','XHB','XLB',
         'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT','XLRE'):
-        return AssetType.AktienFond
+        if cur_year >= KAPINV_YEAR:
+            return AssetType.AktienFond
+        return AssetType.OtherStock
     if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO'):
         return AssetType.OtherStock
     if symbol in REITS:
@@ -1096,7 +1101,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     (tsubcode in ('Expiration', 'Exercise', 'Assignment', 'Cash Settled Assignment', 'Cash Settled Exercise') and not fifos_islong(fifos, asset))):
                     asset_type = AssetType.ShortOption
             else:
-                asset_type = is_stock(symbol, tsubcode)
+                asset_type = is_stock(symbol, tsubcode, cur_year)
             # 'buysell' is not set correctly for 'Expiration'/'Exercise'/'Assignment' entries,
             # so we look into existing positions to check if we are long or short (we cannot
             # be both, so this test should be safe):
@@ -1122,7 +1127,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 local_pnl = eur_amount
             else:
                 pass
-                #if cur_year >= '2018':
+                #if cur_year >= KAPINV_YEAR:
                 #    # Teilfreistellungen: https://www.gesetze-im-internet.de/invstg_2018/__20.html
                 #    if asset_type == AssetType.AktienFond:
                 #        local_pnl *= 0.70
@@ -1135,8 +1140,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
 
         #check_total(fifos, cash_total)
 
-        if asset_type == AssetType.Dividend:
-            div_type = is_stock(symbol, 'Buy')
+        if cur_year >= KAPINV_YEAR and asset_type == AssetType.Dividend:
+            div_type = is_stock(symbol, 'Buy', cur_year)
             if div_type == AssetType.AktienFond:
                 #local_pnl = f'{float(local_pnl)*0.70:.4f}'
                 asset_type = AssetType.DividendAktienFond
