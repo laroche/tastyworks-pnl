@@ -849,7 +849,9 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
         out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             # XXX enable these again if data is complete also for yearly stats:
-            if tax_output and i in ('Time Weighted Return EUR', 'Time Weighted Return USD'):
+            if tax_output and i in ('Time Weighted Return EUR', 'Time Weighted Return USD',
+                'Anlage SO Steuerbetrag', 'Anlage SO Verlustvortrag',
+                'KAP+KAP-INV KErSt+Soli', 'KAP+KAP-INV Verlustvortrag'):
                 continue
             unit = 'Euro'
             if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value',
