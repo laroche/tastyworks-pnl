@@ -74,7 +74,7 @@ Für einen schönen Ausdruck lade ich die csv-Ausgabedatei in [Google Spreadshee
 Dabei einfach keine Konvertierung von Zahlen zulassen. Dann die Überschrift groß und in Fettdruck darstelllen,
 einige Spalten auf Rechts-Formaierung stellen und fürs Finanzamt unnötige Daten löschen.
 
-iAls Alternative kann man die Tabellenkalkulation [libreoffice](https://de.libreoffice.org/) mit der
+Als Alternative kann man die Tabellenkalkulation [libreoffice](https://de.libreoffice.org/) mit der
 CSV Ausgabedatei tastyworks-tax-2023.csv starten:
 <pre>
 soffice tastyworks-tax-2023.csv
@@ -103,8 +103,7 @@ you can download the current zip file from <https://github.com/laroche/tastywork
 Download your trade history as csv file from the web-browser via
 <https://trade.tastyworks.com/index.html#/transactionHistoryPage>.
 (Choose "Activity" and then "History" and then setup the filter for a
-custom period of time and download it as csv file. Beware that Tastyworks
-limits the download to 250 lines.
+custom period of time and download it as csv file.
 Do not download this file from the separate Tastyworks application,
 but use the website and your browser.)
 
@@ -246,9 +245,6 @@ FAQ
   stay with original data from Tastyworks or use a normal editor instead of Excel to change data.
 - Even the tax report is currently in US notation. I recommend to use libreoffice to read in this
   data and then store it in German notation plus output it into a pdf for tax authorities.
-- Some people say the csv download from Tastyworks is limited to about 250 lines. Here is a similar
-  bug description: <https://github.com/blais/tastybugs/issues/8>
-- Issues of the Tastyworks (web) application: <https://github.com/blais/tastybugs/issues>
 - One check is to look at the computed value of "account cash balance" from this script and compare it
   to the official value "Cash Balance" from Tastyworks at <https://manage.tastyworks.com/#/accounts/balances>.
   After 550 transactions the final cash balance value is on the cent identical to the
@@ -274,7 +270,7 @@ TODO
       - stock splits are now implemented, but not tested at all. Options are not yet supported. Please send in more test data.
    - In German: Bei Aktien-Leerverkäufen (über eine Jahresgrenze hinaus) wird 30 % vom Preis mit der KapESt
      als Ersatzbemessungsgrundlage besteuert (§ 43a Absatz 2 Satz 7 EStG) und erst mit der Eindeckung ausgeglichen.
-   - Complete support for Investmentsteuergesetz (InvStG) 2018: Zahlungen am Anfang vom Jahr.
+   - Complete support for Investmentsteuergesetz (InvStG) 2018: Zahlungen am Anfang vom Jahr (Vorabpauschale).
    - Check if withholding tax is max 15% for dividends for US stocks as per DBA.
      Warn if e.g. 30% withholding tax is paid and point to missing W8-BEN formular.
    - Complete the list of non-stocks.
