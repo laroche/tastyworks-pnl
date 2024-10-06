@@ -1,3 +1,6 @@
 # Ingore Virtual Environment
 .venv/
 venv/
+# Innore other files
+*.pyc
+.DS_Store

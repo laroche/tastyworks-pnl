@@ -1,0 +1,3 @@
+Date,Type,Sub Type,Action,Symbol,Instrument Type,Description,Value,Quantity,Average Price,Commissions,Fees,Multiplier,Root Symbol,Underlying Symbol,Expiration Date,Strike Price,Call or Put,Order #,Currency
+2023-03-04T14:16:27+0100,Trade,Sell,SELL,/CLJ4,Future,Sold 1 /CLJ4 @ 79.53,-160.00,1,-160.00,-1.25,-1.82,,,,,,,310910163,USD
+2023-03-04T14:12:32+0100,Trade,Buy,BUY,/CLJ4,Future,Bought 1 /CLJ4 @ 79.69,0.00,1,0.00,-1.25,-1.82,,,,,,,310909959,USD

@@ -1,0 +1,8 @@
+Date,Type,Sub Type,Action,Symbol,Instrument Type,Description,Value,Quantity,Average Price,Commissions,Fees,Multiplier,Root Symbol,Underlying Symbol,Expiration Date,Strike Price,Call or Put,Order #,Currency
+2024-09-20T23:00:00+0200,Receive Deliver,Expiration,BUY_TO_CLOSE,./MESU4MESU4 240920P5050,Future Option,Removal of option due to expiration,0.00,1,0.00,--,0.00,1,"./MESU4MESU4 ",/MESU4,9/20/24,5050.0,PUT,,USD
+2024-09-20T23:00:00+0200,Receive Deliver,Expiration,SELL_TO_CLOSE,./MESU4MESU4 240920P5100,Future Option,Removal of option due to expiration,0.00,1,0.00,--,0.00,1,"./MESU4MESU4 ",/MESU4,9/20/24,5100.0,PUT,,USD
+2024-09-10T15:32:26+0200,Trade,Buy to Close,BUY_TO_CLOSE,./MESU4MESU4 240920P4650,Future Option,Bought 2 /MESU4 MESU4 09/20/24 Put 4650.00 @ 1.1,-11.00,2,-5.50,0.00,-1.04,1,"./MESU4MESU4 ",/MESU4,9/20/24,4650.0,PUT,327129782,USD
+2024-05-23T17:05:16+0200,Trade,Sell to Open,SELL_TO_OPEN,./MESU4MESU4 240920P4650,Future Option,Sold 2 /MESU4 MESU4 09/20/24 Put 4650.00 @ 22.0,220.00,2,110.00,-3.00,-1.04,1,"./MESU4MESU4 ",/MESU4,9/20/24,4650.0,PUT,323968393,USD
+2024-05-23T17:01:37+0200,Trade,Sell to Open,SELL_TO_OPEN,./MESU4MESU4 240920P5050,Future Option,Sold 1 /MESU4 MESU4 09/20/24 Put 5050.00 @ 54.0,270.00,1,270.00,-1.50,-0.46,1,"./MESU4MESU4 ",/MESU4,9/20/24,5050.0,PUT,323965426,USD
+2024-05-23T17:01:37+0200,Trade,Buy to Open,BUY_TO_OPEN,./MESU4MESU4 240920P5100,Future Option,Bought 1 /MESU4 MESU4 09/20/24 Put 5100.00 @ 61.5,-307.50,1,-307.50,-1.50,-0.46,1,"./MESU4MESU4 ",/MESU4,9/20/24,5100.0,PUT,323965426,USD
+2024-01-03T14:00:00+0200,Money Movement,Deposit,,,,Wire Funds Received,"1,000.00",0,,--,0.00,,,,,,,,USD
