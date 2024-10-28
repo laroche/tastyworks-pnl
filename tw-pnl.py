@@ -1225,7 +1225,7 @@ def price_from_description(description: str) -> float:
     parts = description.split('@')
     if len(parts) == 1:
         return price
-    
+
     price = float(parts[-1].strip())
     return price
 
@@ -1292,7 +1292,7 @@ def transform_csv(csv_file: str) -> str:
 
             transformed_data += f'\n{date},{transaction_code},{transaction_subcode},{symbol},{buy_sell},{open_close},{quantity},{expiration_date},{strike},{call_put},{price},{fees},{amount},{description},{account_refrerence}'
 
-    return transformed_data        
+    return transformed_data
 
 def is_legacy_csv(csv_file) -> bool:
     """ Checks the first line of the csv data file if the header fits the legacy or the current format.
