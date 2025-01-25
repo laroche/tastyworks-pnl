@@ -1,9 +1,9 @@
 #!/bin/bash
 #
-# example on how to generate all tastyworks tax reports
+# example on how to generate all tastytrade tax reports
 #
 
-# input file from Tastyworks with all transaction history as csv file:
+# input file from Tastytrade with all transaction history as csv file:
 INPUT=transaction_history.csv
 #INPUT="../TW-*.csv"
 

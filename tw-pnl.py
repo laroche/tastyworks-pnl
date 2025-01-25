@@ -3,11 +3,11 @@
 # Copyright (C) 2020-2025 Florian La Roche <Florian.LaRoche@gmail.com>
 # https://github.com/laroche/tastyworks-pnl
 #
-# Generate data for a German tax income statement from Tastyworks trade history.
+# Generate data for a German tax income statement from Tastytrade trade history.
 #
 #
 # Download your trade history as csv file from
-# https://trade.tastyworks.com/index.html#/transactionHistoryPage
+# https://trade.tastytrade.com/index.html#/transactionHistoryPage
 # (Choose 'Activity' and then 'History' and then setup the filter for a
 # custom period of time and download it as csv file.)
 # Newest entries in the csv file should be on the top and it should contain the complete
@@ -845,7 +845,7 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
     for year in years:
         out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
-        out.append([f'Tastyworks Kapitalflussrechnung {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
+        out.append([f'Tastytrade Kapitalflussrechnung {year}', '', '', '', '', '', '', '', '', '', '', ''] + end)
         out.append(['', '', '', '', '', '', '', '', '', '', '', ''] + end)
         for i in stats.index:
             # XXX enable these again if data is complete also for yearly stats:
@@ -956,7 +956,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         # und sind daher steuer-neutral:
         # XXX We use "Sell-to-Open" to find all "Stillhaltergeschäfte". This works
         # ok for me, but what happens if we have one long option and sell two? Will
-        # Tastyworks split this into two transactions or keep this? With keeping this
+        # Tastytrade split this into two transactions or keep this? With keeping this
         # as one transaction, we should split the currency gains transaction as well.
         # Could we detect this bad case within transactions?
         if tcode != 'Money Movement' and \
@@ -1212,7 +1212,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             new_wk.to_csv(f, index=False)
     if output_excel is not None:
         with pandas.ExcelWriter(output_excel) as f:
-            new_wk.to_excel(f, index=False, sheet_name='Tastyworks Report') #, engine='xlsxwriter')
+            new_wk.to_excel(f, index=False, sheet_name='Tastytrade Report') #, engine='xlsxwriter')
 
 def price_from_description(description: str) -> float:
     """
@@ -1316,7 +1316,7 @@ def is_legacy_csv(csv_file) -> bool:
     return legacy_format
 
 def read_csv_tasty(csv_file: str) -> pandas.DataFrame:
-    """ Read the csv file from tastyworks and return a pandas DataFrame.
+    """ Read the csv file from tastytrade and return a pandas DataFrame.
     """
     csv_string = csv_file
     if not is_legacy_csv(csv_file):
