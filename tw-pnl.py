@@ -1303,7 +1303,7 @@ def is_legacy_csv(csv_file) -> bool:
 				'Account Reference\n'
     header = 'Date,Type,Sub Type,Action,Symbol,Instrument Type,Description,Value,Quantity,' + \
         		'Average Price,Commissions,Fees,Multiplier,Root Symbol,Underlying Symbol,Expiration Date,' + \
-                'Strike Price,Call or Put,Order #,Currency\n'
+                'Strike Price,Call or Put,Order #,Total,Currency\n'
     with open(csv_file, encoding='UTF8') as f:
         content = f.readlines()
     if content[0] == header_legacy:
