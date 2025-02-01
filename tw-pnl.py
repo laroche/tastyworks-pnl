@@ -782,6 +782,7 @@ def get_summary(new_wk, orig_wk, tax_output, min_year, max_year):
             stats.loc['Z19 Ausländische Kapitalerträge', year] + \
             stats.loc['Anlage KAP-INV', year] + \
             terminverlust
+        # XXX add more detailed computation of taxes for "Anlage KAP-INV" (Teilfreistellungen):
         kerstsoli = stats.loc['KAP+KAP-INV', year] * 0.26375
         if year > min_year:
             kerstsoli += stats.loc['KAP+KAP-INV Verlustvortrag', year - 1]
@@ -895,12 +896,35 @@ def get_multiplier(asset: str) -> float:
         return mul_dict[asset[:3]]
     return 100.0
 
+def append_open_positions(new_wk, tax_output, fifos):
+    out = []
+    end = [''] * 5
+    if tax_output:
+        end = []
+    for fifo in fifos:
+        if fifo != 'account-usd':
+            for (price, price_usd, quantity, date, tax_free) in fifos[fifo]:
+                out.append([date, quantity, fifo, '', f'{price:.2f}', 'Euro', f'{price_usd:.2f}', 'USD', '', '', '', '', ''] + end)
+    dfnew = pandas.DataFrame(out, columns=new_wk.columns)
+    return pandas.concat([new_wk, dfnew], ignore_index=True)
+
+def append_open_positions2(out, tax_output, fifos):
+    end = [''] * 5
+    if tax_output:
+        end = []
+    for fifo in fifos:
+        if fifo != 'account-usd':
+            for (price, price_usd, quantity, date, tax_free) in fifos[fifo]:
+                out.append([date, quantity, fifo, '', f'{price:.2f}', 'Euro', f'{price_usd:.2f}', 'USD', '', '', '', '', ''] + end)
+    return out
+
 def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, verbose, debug):
     if len(all_wk) == 1:
         wk = all_wk[0]
     else:
         wk = pandas.concat(all_wk)
         wk.sort_values(by=['Date/Time',], ascending=False, inplace=True)
+        #wk.sort_values(by=['Date/Time', 0], ascending=[False, True], inplace=True)
         wk.reset_index(drop=True, inplace=True)
     splits = {}               # save data for stock/option splits
     fifos = {}
@@ -927,6 +951,8 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         date = datetime[:10] # year-month-day but no time
         cur_year = datetime[:4]
         if int(cur_year) > max_year:
+            # XXX print open positions for year cur_year if max_year != 0
+            #new_wk = append_open_positions2(new_wk, tax_output, fifos)
             max_year = int(cur_year)
         if int(cur_year) < min_year or min_year == 0:
             min_year = int(cur_year)
@@ -1204,6 +1230,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         new_wk.drop('USD Cash Total', axis=1, inplace=True)
         new_wk.drop('Net-Total', axis=1, inplace=True)
     new_wk = prepend_yearly_stats(new_wk, tax_output, stats, min_year, max_year)
+    #new_wk = append_open_positions(new_wk, tax_output, fifos)
     new_wk.drop('callput', axis=1, inplace=True)
     if verbose:
         print(new_wk.to_string())
