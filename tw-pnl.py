@@ -1025,7 +1025,7 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
             raise ValueError(f'Price must be positive, but is {price}')
 
         if tcode == 'Money Movement':
-            local_pnl = f'{eur_amount:.4f}'
+            local_pnl = f'{eur_amount:.2f}'
             if tsubcode != 'Transfer' and fees != .0:
                 raise ValueError('Money Movement with fees')
             if tsubcode == 'Transfer' or (tsubcode == 'Deposit' and description == 'ACH DEPOSIT') or (tsubcode == 'Deposit' and description == 'Wire Funds Received'):
@@ -1164,20 +1164,20 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                 #    elif asset_type == AssetType.ImmobilienFond:
                 #        local_pnl *= 0.20
             description = ''
-            local_pnl = f'{local_pnl:.4f}'
+            local_pnl = f'{local_pnl:.2f}'
 
         #check_total(fifos, cash_total)
 
         if cur_year >= KAPINV_YEAR and asset_type == AssetType.Dividend:
             div_type = is_stock(symbol, 'Buy', cur_year)
             if div_type == AssetType.AktienFond:
-                #local_pnl = f'{float(local_pnl)*0.70:.4f}'
+                #local_pnl = f'{float(local_pnl)*0.70:.2f}'
                 asset_type = AssetType.DividendAktienFond
             if div_type == AssetType.MischFond:
-                #local_pnl = f'{float(local_pnl)*0.85:.4f}'
+                #local_pnl = f'{float(local_pnl)*0.85:.2f}'
                 asset_type = AssetType.DividendMischFond
             if div_type == AssetType.ImmobilienFond:
-                #local_pnl = f'{float(local_pnl)*0.20:.4f}'
+                #local_pnl = f'{float(local_pnl)*0.20:.2f}'
                 asset_type = AssetType.DividendImmobilienFond
 
         net_total = cash_total + fifos_sum_usd(fifos)
@@ -1187,13 +1187,13 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
         if tax_output:
             if datetime[:4] == tax_output:
                 new_wk.append([datetime[:10], transaction_type(asset_type), local_pnl,
-                        f'{eur_amount:.2f}', f'{amount - fees:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
+                        f'{eur_amount:.2f}', f'{amount - fees:.2f}', f'{fees:.2f}', f'{conv_usd:.4f}',
                         quantity, asset, callput,
                         tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}', f'{usd_gains + usd_gains_notax:.2f}',
                         f'{cash_total:.2f}', f'{net_total:.2f}'])
         else:
             new_wk.append([datetime, transaction_type(asset_type), local_pnl,
-                f'{eur_amount:.2f}', f'{amount:.4f}', f'{fees:.4f}', f'{conv_usd:.4f}',
+                f'{eur_amount:.2f}', f'{amount:.2f}', f'{fees:.2f}', f'{conv_usd:.4f}',
                 quantity, asset, symbol, callput,
                 tax_free, f'{usd_gains:.2f}', f'{usd_gains_notax:.2f}', f'{usd_gains + usd_gains_notax:.2f}',
                 newdescription, f'{cash_total:.2f}', f'{net_total:.2f}'])
