@@ -56,7 +56,6 @@ eurusd_url: str = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsI
 # If the file 'eurusd.csv' does not exist, download the data from
 # the bundesbank directly.
 def read_eurusd() -> None:
-    import csv
     global eurusd
     url = 'eurusd.csv'
     if not os.path.exists(url):
