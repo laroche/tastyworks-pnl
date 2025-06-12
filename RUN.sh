@@ -4,7 +4,7 @@
 #
 
 # input file from Tastytrade with all transaction history as csv file:
-INPUT=transaction_history.csv
+INPUT=tastytrade_transactions_history.csv
 #INPUT="../TW-*.csv"
 
 YEARS="2017 2018 2019 2020 2021 2022 2023 2024 2025"
