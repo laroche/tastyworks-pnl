@@ -732,8 +732,9 @@ def get_summary(new_wk, orig_wk, tax_output, min_year, max_year):
         stats.loc['Zinsen Gesamt', year] = \
             stats.loc['Zinseinnahmen', year] + stats.loc['Zinsausgaben', year]
         stats.loc['Anlage SO', year] = \
-            stats.loc['Währungsgewinne USD', year] + \
             stats.loc['Krypto-Gewinne', year] + stats.loc['Krypto-Verluste', year]
+        if year < 2024:
+            stats.loc['Anlage SO', year] += stats.loc['Währungsgewinne USD', year]
         anlage_so = stats.loc['Anlage SO', year]
         if year > min_year:
             anlage_so += stats.loc['Anlage SO Verlustvortrag', year - 1]
@@ -772,11 +773,13 @@ def get_summary(new_wk, orig_wk, tax_output, min_year, max_year):
             terminverlust = z24
             if year > min_year and year > 2021:
                 terminverlust += stats.loc['Termingeschäftsverlustvortrag', year - 1]
-            if terminverlust < -20000.0:
+            if year < 2024 and terminverlust < -20000.0:
                 stats.loc['Termingeschäftsverlustvortrag', year] = terminverlust + 20000.0
                 terminverlust = -20000.0
         else:
             stats.loc['Z19 Ausländische Kapitalerträge', year] += z24
+        if year >= 2024:
+            stats.loc['Z19 Ausländische Kapitalerträge', year] += stats.loc['Währungsgewinne USD Gesamt', year]
         stats.loc['KAP+KAP-INV', year] = \
             stats.loc['Z19 Ausländische Kapitalerträge', year] + \
             stats.loc['Anlage KAP-INV', year] + \
