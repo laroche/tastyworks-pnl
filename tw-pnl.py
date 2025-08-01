@@ -37,6 +37,7 @@ from collections import deque
 import math
 import datetime as pydatetime
 import pandas
+from tastytradehelper import TastytradeHelper
 
 convert_currency: bool = True
 
@@ -1112,11 +1113,11 @@ def check(all_wk, output_summary, output_csv, output_excel, tax_output, show, ve
                     ratio = int(ratio)
                 #print(symbol, quantity, oldquantity, ratio)
                 fifos_split(fifos, symbol, ratio)
-        elif tcode == 'Receive Deliver' and tsubcode in ('Exercise', 'Assignment') and symbol == 'SPX':
+        elif tcode == 'Receive Deliver' and tsubcode in ('Exercise', 'Assignment') and TastytradeHelper.is_symbol_cash_settled(symbol):
             # SPX Options already have a "Cash Settled Exercise/Assignment" tsubcode that handels all
             # trade relevant data. So we just delete this Exercise/Assignment line altogether.
             # XXX Add a check there is no relevant transaction data included here.
-            pass
+            continue
         else:
             asset = symbol
             if not isnan(expire):
