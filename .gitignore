@@ -3,3 +3,6 @@
 venv/
 tax-reports
 tax-reports.old
+# Ignore other files
+*.pyc
+.DS_Store
