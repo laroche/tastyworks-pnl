@@ -316,7 +316,7 @@ def is_stock(symbol, tsubcode, cur_year):
         if cur_year >= KAPINV_YEAR:
             return AssetType.AktienFond
         return AssetType.OtherStock
-    if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO'):
+    if symbol in ('TLT','HYG','IEF','GLD','SLV','VXX','UNG','USO','IBIT','SGOV'):
         return AssetType.OtherStock
     if symbol in REITS:
         return AssetType.ImmobilienFond
