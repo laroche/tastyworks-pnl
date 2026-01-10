@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2020-2025 Florian La Roche <Florian.LaRoche@gmail.com>
+# Copyright (C) 2020-2026 Florian La Roche <Florian.LaRoche@gmail.com>
 # https://github.com/laroche/tastyworks-pnl
 #
 # Generate data for a German tax income statement from Tastytrade trade history.

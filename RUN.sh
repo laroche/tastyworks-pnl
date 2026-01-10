@@ -7,8 +7,8 @@
 INPUT=tastytrade_transactions_history.csv
 #INPUT="../TW-*.csv"
 
-YEARS="2017 2018 2019 2020 2021 2022 2023 2024 2025"
-#YEARS="`seq 2017 2025`"
+YEARS="2017 2018 2019 2020 2021 2022 2023 2024 2025 2026"
+#YEARS="`seq 2017 2026`"
 
 # Additional parameters:
 PARAM="--assume-individual-stock"
