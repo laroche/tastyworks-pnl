@@ -309,9 +309,9 @@ def is_stock(symbol, tsubcode, cur_year):
     if symbol[-4:] == '/USD':
         return AssetType.Crypto
     # Well known ETFs:
-    if symbol in ('DIA','DXJ','EEM','EFA','EFA','EQQQ','EWW','EWZ','FEZ','FXB','FXE','FXI',
+    if symbol in ('DIA','DXJ','EEM','EFA','EQQQ','EWW','EWZ','FEZ','FXB','FXE','FXI',
         'GDX','GDXJ','IWM','IYR','KRE','OIH','QQQ','TQQQ',
-        'RSX','SMH','SPY','NOBL','UNG','XBI','XHB','XLB',
+        'RSX','SMH','SPY','NOBL','XBI','XHB','XLB',
         'XLE','XLF','XLI','XLK','XLP','XLU','XLV','XME','XOP','XRT','XLRE'):
         if cur_year >= KAPINV_YEAR:
             return AssetType.AktienFond
@@ -328,7 +328,7 @@ def is_stock(symbol, tsubcode, cur_year):
             raise ValueError(f'Unknown subcode: {tsubcode}')
         return AssetType.Future
     # The conservative way is to throw an exception if we are not sure.
-    if not assume_stock:
+    if assume_stock is False:
         raise ValueError(f'No idea if this is a stock: {symbol}\n' +
             'Use the option --assume-individual-stock to assume individual stock ' +
             'for all unknown symbols.')
