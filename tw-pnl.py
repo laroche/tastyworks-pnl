@@ -49,7 +49,7 @@ assume_stock: bool = False
 
 eurusd = None
 
-eurusd_url: str = 'https://www.bundesbank.de/statistic-rmi/StatisticDownload?tsId=BBEX3.D.USD.EUR.BB.AC.000&its_csvFormat=en&its_fileFormat=csv&mode=its&its_from=2010'
+eurusd_url: str = 'https://api.statistiken.bundesbank.de/rest/data/BBEX3/D.USD.EUR.BB.AC.000?format=bbk_csv&lang=en&startPeriod=2010-01-01'
 
 # Setup 'eurusd' as dict() to contain the EURUSD exchange rate on a given date
 # based on official data from bundesbank.de.
@@ -65,7 +65,7 @@ def read_eurusd() -> None:
     eurusd = {}
     with open(url, encoding='UTF8') as csv_file:
         reader = csv.reader(csv_file)
-        for _ in range(5):
+        for _ in range(10):
             next(reader)
         for (date, usd, _) in reader:
             if date != '':
