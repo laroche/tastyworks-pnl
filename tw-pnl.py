@@ -771,7 +771,7 @@ def get_summary(new_wk, orig_wk, tax_output, min_year, max_year):
             stats.loc['Zinsen Gesamt', year] + \
             stats.loc['zusätzliche Ordergebühren', year]
         terminverlust = .0
-        if year >= 2021:
+        if 2021 <= year < 2024:
             stats.loc['Z21 Termingeschäftsgewinne+Stillhalter', year] = z21
             stats.loc['Z24 Termingeschäftsverluste', year] = z24
             terminverlust = z24
@@ -859,6 +859,11 @@ def prepend_yearly_stats(df: pandas.DataFrame, tax_output, stats, min_year, max_
             if tax_output and i in ('Time Weighted Return EUR', 'Time Weighted Return USD',
                 'Anlage SO Steuerbetrag', 'Anlage SO Verlustvortrag',
                 'KAP+KAP-INV KErSt+Soli', 'KAP+KAP-INV Verlustvortrag'):
+                continue
+            if not (2021 <= year < 2024) and i in (
+                'Z21 Termingeschäftsgewinne+Stillhalter',
+                'Z24 Termingeschäftsverluste',
+                'Termingeschäftsverlustvortrag'):
                 continue
             unit = 'Euro'
             if i in ('Alle Gebühren in USD', 'Cash Balance USD', 'Net Liquidating Value',
